@@ -8,6 +8,7 @@ import (
 type ExportCfg struct {
 	Memory     *MemoryCfg     `json:"Memory Configuration"`
 	Checkpoint *CheckpointCfg `json:"Checkpoint Related Configuration"`
+	Storage    *StorageCfg    `json:"Storage Configuration"`
 }
 
 // NewExportCfg creates a new ExportCfg with the basic values
@@ -16,5 +17,6 @@ func NewExportCfg(in config.Input) *ExportCfg {
 	return &ExportCfg{
 		Memory:     NewMemoryCfg(in),
 		Checkpoint: NewCheckpointCfg(in),
+		Storage:    NewStorageCfg(in),
 	}
 }
