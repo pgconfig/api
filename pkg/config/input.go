@@ -1,6 +1,6 @@
-package compute
+package config
 
-// Input is bla
+// Input are all needed values to compute all parameters
 type Input struct {
 	OS              string
 	Arch            string

@@ -3,9 +3,12 @@ package compute
 import (
 	"errors"
 	"fmt"
+
+	"github.com/pgconfig/api/pkg/category"
+	"github.com/pgconfig/api/pkg/config"
 )
 
-func computeOS(in *Input, cfg *ExportCfg, err error) (*Input, *ExportCfg, error) {
+func computeOS(in *config.Input, cfg *category.ExportCfg, err error) (*config.Input, *category.ExportCfg, error) {
 
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not compute OS: %w", err)

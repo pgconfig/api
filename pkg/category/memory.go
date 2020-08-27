@@ -1,4 +1,6 @@
-package compute
+package category
+
+import "github.com/pgconfig/api/pkg/config"
 
 // MemoryCfg is the main memory category
 type MemoryCfg struct {
@@ -8,7 +10,8 @@ type MemoryCfg struct {
 	MaintenanceWorkMem int
 }
 
-func NewMemoryCfg(in Input) *MemoryCfg {
+// NewMemoryCfg creates a new Memory Configuration
+func NewMemoryCfg(in config.Input) *MemoryCfg {
 	return &MemoryCfg{
 		SharedBuffers:      in.TotalRAM / 4,
 		EffectiveCacheSize: (in.TotalRAM / 4) * 3,
@@ -16,9 +19,3 @@ func NewMemoryCfg(in Input) *MemoryCfg {
 		MaintenanceWorkMem: in.TotalRAM / 16,
 	}
 }
-
-/*
-	mem := MemoryCfg{}
-	computeOS(mem)
-
-*/
