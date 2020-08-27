@@ -4,10 +4,10 @@ import "github.com/pgconfig/api/pkg/config"
 
 // MemoryCfg is the main memory category
 type MemoryCfg struct {
-	SharedBuffers      int
-	EffectiveCacheSize int
-	WorkMem            int
-	MaintenanceWorkMem int
+	SharedBuffers      int `json:"shared_buffers"`
+	EffectiveCacheSize int `json:"effective_cache_size"`
+	WorkMem            int `json:"work_mem"`
+	MaintenanceWorkMem int `json:"maintenance_work_mem"`
 }
 
 // NewMemoryCfg creates a new Memory Configuration

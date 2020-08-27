@@ -6,8 +6,8 @@ import (
 
 // ExportCfg is the final report
 type ExportCfg struct {
-	Memory     *MemoryCfg
-	Checkpoint *CheckpointCfg
+	Memory     *MemoryCfg     `json:"Memory Configuration"`
+	Checkpoint *CheckpointCfg `json:"Checkpoint Related Configuration"`
 }
 
 // NewExportCfg creates a new ExportCfg with the basic values
