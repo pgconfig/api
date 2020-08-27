@@ -1,8 +1,15 @@
 package compute
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 func computeArch(in *Input, cfg *ExportCfg, err error) (*Input, *ExportCfg, error) {
+
+	if err != nil {
+		return nil, nil, fmt.Errorf("could not compute Arch: %w", err)
+	}
 
 	switch in.Arch {
 	case "x86_64":

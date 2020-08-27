@@ -1,8 +1,15 @@
 package compute
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 func computeOS(in *Input, cfg *ExportCfg, err error) (*Input, *ExportCfg, error) {
+
+	if err != nil {
+		return nil, nil, fmt.Errorf("could not compute OS: %w", err)
+	}
 
 	switch in.OS {
 	case "windows":

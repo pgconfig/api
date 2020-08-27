@@ -5,6 +5,9 @@ import (
 )
 
 func Test_computeArch(t *testing.T) {
+
+	shouldAbortChainOnError(computeArch, t)
+
 	_, _, err := computeArch(&Input{Arch: "xpto-invalid-arch"}, &ExportCfg{}, nil)
 
 	if err == nil {
