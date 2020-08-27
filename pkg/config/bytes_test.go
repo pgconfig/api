@@ -39,6 +39,8 @@ func Test_formatBytes(t *testing.T) {
 		args int
 		want string
 	}{
+		{"none", -1, "-1"},
+		{"none", 0, "0"},
 		{"bytes", 5, "5B"},
 		{"kb", 455 * KB, "455KB"},
 		{"mb", 1023 * MB, "1023MB"},

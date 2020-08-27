@@ -41,6 +41,9 @@ func marshalBytes(b *Byte) ([]byte, error) {
 // ideas from https://github.com/dustin/go-humanize/blob/master/bytes.go#L68
 func formatBytes(i int) string {
 
+	if i <= 0 {
+		return fmt.Sprintf("%d", i)
+	}
 	if i < 1024 {
 		return fmt.Sprintf("%dB", i)
 	}
