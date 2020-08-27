@@ -2,13 +2,13 @@ package compute
 
 import "errors"
 
-func computeArch(in Input, cfg ExportCfg) (*ExportCfg, error) {
+func computeArch(in *Input, cfg *ExportCfg, err error) (*Input, *ExportCfg, error) {
 
 	switch in.Arch {
 	case "x86_64":
 	case "i686":
 	default:
-		return nil, errors.New("Invalid Architecture")
+		return nil, nil, errors.New("Invalid Architecture")
 	}
 
 	if in.Arch == "i686" {
@@ -23,5 +23,5 @@ func computeArch(in Input, cfg ExportCfg) (*ExportCfg, error) {
 		}
 	}
 
-	return &cfg, nil
+	return in, cfg, nil
 }
