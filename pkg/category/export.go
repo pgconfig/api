@@ -6,13 +6,15 @@ import (
 
 // ExportCfg is the final report
 type ExportCfg struct {
-	Memory *MemoryCfg
+	Memory     *MemoryCfg
+	Checkpoint *CheckpointCfg
 }
 
 // NewExportCfg creates a new ExportCfg with the basic values
 // to be processed by the input rules
 func NewExportCfg(in config.Input) *ExportCfg {
 	return &ExportCfg{
-		Memory: NewMemoryCfg(in),
+		Memory:     NewMemoryCfg(in),
+		Checkpoint: NewCheckpointCfg(in),
 	}
 }

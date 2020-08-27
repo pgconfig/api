@@ -11,7 +11,7 @@ import (
 // computeOS(computeCPU(BLA(input,param)))
 
 func fakeInput() *config.Input {
-	return config.NewInput("linux", "x86_64", 4*GB, "WEB", "SSD", 100, 12.2)
+	return config.NewInput("linux", "x86_64", 4*config.GB, "WEB", "SSD", 100, 12.2)
 }
 
 func shouldAbortChainOnError(origin func(*config.Input, *category.ExportCfg, error) (*config.Input, *category.ExportCfg, error), t *testing.T) {
@@ -39,16 +39,16 @@ func Test_computeOS(t *testing.T) {
 
 	_, out, _ := computeOS(in, category.NewExportCfg(*in), nil)
 
-	if out.Memory.SharedBuffers > 512*MB {
+	if out.Memory.SharedBuffers > 512*config.MB {
 		t.Error("should limit shared_buffers to 512MB until pg 10 on windows")
 	}
 
 	in = fakeInput()
-	in.TotalRAM = 120 * GB
+	in.TotalRAM = 120 * config.GB
 
 	_, out, _ = computeOS(in, category.NewExportCfg(*in), nil)
 
-	if out.Memory.SharedBuffers < 25*GB {
+	if out.Memory.SharedBuffers < 25*config.GB {
 		t.Error("should not limit shared_buffers on versions greater or equal than pg 11")
 	}
 }

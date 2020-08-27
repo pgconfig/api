@@ -19,13 +19,13 @@ func Test_computeArch(t *testing.T) {
 
 	in := fakeInput()
 	in.Arch = "i686"
-	in.TotalRAM = 1 * TB
+	in.TotalRAM = 1 * config.TB
 
 	_, out, _ := computeArch(in, category.NewExportCfg(*in), nil)
 
-	if out.Memory.SharedBuffers > 4*GB ||
-		out.Memory.WorkMem > 4*GB ||
-		out.Memory.MaintenanceWorkMem > 4*GB {
+	if out.Memory.SharedBuffers > 4*config.GB ||
+		out.Memory.WorkMem > 4*config.GB ||
+		out.Memory.MaintenanceWorkMem > 4*config.GB {
 		t.Error("should limit ANY memory parameter to a max of 4GB in a 32 bits system")
 	}
 

@@ -1,4 +1,4 @@
-package compute
+package config
 
 const (
 	// B is a byte

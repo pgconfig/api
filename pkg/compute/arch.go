@@ -6,6 +6,8 @@ import (
 
 	"github.com/pgconfig/api/pkg/category"
 	"github.com/pgconfig/api/pkg/config"
+
+	_ "github.com/pgconfig/api/pkg/config"
 )
 
 func computeArch(in *config.Input, cfg *category.ExportCfg, err error) (*config.Input, *category.ExportCfg, error) {
@@ -22,14 +24,14 @@ func computeArch(in *config.Input, cfg *category.ExportCfg, err error) (*config.
 	}
 
 	if in.Arch == "i686" {
-		if cfg.Memory.SharedBuffers > 4*GB {
-			cfg.Memory.SharedBuffers = 4 * GB
+		if cfg.Memory.SharedBuffers > 4*config.GB {
+			cfg.Memory.SharedBuffers = 4 * config.GB
 		}
-		if cfg.Memory.WorkMem > 4*GB {
-			cfg.Memory.WorkMem = 4 * GB
+		if cfg.Memory.WorkMem > 4*config.GB {
+			cfg.Memory.WorkMem = 4 * config.GB
 		}
-		if cfg.Memory.MaintenanceWorkMem > 4*GB {
-			cfg.Memory.MaintenanceWorkMem = 4 * GB
+		if cfg.Memory.MaintenanceWorkMem > 4*config.GB {
+			cfg.Memory.MaintenanceWorkMem = 4 * config.GB
 		}
 	}
 

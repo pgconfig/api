@@ -23,7 +23,7 @@ func computeOS(in *config.Input, cfg *category.ExportCfg, err error) (*config.In
 	}
 
 	if in.PostgresVersion <= 9.6 {
-		cfg.Memory.SharedBuffers = 512 * MB
+		cfg.Memory.SharedBuffers = 512 * config.MB
 	}
 
 	return in, cfg, nil

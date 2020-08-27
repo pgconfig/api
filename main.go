@@ -9,7 +9,7 @@ import (
 func main() {
 
 	_, out, err := compute.Compute(
-		*config.NewInput("linux", "x86_64", 64*compute.GB, "WEB", "SSD", 100, 12.4))
+		*config.NewInput("linux", "x86_64", 64*config.GB, "WEB", "SSD", 100, 12.4))
 
 	if err != nil {
 		panic(err)
