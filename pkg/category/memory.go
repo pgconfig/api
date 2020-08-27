@@ -4,18 +4,18 @@ import "github.com/pgconfig/api/pkg/config"
 
 // MemoryCfg is the main memory category
 type MemoryCfg struct {
-	SharedBuffers      int `json:"shared_buffers"`
-	EffectiveCacheSize int `json:"effective_cache_size"`
-	WorkMem            int `json:"work_mem"`
-	MaintenanceWorkMem int `json:"maintenance_work_mem"`
+	SharedBuffers      config.Byte `json:"shared_buffers"`
+	EffectiveCacheSize config.Byte `json:"effective_cache_size"`
+	WorkMem            config.Byte `json:"work_mem"`
+	MaintenanceWorkMem config.Byte `json:"maintenance_work_mem"`
 }
 
 // NewMemoryCfg creates a new Memory Configuration
 func NewMemoryCfg(in config.Input) *MemoryCfg {
 	return &MemoryCfg{
-		SharedBuffers:      in.TotalRAM / 4,
-		EffectiveCacheSize: (in.TotalRAM / 4) * 3,
-		WorkMem:            (in.TotalRAM / in.MaxConnections),
-		MaintenanceWorkMem: in.TotalRAM / 16,
+		SharedBuffers:      config.Byte(in.TotalRAM) / 4,
+		EffectiveCacheSize: (config.Byte(in.TotalRAM) / 4) * 3,
+		WorkMem:            config.Byte(in.TotalRAM / in.MaxConnections),
+		MaintenanceWorkMem: config.Byte(in.TotalRAM) / 16,
 	}
 }
