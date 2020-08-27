@@ -6,8 +6,6 @@ import (
 
 	"github.com/pgconfig/api/pkg/category"
 	"github.com/pgconfig/api/pkg/config"
-
-	_ "github.com/pgconfig/api/pkg/config"
 )
 
 func computeArch(in *config.Input, cfg *category.ExportCfg, err error) (*config.Input, *category.ExportCfg, error) {

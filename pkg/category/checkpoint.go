@@ -4,11 +4,11 @@ import "github.com/pgconfig/api/pkg/config"
 
 // CheckpointCfg is the checkpoint related category
 type CheckpointCfg struct {
-	MinWALSize                 config.Byte `json:"min_wal_size"`
-	MaxWALSize                 config.Byte `json:"max_wal_size"` /* pg >= 9.5 */
+	MinWALSize                 config.Byte `json:"min_wal_size,omitempty"`
+	MaxWALSize                 config.Byte `json:"max_wal_size,omitempty"` /* pg >= 9.5 */
 	CheckpointCompletionTarget float32     `json:"checkpoint_completion_target"`
 	WALBuffers                 config.Byte `json:"wal_buffers"`
-	CheckpointSegments         int         `json:"checkpoint_segments"` /* pg <= 9.4 */
+	CheckpointSegments         int         `json:"checkpoint_segments,omitempty"` /* pg <= 9.4 */
 }
 
 // NewCheckpointCfg creates a new Memory Configuration
