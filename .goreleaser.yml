@@ -1,0 +1,57 @@
+builds:
+  - id: pgconfigctl
+    binary: pgconfigctl
+    main: cmd/pgconfigctl/main.go
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    ignore:
+      - goos: darwin
+        goarch: 386
+    goarch:
+      - amd64
+
+nfpms:
+  - id: default
+    package_name: pgconfigctl
+    file_name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+    builds:
+      - pgconfigctl
+
+    replacements:
+      amd64: 64-bit
+      386: 32-bit
+      darwin: macOS
+
+    homepage: https://pgconfig.org/
+    maintainer: Sebastian Webber <sebastian@swebber.me>
+    description: CLI for the pgconfig.org website
+
+    license: MIT
+
+    formats:
+      - deb
+      - rpm
+
+archives:
+  - id: pgconfigctl
+    builds:
+      - pgconfigctl
+    name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+    format: binary
+checksum:
+  name_template: "checksums.txt"
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
