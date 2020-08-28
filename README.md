@@ -1,6 +1,6 @@
 # PGConfig API
 
-[![Coverage Status](https://coveralls.io/repos/github/pgconfig/api/badge.svg?branch=master)](https://coveralls.io/github/pgconfig/api?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/pgconfig/api/badge.svg?branch=master)](https://coveralls.io/github/pgconfig/api?branch=master) [![Go Report Card](https://goreportcard.com/badge/github.com/pgconfig/api)](https://goreportcard.com/report/github.com/pgconfig/api) ![CoverALL](https://github.com/pgconfig/api/workflows/CoverALL/badge.svg) ![GoReleaser](https://github.com/pgconfig/api/workflows/goreleaser/badge.svg)
 
 > This project is a VERY BIG WORK IN PROGRESS.
 
