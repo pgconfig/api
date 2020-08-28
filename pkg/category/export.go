@@ -9,6 +9,7 @@ type ExportCfg struct {
 	Memory     *MemoryCfg     `json:"Memory Configuration"`
 	Checkpoint *CheckpointCfg `json:"Checkpoint Related Configuration"`
 	Storage    *StorageCfg    `json:"Storage Configuration"`
+	Worker     *WorkerCfg     `json:"Worker Processes Configuration,omitempty"`
 }
 
 // NewExportCfg creates a new ExportCfg with the basic values
@@ -18,5 +19,6 @@ func NewExportCfg(in config.Input) *ExportCfg {
 		Memory:     NewMemoryCfg(in),
 		Checkpoint: NewCheckpointCfg(in),
 		Storage:    NewStorageCfg(in),
+		Worker:     NewWorkerCfg(in),
 	}
 }

@@ -26,4 +26,31 @@ func Test_computeVersion(t *testing.T) {
 	if out.Checkpoint.CheckpointSegments > 0 {
 		t.Error("should remove checkpoint_segments on versions greater than 9.5")
 	}
+
+	in = fakeInput()
+	in.PostgresVersion = 9.3
+
+	_, out, _ = computeVersion(in, category.NewExportCfg(*in), nil)
+
+	if out.Worker != nil {
+		t.Error("should remove the workers category in versions older than 9.3")
+	}
+
+	in = fakeInput()
+	in.PostgresVersion = 9.4
+
+	_, out, _ = computeVersion(in, category.NewExportCfg(*in), nil)
+
+	if out.Worker.MaxParallelWorkerPerGather != 0 {
+		t.Error("should remove max_parallel_workers_per_gather on versions < 9.6")
+	}
+
+	in = fakeInput()
+	in.PostgresVersion = 9.5
+
+	_, out, _ = computeVersion(in, category.NewExportCfg(*in), nil)
+
+	if out.Worker.MaxParallelWorkers != 0 {
+		t.Error("should remove max_parallel_workers on versions < 10")
+	}
 }
