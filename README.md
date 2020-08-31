@@ -17,12 +17,12 @@ PGConfig.org API v2.
 
 1. build and release the pgconfigctl (wip):
 
-    * [ ] Migrate/Review all Categories:
+    * [x] Migrate/Review all Categories:
         * [x] Memory Configuration
         * [x] Checkpoint Related Configuration
-        * [ ] Network Related Configuration
+        * [x] Network Related Configuration
         * [x] Storage Configuration
-        * [ ] Worker Processes Configuration
+        * [x] Worker Processes Configuration
     * [ ] Implement compute filters:
         * [x] Arch
         * [x] OS
@@ -30,7 +30,7 @@ PGConfig.org API v2.
         * [ ] CPU Count
         * [ ] Total RAM
         * [ ] Profile
-        * [ ] Version
+        * [x] Version
 
 
 

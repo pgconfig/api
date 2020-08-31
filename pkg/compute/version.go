@@ -21,6 +21,14 @@ func computeVersion(in *config.Input, cfg *category.ExportCfg, err error) (*conf
 
 	if in.PostgresVersion < 9.6 {
 		cfg.Worker.MaxParallelWorkerPerGather = 0
+
+		/*
+			until 9.6 (ref to this commit: https://github.com/postgres/postgres/commit/48354581a49c30f5757c203415aa8412d85b0f70)
+			large values in this parameter tend to cause slowness
+		*/
+		if cfg.Memory.SharedBuffers > 8*config.GB {
+			cfg.Memory.SharedBuffers = 8 * config.GB
+		}
 	}
 
 	if in.PostgresVersion < 10.0 {

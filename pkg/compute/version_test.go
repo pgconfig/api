@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/pgconfig/api/pkg/category"
+	"github.com/pgconfig/api/pkg/config"
 )
 
 func Test_computeVersion(t *testing.T) {
@@ -52,5 +53,15 @@ func Test_computeVersion(t *testing.T) {
 
 	if out.Worker.MaxParallelWorkers != 0 {
 		t.Error("should remove max_parallel_workers on versions < 10")
+	}
+
+	in = fakeInput()
+	in.PostgresVersion = 9.5
+	in.TotalRAM = 1 * config.TB
+
+	_, out, _ = computeVersion(in, category.NewExportCfg(*in), nil)
+
+	if out.Memory.SharedBuffers > 8*config.GB {
+		t.Error("should limit shared_buffers up to 8gb on versions <= 9.5")
 	}
 }
