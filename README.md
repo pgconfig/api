@@ -1,7 +1,7 @@
 # PGConfig API
 
 [![Coverage Status](https://coveralls.io/repos/github/pgconfig/api/badge.svg?branch=master)](https://coveralls.io/github/pgconfig/api?branch=master) [![Go Report Card](https://goreportcard.com/badge/github.com/pgconfig/api)](https://goreportcard.com/report/github.com/pgconfig/api) ![CoverALL](https://github.com/pgconfig/api/workflows/CoverALL/badge.svg) ![GoReleaser](https://github.com/pgconfig/api/workflows/goreleaser/badge.svg)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpgconfig%2Fapi.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fpgconfig%2Fapi?ref=badge_shield)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpgconfig%2Fapi.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fpgconfig%2Fapi?ref=badge_shield)[![Total alerts](https://img.shields.io/lgtm/alerts/g/pgconfig/api.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/pgconfig/api/alerts/) [![Language grade: Go](https://img.shields.io/lgtm/grade/go/g/pgconfig/api.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/pgconfig/api/context:go)
 
 > This project is a VERY BIG WORK IN PROGRESS.
 
