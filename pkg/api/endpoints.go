@@ -40,15 +40,19 @@ func compare(ctx *fiber.Ctx) {
 
 	cIn, cExC, err := compute.Compute(*in)
 	if err != nil {
-		log.Println("compute.Compute(*in) -> ", err)
-		ctx.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
+		if err := ctx.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
 			"errors": v.Errors,
-		})
+		}); err != nil {
+			log.Println("compute.Compute(*in) -> ", err)
+		}
 		return
 	}
 
-	ctx.Status(200).JSON(fiber.Map{
+	if err := ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"Input":     cIn,
 		"ExportCfg": cExC,
-	})
+	}); err != nil {
+		log.Println("result was Okay --> ", err)
+		ctx.Status(fiber.StatusInternalServerError)
+	}
 }
