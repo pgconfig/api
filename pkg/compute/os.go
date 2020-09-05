@@ -3,9 +3,9 @@ package compute
 import (
 	"fmt"
 
-	"github.com/pgconfig/api/pkg/errors"
 	"github.com/pgconfig/api/pkg/category"
 	"github.com/pgconfig/api/pkg/config"
+	"github.com/pgconfig/api/pkg/errors"
 )
 
 func ValidOS(os string) error {
@@ -17,7 +17,7 @@ func ValidOS(os string) error {
 		return errors.ErrorInvalidOS
 	}
 	return nil
-} 
+}
 
 func computeOS(in *config.Input, cfg *category.ExportCfg, err error) (*config.Input, *category.ExportCfg, error) {
 

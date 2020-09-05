@@ -2,12 +2,12 @@ package config
 
 // Input are all needed values to compute all parameters
 type Input struct {
-	OS              string `json:"os"`
-	Arch            string `json:"arch"`
-	TotalRAM        int `json:"total_ram"`
-	Profile         string `json:"profile"`
-	DiskType        string `json:"disk_type"`
-	MaxConnections  int `json:"max_connections"`
+	OS              string  `json:"os"`
+	Arch            string  `json:"arch"`
+	TotalRAM        int     `json:"total_ram"`
+	Profile         string  `json:"profile"`
+	DiskType        string  `json:"disk_type"`
+	MaxConnections  int     `json:"max_connections"`
 	PostgresVersion float32 `json:"postgres_version"`
 }
 

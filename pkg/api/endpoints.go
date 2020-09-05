@@ -3,10 +3,10 @@ package api
 import (
 	"log"
 
+	"github.com/gofiber/fiber"
 	"github.com/pgconfig/api/pkg/compute"
 	"github.com/pgconfig/api/pkg/config"
 	"github.com/pgconfig/api/pkg/errors"
-	"github.com/gofiber/fiber"
 )
 
 func SetupRoutesCompute(rtr fiber.Router) {
@@ -35,12 +35,10 @@ func compare(ctx *fiber.Ctx) {
 		}); err != nil {
 			log.Println("v.hasErrors() -> Error CTX fiber", err)
 		}
-		return  
+		return
 	}
 
-	// TODO: return compute
-	// *config.Input, *category.ExportCfg, error
-	cIn, cExC, err := compute.Compute(*in) 
+	cIn, cExC, err := compute.Compute(*in)
 	if err != nil {
 		log.Println("compute.Compute(*in) -> ", err)
 		ctx.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
@@ -50,7 +48,7 @@ func compare(ctx *fiber.Ctx) {
 	}
 
 	ctx.Status(200).JSON(fiber.Map{
-		"Input": cIn,
+		"Input":     cIn,
 		"ExportCfg": cExC,
 	})
 }

@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/pgconfig/api/pkg/api"
 	"github.com/gofiber/fiber"
+	"github.com/pgconfig/api/pkg/api"
 )
 
 const APIVersion = "/api/v2"
@@ -25,7 +25,7 @@ func main() {
 	app := fiber.New()
 	v2 := app.Group(APIVersion, next)
 	api.SetupRoutesCompute(v2)
-	if err:= app.Listen(3000); err != nil {
+	if err := app.Listen(3000); err != nil {
 		log.Println("[ERR] not running API: ", err)
 	}
 }

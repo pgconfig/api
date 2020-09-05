@@ -3,9 +3,9 @@ package compute
 import (
 	"fmt"
 
-	"github.com/pgconfig/api/pkg/errors"
 	"github.com/pgconfig/api/pkg/category"
 	"github.com/pgconfig/api/pkg/config"
+	"github.com/pgconfig/api/pkg/errors"
 )
 
 func ValidArch(arch string) error {
