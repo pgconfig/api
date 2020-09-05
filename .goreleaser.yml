@@ -13,6 +13,20 @@ builds:
         goarch: 386
     goarch:
       - amd64
+  - id: api
+    binary: api
+    main: cmd/api/main.go
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    ignore:
+      - goos: darwin
+        goarch: 386
+    goarch:
+      - amd64
 
 nfpms:
   - id: default
@@ -55,3 +69,23 @@ snapshot:
   name_template: "{{ .Tag }}-next"
 changelog:
   sort: asc
+
+dockers:
+  -
+    dockerfile: cmd/pgconfigctl/Dockerfile
+    binaries:
+    - pgconfigctl
+    image_templates:
+    - "pgconfig/pgconfigctl:{{ .Tag }}"
+    - "pgconfig/pgconfigctl:v{{ .Major }}"
+    - "pgconfig/pgconfigctl:v{{ .Major }}.{{ .Minor }}"
+    - "pgconfig/pgconfigctl:latest"
+  -
+    dockerfile: cmd/api/Dockerfile
+    binaries:
+    - api
+    image_templates:
+    - "pgconfig/api:{{ .Tag }}"
+    - "pgconfig/api:v{{ .Major }}"
+    - "pgconfig/api:v{{ .Major }}.{{ .Minor }}"
+    - "pgconfig/api:latest"

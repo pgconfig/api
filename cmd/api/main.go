@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 
 	"github.com/gofiber/fiber"
@@ -8,6 +9,13 @@ import (
 )
 
 const APIVersion = "/api/v2"
+
+var port int
+
+func init() {
+	flag.IntVar(&port, "version", 3000, "Listen port")
+	flag.Parse()
+}
 
 // Next with CORS
 func next(c *fiber.Ctx) {
@@ -25,7 +33,7 @@ func main() {
 	app := fiber.New()
 	v2 := app.Group(APIVersion, next)
 	api.SetupRoutesCompute(v2)
-	if err := app.Listen(3000); err != nil {
+	if err := app.Listen(port); err != nil {
 		log.Println("[ERR] not running API: ", err)
 	}
 }
