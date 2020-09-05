@@ -1,12 +1,23 @@
 package compute
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/pgconfig/api/pkg/category"
 	"github.com/pgconfig/api/pkg/config"
+	"github.com/pgconfig/api/pkg/errors"
 )
+
+func ValidOS(os string) error {
+	switch os {
+	case "windows":
+	case "linux":
+	case "unix":
+	default:
+		return errors.ErrorInvalidOS
+	}
+	return nil
+}
 
 func computeOS(in *config.Input, cfg *category.ExportCfg, err error) (*config.Input, *category.ExportCfg, error) {
 
@@ -14,12 +25,8 @@ func computeOS(in *config.Input, cfg *category.ExportCfg, err error) (*config.In
 		return nil, nil, fmt.Errorf("could not compute OS: %w", err)
 	}
 
-	switch in.OS {
-	case "windows":
-	case "linux":
-	case "unix":
-	default:
-		return nil, nil, errors.New("Invalid OS")
+	if err = ValidOS(in.OS); err != nil {
+		return nil, nil, err
 	}
 
 	if in.PostgresVersion <= 9.6 {

@@ -1,12 +1,22 @@
 package compute
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/pgconfig/api/pkg/category"
 	"github.com/pgconfig/api/pkg/config"
+	"github.com/pgconfig/api/pkg/errors"
 )
+
+func ValidArch(arch string) error {
+	switch arch {
+	case "x86_64":
+	case "i686":
+	default:
+		return errors.ErrorInvalidArch
+	}
+	return nil
+}
 
 func computeArch(in *config.Input, cfg *category.ExportCfg, err error) (*config.Input, *category.ExportCfg, error) {
 
@@ -14,11 +24,8 @@ func computeArch(in *config.Input, cfg *category.ExportCfg, err error) (*config.
 		return nil, nil, fmt.Errorf("could not compute Arch: %w", err)
 	}
 
-	switch in.Arch {
-	case "x86_64":
-	case "i686":
-	default:
-		return nil, nil, errors.New("Invalid Architecture")
+	if err = ValidArch(in.Arch); err != nil {
+		return nil, nil, err
 	}
 
 	if in.Arch == "i686" {
