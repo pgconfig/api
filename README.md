@@ -12,6 +12,8 @@ PGConfig.org API v2.
 1. host the v2 api of pgconfig.org (not started):
 
     * [ ] Create new API using fiber
+        * [x] Route compare
+        * [ ] other routes
     * [ ] Update Release with and build the docker images
 
 
