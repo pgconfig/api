@@ -7,8 +7,8 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/pgconfig/api/pkg/category"
-	"github.com/pgconfig/api/pkg/compute"
 	"github.com/pgconfig/api/pkg/config"
+	"github.com/pgconfig/api/pkg/rules"
 )
 
 var pgVersion float64
@@ -20,7 +20,7 @@ func init() {
 
 func main() {
 
-	_, out, err := compute.Compute(
+	out, err := rules.Compute(
 		*config.NewInput("linux", "x86_64", 64*config.GB, "WEB", "SSD", 100, float32(pgVersion)))
 
 	if err != nil {

@@ -1,14 +1,12 @@
-package compute
+package rules
 
 import (
-	"fmt"
-
 	"github.com/pgconfig/api/pkg/category"
 	"github.com/pgconfig/api/pkg/config"
 	"github.com/pgconfig/api/pkg/errors"
 )
 
-// ValidOS validates the OS
+// ValidOS validates the Operating System
 func ValidOS(os string) error {
 	switch os {
 	case "windows":
@@ -20,19 +18,17 @@ func ValidOS(os string) error {
 	return nil
 }
 
-func computeOS(in *config.Input, cfg *category.ExportCfg, err error) (*config.Input, *category.ExportCfg, error) {
+func computeOS(in *config.Input, cfg *category.ExportCfg) (*category.ExportCfg, error) {
 
-	if err != nil {
-		return nil, nil, fmt.Errorf("could not compute OS: %w", err)
-	}
+	var err error
 
 	if err = ValidOS(in.OS); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	if in.PostgresVersion <= 9.6 {
 		cfg.Memory.SharedBuffers = 512 * config.MB
 	}
 
-	return in, cfg, nil
+	return cfg, nil
 }

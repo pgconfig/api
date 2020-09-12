@@ -4,9 +4,9 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber"
-	"github.com/pgconfig/api/pkg/compute"
 	"github.com/pgconfig/api/pkg/config"
 	"github.com/pgconfig/api/pkg/errors"
+	"github.com/pgconfig/api/pkg/rules"
 )
 
 func SetupRoutesCompute(rtr fiber.Router) {
@@ -38,7 +38,7 @@ func compare(ctx *fiber.Ctx) {
 		return
 	}
 
-	cIn, cExC, err := compute.Compute(*in)
+	cExC, err := rules.Compute(*in)
 	if err != nil {
 		if err := ctx.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
 			"errors": v.Errors,
@@ -49,7 +49,7 @@ func compare(ctx *fiber.Ctx) {
 	}
 
 	if err := ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"Input":     cIn,
+		"Input":     in,
 		"ExportCfg": cExC,
 	}); err != nil {
 		log.Println("result was Okay --> ", err)

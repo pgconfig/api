@@ -1,8 +1,6 @@
-package compute
+package rules
 
 import (
-	"fmt"
-
 	"github.com/pgconfig/api/pkg/category"
 	"github.com/pgconfig/api/pkg/config"
 	"github.com/pgconfig/api/pkg/errors"
@@ -19,14 +17,10 @@ func ValidArch(arch string) error {
 	return nil
 }
 
-func computeArch(in *config.Input, cfg *category.ExportCfg, err error) (*config.Input, *category.ExportCfg, error) {
+func computeArch(in *config.Input, cfg *category.ExportCfg) (*category.ExportCfg, error) {
 
-	if err != nil {
-		return nil, nil, fmt.Errorf("could not compute Arch: %w", err)
-	}
-
-	if err = ValidArch(in.Arch); err != nil {
-		return nil, nil, err
+	if err := ValidArch(in.Arch); err != nil {
+		return nil, err
 	}
 
 	if in.Arch == "i686" {
@@ -41,5 +35,5 @@ func computeArch(in *config.Input, cfg *category.ExportCfg, err error) (*config.
 		}
 	}
 
-	return in, cfg, nil
+	return cfg, nil
 }

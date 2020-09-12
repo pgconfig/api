@@ -1,18 +1,12 @@
-package compute
+package rules
 
 import (
-	"fmt"
-
 	"github.com/pgconfig/api/pkg/category"
 	"github.com/pgconfig/api/pkg/config"
 )
 
 // computeVersion will remove the values that were removed on specific versions
-func computeVersion(in *config.Input, cfg *category.ExportCfg, err error) (*config.Input, *category.ExportCfg, error) {
-
-	if err != nil {
-		return nil, nil, fmt.Errorf("could not compute Version: %w", err)
-	}
+func computeVersion(in *config.Input, cfg *category.ExportCfg) (*category.ExportCfg, error) {
 
 	if in.PostgresVersion < 9.5 {
 		cfg.Checkpoint.MinWALSize = 0
@@ -43,5 +37,5 @@ func computeVersion(in *config.Input, cfg *category.ExportCfg, err error) (*conf
 		cfg.Worker = nil
 	}
 
-	return in, cfg, nil
+	return cfg, nil
 }

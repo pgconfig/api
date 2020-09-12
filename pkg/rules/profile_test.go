@@ -1,4 +1,4 @@
-package compute
+package rules
 
 import (
 	"testing"
@@ -9,13 +9,11 @@ import (
 )
 
 func Test_computeProfile(t *testing.T) {
-	shouldAbortChainOnError(computeVersion, t)
-
 	in := fakeInput()
 	in.Profile = profile.Desktop
 	in.TotalRAM = 4 * config.GB
 
-	_, out, _ := computeProfile(in, category.NewExportCfg(*in), nil)
+	out, _ := computeProfile(in, category.NewExportCfg(*in))
 
 	if in.Profile == profile.Desktop && out.Memory.SharedBuffers != (4*config.GB)/16 {
 		t.Error("should apply a lower value for shared_buffers on the Desktop profile")
