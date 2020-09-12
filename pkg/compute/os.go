@@ -8,6 +8,7 @@ import (
 	"github.com/pgconfig/api/pkg/errors"
 )
 
+// ValidOS validates the OS
 func ValidOS(os string) error {
 	switch os {
 	case "windows":

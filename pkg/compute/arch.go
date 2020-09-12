@@ -8,6 +8,7 @@ import (
 	"github.com/pgconfig/api/pkg/errors"
 )
 
+// ValidArch validates the arch
 func ValidArch(arch string) error {
 	switch arch {
 	case "x86_64":

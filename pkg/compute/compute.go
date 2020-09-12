@@ -7,8 +7,9 @@ import (
 
 // Compute evaluate all parameters
 func Compute(in config.Input) (*config.Input, *category.ExportCfg, error) {
-	return computeArch(
-		computeOS(
-			computeVersion(&in,
-				category.NewExportCfg(in), nil)))
+	return computeVersion(
+		computeProfile(
+			computeOS(
+				computeArch(&in,
+					category.NewExportCfg(in), nil))))
 }
