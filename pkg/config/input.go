@@ -8,15 +8,17 @@ type Input struct {
 	Profile         string  `json:"profile"`
 	DiskType        string  `json:"disk_type"`
 	MaxConnections  int     `json:"max_connections"`
+	TotalCPU        int     `json:"total_cpu"`
 	PostgresVersion float32 `json:"postgres_version"`
 }
 
 // NewInput creates a Input
-func NewInput(os string, arch string, totalRAM int, profile string, diskType string, maxConnections int, postgresVersion float32) *Input {
+func NewInput(os string, arch string, totalRAM int, totalCPU int, profile string, diskType string, maxConnections int, postgresVersion float32) *Input {
 	return &Input{
 		OS:              os,
 		Arch:            arch,
 		TotalRAM:        totalRAM,
+		TotalCPU:        totalCPU,
 		Profile:         profile,
 		DiskType:        diskType,
 		MaxConnections:  maxConnections,

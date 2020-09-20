@@ -13,6 +13,9 @@ builds:
         goarch: 386
     goarch:
       - amd64
+      # - 386
+      # - arm
+      - arm64
   - id: api
     binary: api
     main: cmd/api/main.go
@@ -77,8 +80,7 @@ dockers:
     - pgconfigctl
     image_templates:
     - "pgconfig/pgconfigctl:{{ .Tag }}"
-    - "pgconfig/pgconfigctl:v{{ .Major }}"
-    - "pgconfig/pgconfigctl:v{{ .Major }}.{{ .Minor }}"
+    - "pgconfig/pgconfigctl:{{ .Major }}.{{ .Minor }}"
     - "pgconfig/pgconfigctl:latest"
   -
     dockerfile: cmd/api/Dockerfile
@@ -86,6 +88,5 @@ dockers:
     - api
     image_templates:
     - "pgconfig/api:{{ .Tag }}"
-    - "pgconfig/api:v{{ .Major }}"
-    - "pgconfig/api:v{{ .Major }}.{{ .Minor }}"
+    - "pgconfig/api:{{ .Major }}.{{ .Minor }}"
     - "pgconfig/api:latest"
