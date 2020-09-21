@@ -12,11 +12,11 @@ func Test_computeArch(t *testing.T) {
 	_, err := computeArch(&config.Input{Arch: "xpto-invalid-arch"}, nil)
 
 	if err == nil {
-		t.Error("should support only x86_64 and i686")
+		t.Error("should support only 386, amd64, arm and arm64")
 	}
 
 	in := fakeInput()
-	in.Arch = "i686"
+	in.Arch = "386"
 	in.TotalRAM = 1 * config.TB
 
 	out, _ := computeArch(in, category.NewExportCfg(*in))

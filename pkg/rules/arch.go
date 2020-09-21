@@ -9,8 +9,10 @@ import (
 // ValidArch validates the arch
 func ValidArch(arch string) error {
 	switch arch {
-	case "x86_64":
-	case "i686":
+	case "386":
+	case "amd64":
+	case "arm":
+	case "arm64":
 	default:
 		return errors.ErrorInvalidArch
 	}
@@ -23,7 +25,7 @@ func computeArch(in *config.Input, cfg *category.ExportCfg) (*category.ExportCfg
 		return nil, err
 	}
 
-	if in.Arch == "i686" {
+	if in.Arch == "386" {
 		if cfg.Memory.SharedBuffers > 4*config.GB {
 			cfg.Memory.SharedBuffers = 4 * config.GB
 		}
