@@ -25,6 +25,11 @@ func (b *Byte) MarshalJSON() ([]byte, error) {
 	return marshalBytes(b)
 }
 
+// String converst bytes into human bytes
+func (b *Byte) String() string {
+	return formatBytes(*b)
+}
+
 func marshalBytes(b *Byte) ([]byte, error) {
 
 	buffer := bytes.NewBufferString("")
