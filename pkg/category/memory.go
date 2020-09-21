@@ -15,7 +15,7 @@ func NewMemoryCfg(in config.Input) *MemoryCfg {
 	return &MemoryCfg{
 		SharedBuffers:      config.Byte(in.TotalRAM) / 4,
 		EffectiveCacheSize: (config.Byte(in.TotalRAM) / 4) * 3,
-		WorkMem:            config.Byte(in.TotalRAM / in.MaxConnections),
+		WorkMem:            in.TotalRAM / config.Byte(in.MaxConnections),
 		MaintenanceWorkMem: config.Byte(in.TotalRAM) / 16,
 	}
 }

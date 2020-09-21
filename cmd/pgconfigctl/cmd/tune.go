@@ -40,7 +40,7 @@ var (
 	osName         string
 	arch           string
 	totalCPU       int
-	totalRAM       uint64
+	totalRAM       int64
 	maxConnections int
 	diskType       string
 	profile        string
@@ -57,8 +57,8 @@ var tuneCmd = &cobra.Command{
 			*config.NewInput(
 				osName,
 				arch,
+				config.Byte(totalRAM),
 				totalCPU,
-				int(totalRAM),
 				profile,
 				diskType,
 				100,
@@ -95,6 +95,6 @@ func init() {
 	tuneCmd.PersistentFlags().StringVarP(&profile, "profile", "", "WEB", "Tuning profile (possible values are WEB, HDD and SAN)")
 	tuneCmd.PersistentFlags().Float32VarP(&version, "version", "", 12.4, "PostgreSQL Version")
 	tuneCmd.PersistentFlags().IntVarP(&totalCPU, "cpus", "c", runtime.NumCPU(), "Total CPU cores")
-	tuneCmd.PersistentFlags().Uint64VarP(&totalRAM, "ram", "", memory.Total, "Total Memory in bytes")
+	tuneCmd.PersistentFlags().Int64VarP(&totalRAM, "ram", "", int64(memory.Total), "Total Memory in bytes")
 	tuneCmd.PersistentFlags().IntVarP(&maxConnections, "max-connections", "M", 100, "Max expected connections")
 }

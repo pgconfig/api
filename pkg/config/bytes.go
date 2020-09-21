@@ -5,25 +5,20 @@ import (
 	"fmt"
 )
 
+// IEC Sizes
 const (
-	// B is a byte
-	B = 1
-
-	// KB is a KibiByte
-	KB = B * 1024
-
-	// MB is a MebiByte
-	MB = KB * 1024
-
-	// GB is a GibiByte
-	GB = MB * 1024
-
-	// TB is a TebiByte
-	TB = GB * 1024
+	B Byte = 1 << (iota * 10)
+	KB
+	MB
+	GB
+	TB
+	PB
+	EB
 )
 
-// Byte is a int that is displayed in a fancy way
-type Byte int
+// Byte is a int that is displayed in a fancy way.
+// Follows ISO/IEC 80000 spec.
+type Byte int64
 
 // MarshalJSON converst the byte
 func (b *Byte) MarshalJSON() ([]byte, error) {
@@ -33,13 +28,13 @@ func (b *Byte) MarshalJSON() ([]byte, error) {
 func marshalBytes(b *Byte) ([]byte, error) {
 
 	buffer := bytes.NewBufferString("")
-	buffer.WriteString(fmt.Sprintf(`"%s"`, formatBytes(int(*b))))
+	buffer.WriteString(fmt.Sprintf(`"%s"`, formatBytes(Byte(*b))))
 
 	return buffer.Bytes(), nil
 }
 
 // ideas from https://github.com/dustin/go-humanize/blob/master/bytes.go#L68
-func formatBytes(i int) string {
+func formatBytes(i Byte) string {
 
 	if i <= 0 {
 		return fmt.Sprintf("%d", i)

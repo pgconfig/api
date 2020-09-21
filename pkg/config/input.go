@@ -4,7 +4,7 @@ package config
 type Input struct {
 	OS              string  `json:"os"`
 	Arch            string  `json:"arch"`
-	TotalRAM        int     `json:"total_ram"`
+	TotalRAM        Byte    `json:"total_ram"`
 	Profile         string  `json:"profile"`
 	DiskType        string  `json:"disk_type"`
 	MaxConnections  int     `json:"max_connections"`
@@ -13,7 +13,7 @@ type Input struct {
 }
 
 // NewInput creates a Input
-func NewInput(os string, arch string, totalRAM int, totalCPU int, profile string, diskType string, maxConnections int, postgresVersion float32) *Input {
+func NewInput(os string, arch string, totalRAM Byte, totalCPU int, profile string, diskType string, maxConnections int, postgresVersion float32) *Input {
 	return &Input{
 		OS:              os,
 		Arch:            arch,

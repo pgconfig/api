@@ -36,7 +36,7 @@ func Test_formatBytes(t *testing.T) {
 	}
 	tests := []struct {
 		name string
-		args int
+		args Byte
 		want string
 	}{
 		{"none", -1, "-1"},
