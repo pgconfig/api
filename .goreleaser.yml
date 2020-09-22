@@ -1,3 +1,7 @@
+before:
+  hooks:
+  - go mod download
+  
 builds:
   - id: pgconfigctl
     binary: pgconfigctl
@@ -16,77 +20,82 @@ builds:
       - 386
       - arm
       - arm64
-  - id: api
-    binary: api
-    main: cmd/api/main.go
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - linux
-      - windows
-      - darwin
-    ignore:
-      - goos: darwin
-        goarch: 386
-    goarch:
-      - amd64
 
-nfpms:
-  - id: default
-    package_name: pgconfigctl
-    file_name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+#   - id: api
+#     binary: api
+#     main: cmd/api/main.go
+#     env:
+#       - CGO_ENABLED=0
+#     goos:
+#       - linux
+#       - windows
+#       - darwin
+#     ignore:
+#       - goos: darwin
+#         goarch: 386
+#     goarch:
+#       - amd64
+#       - 386
+#       - arm
+#       - arm64
+#     ldflags:
+#       - -s -w -X version.Tag={{.Version}} -X version.Commit={{.Commit}}
+# nfpms:
+#   - id: default
+#     package_name: pgconfigctl
+#     file_name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
-    builds:
-      - pgconfigctl
+#     builds:
+#       - pgconfigctl
 
-    replacements:
-      amd64: 64-bit
-      386: 32-bit
-      darwin: macOS
+#     replacements:
+#       amd64: 64-bit
+#       386: 32-bit
+#       darwin: macOS
 
-    homepage: https://pgconfig.org/
-    maintainer: Sebastian Webber <sebastian@swebber.me>
-    description: CLI for the pgconfig.org website
+#     homepage: https://pgconfig.org/
+#     maintainer: Sebastian Webber <sebastian@swebber.me>
+#     description: CLI for the pgconfig.org website
 
-    license: MIT
+#     license: MIT
 
-    formats:
-      - deb
-      - rpm
+#     formats:
+#       - deb
+#       - rpm
 
-archives:
-  - id: pgconfigctl
-    builds:
-      - pgconfigctl
-    name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-    replacements:
-      darwin: Darwin
-      linux: Linux
-      windows: Windows
-      386: i386
-      amd64: x86_64
-    format: binary
-checksum:
-  name_template: "checksums.txt"
-snapshot:
-  name_template: "{{ .Tag }}-next"
-changelog:
-  sort: asc
+# archives:
+#   - id: pgconfigctl
+#     builds:
+#       - pgconfigctl
+#     name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+#     replacements:
+#       darwin: Darwin
+#       linux: Linux
+#       windows: Windows
+#       386: i386
+#       amd64: x86_64
+#     format: binary
+# checksum:
+#   name_template: "checksums.txt"
+# snapshot:
+#   name_template: "{{ .Tag }}-next"
+# changelog:
+#   sort: asc
 
-dockers:
-  -
-    dockerfile: cmd/pgconfigctl/Dockerfile
-    binaries:
-    - pgconfigctl
-    image_templates:
-    - "pgconfig/pgconfigctl:{{ .Tag }}"
-    - "pgconfig/pgconfigctl:{{ .Major }}.{{ .Minor }}"
-    - "pgconfig/pgconfigctl:latest"
-  -
-    dockerfile: cmd/api/Dockerfile
-    binaries:
-    - api
-    image_templates:
-    - "pgconfig/api:{{ .Tag }}"
-    - "pgconfig/api:{{ .Major }}.{{ .Minor }}"
-    - "pgconfig/api:latest"
+# dockers:
+#   -
+#     dockerfile: cmd/pgconfigctl/Dockerfile
+#     binaries:
+#     - pgconfigctl
+#     image_templates:
+#     - "pgconfig/pgconfigctl:{{ .Tag }}"
+#     - "pgconfig/pgconfigctl:{{ .Major }}.{{ .Minor }}"
+#     - "pgconfig/pgconfigctl:latest"
+#   -
+#     dockerfile: cmd/api/Dockerfile
+#     binaries:
+#     - api
+#     image_templates:
+#     - "pgconfig/api:{{ .Tag }}"
+#     - "pgconfig/api:{{ .Major }}.{{ .Minor }}"
+#     - "pgconfig/api:latest"

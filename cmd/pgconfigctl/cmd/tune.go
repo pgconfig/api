@@ -37,7 +37,7 @@ import (
 )
 
 var (
-	version        float32
+	pgVersion      float32
 	osName         string
 	arch           string
 	totalCPU       int
@@ -64,7 +64,7 @@ var tuneCmd = &cobra.Command{
 				profile,
 				diskType,
 				maxConnections,
-				version))
+				pgVersion))
 
 		if err != nil {
 			panic(err)
@@ -110,7 +110,7 @@ func init() {
 	tuneCmd.PersistentFlags().StringVarP(&diskType, "disk-type", "D", "SSD", "Disk type (possible values are SSD, HDD and SAN)")
 	tuneCmd.PersistentFlags().StringVarP(&profile, "profile", "", "WEB", "Tuning profile (possible values are WEB, HDD and SAN)")
 	tuneCmd.PersistentFlags().StringVarP(&format, "format", "", "conf", "config file format (possible values are unix, alter-system, and json) - file extension also work (conf, sql, json)")
-	tuneCmd.PersistentFlags().Float32VarP(&version, "version", "", 12.4, "PostgreSQL Version")
+	tuneCmd.PersistentFlags().Float32VarP(&pgVersion, "version", "", 12.4, "PostgreSQL Version")
 	tuneCmd.PersistentFlags().IntVarP(&totalCPU, "cpus", "c", runtime.NumCPU(), "Total CPU cores")
 	tuneCmd.PersistentFlags().Int64VarP(&totalRAM, "ram", "", int64(memory.Total), "Total Memory in bytes")
 	tuneCmd.PersistentFlags().IntVarP(&maxConnections, "max-connections", "M", 100, "Max expected connections")

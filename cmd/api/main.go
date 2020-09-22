@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/fiber"
 	"github.com/pgconfig/api/pkg/api"
+	"github.com/pgconfig/api/pkg/version"
 )
 
 const APIVersion = "/api/v2"
@@ -30,6 +31,7 @@ func next(c *fiber.Ctx) {
 }
 
 func main() {
+	log.Printf("%s (%s)\n", version.Tag, version.Commit)
 	app := fiber.New()
 	v2 := app.Group(APIVersion, next)
 	api.SetupRoutesCompute(v2)
