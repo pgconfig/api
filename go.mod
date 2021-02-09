@@ -3,6 +3,7 @@ module github.com/pgconfig/api
 go 1.13
 
 require (
+	github.com/PuerkitoBio/goquery v1.6.1
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/arsmn/fiber-swagger/v2 v2.3.0
 	github.com/davecgh/go-spew v1.1.1
