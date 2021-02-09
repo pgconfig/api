@@ -14,6 +14,7 @@ type Input struct {
 
 // NewInput creates a Input
 func NewInput(os string, arch string, totalRAM Byte, totalCPU int, profile string, diskType string, maxConnections int, postgresVersion float32) *Input {
+
 	return &Input{
 		OS:              os,
 		Arch:            arch,
