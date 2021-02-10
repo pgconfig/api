@@ -54,37 +54,48 @@ func GetRules(c *fiber.Ctx) error {
 	}
 	pgVersion := docs.FormatVer(float32(ver))
 
-	var output = make([]category, len(allCategories.Categories))
+	return c.JSON(v1Reponse(c, addDocTORules(pgVersion, true)))
+}
+
+func addDocTORules(pgVersion string, showDoc bool) []outputCategory {
+	var output = make([]outputCategory, len(allCategories.Categories))
 	copy(output, allCategories.Categories)
 
 	for c := 0; c < len(output); c++ {
 		for p := 0; p < len(output[c].Parameters); p++ {
-			output[c].Parameters[p].Documentation = pgDocs.Documentation[pgVersion][output[c].Parameters[p].Name]
+			if !showDoc {
+				output[c].Parameters[p].Documentation = nil
+				continue
+			}
+
+			paramDoc := pgDocs.Documentation[pgVersion][output[c].Parameters[p].Name]
+			output[c].Parameters[p].Documentation = &paramDoc
 			output[c].Parameters[p].Documentation.Abstract = output[c].Parameters[p].Notes.Abstract
 			output[c].Parameters[p].Documentation.BlogRecomendations = output[c].Parameters[p].Notes.Recomendations
 		}
 	}
 
-	return c.JSON(v1Reponse(c, output))
+	return output
 }
 
 type rulesFile struct {
-	Categories []category `json:"categories"`
+	Categories []outputCategory `json:"categories"`
 }
 
-type documentation struct {
+type notes struct {
 	Abstract       string            `json:"abstract"`
 	Recomendations map[string]string `json:"recomendations,omitempty"`
 }
 type parameter struct {
-	Notes         documentation `yaml:"notes" json:"-"`
-	Documentation docs.ParamDoc `json:"documentation"`
-	Format        string        `json:"format"`
-	Formula       string        `json:"formula"`
-	Name          string        `json:"name"`
+	Notes         notes          `yaml:"notes" json:"-"`
+	Documentation *docs.ParamDoc `json:"documentation,omitempty"`
+	Format        string         `json:"format"`
+	Formula       string         `json:"formula"`
+	Name          string         `json:"name"`
+	Value         string         `json:"config_value,omitempty"`
 }
-type category struct {
-	Name        string      `json:"category" yaml:"name"`
-	Description string      `json:"description"`
-	Parameters  []parameter `json:"parameters"`
+type outputCategory struct {
+	Name        string       `json:"category" yaml:"name"`
+	Description string       `json:"description"`
+	Parameters  []*parameter `json:"parameters"`
 }

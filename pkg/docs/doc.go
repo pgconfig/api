@@ -11,17 +11,17 @@ import (
 
 // ParamDoc is foo
 type ParamDoc struct {
-	Title              string            `json:"name" yaml:"title"`
-	ShortDesc          string            `json:"short_desc" yaml:"short_desc"`
-	Text               []string          `json:"details" yaml:"details"`
-	DocURL             string            `json:"url" yaml:"url"`
-	ConfURL            string            `json:"conf_url" yaml:"conf_url"`
-	RecomendationsConf string            `json:"recomendations_conf" yaml:"recomendations_conf"`
-	ParamType          string            `json:"type" yaml:"type"`
-	DefaultValue       string            `json:"default_value" yaml:"default_value"`
-	MinValue           string            `json:"min_value" yaml:"min_value"`
-	MaxValue           string            `json:"max_value" yaml:"max_value"`
-	BlogRecomendations map[string]string `json:"recomendations,omitempty" yaml:"recomendations,omitempty"`
+	Title              string            `json:"name,omitempty" yaml:"title"`
+	ShortDesc          string            `json:"short_desc,omitempty" yaml:"short_desc"`
+	Text               []string          `json:"details,omitempty" yaml:"details"`
+	DocURL             string            `json:"url,omitempty" yaml:"url"`
+	ConfURL            string            `json:"conf_url,omitempty" yaml:"conf_url"`
+	RecomendationsConf string            `json:"recomendations_conf,omitempty" yaml:"recomendations_conf"`
+	ParamType          string            `json:"type,omitempty" yaml:"type"`
+	DefaultValue       string            `json:"default_value,omitempty" yaml:"default_value"`
+	MinValue           string            `json:"min_value,omitempty" yaml:"min_value"`
+	MaxValue           string            `json:"max_value,omitempty" yaml:"max_value"`
+	BlogRecomendations map[string]string `json:"recomendations,omitempty,omitempty" yaml:"recomendations,omitempty"`
 	Abstract           string            `json:"abstract,omitempty" yaml:"abstract,omitempty"`
 }
 
