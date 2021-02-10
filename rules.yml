@@ -2,13 +2,11 @@ categories:
   - name: memory_related
     description: Memory Configuration
     parameters:
-      - documentation:
+      - notes:
           abstract: This parameter allocate memory slots used by all process when the database starts. Mainly works as the disk cache and its similar to oracle's SGA buffer.
           recomendations:
             Tuning Your PostgreSQL Server: https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server#shared_buffers
             Tuning shared_buffers and wal_buffers: http://rhaas.blogspot.com.br/2012/03/tuning-sharedbuffers-and-walbuffers.html
-          type: integer
-          url: "{{ .DocWebSite}}/{{ .Version }}/static/runtime-config-resource.html#GUC-SHARED-BUFFERS"
         format: Bytes
         formula: |
           if environment_name == "Desktop":
@@ -16,13 +14,11 @@ categories:
           else:
               parameter["formula"] = "TOTAL_RAM / 4"
         name: shared_buffers
-      - documentation:
+      - notes:
           abstract: This parameter does not allocate any resource, just tells to the query planner how much of the operating system cache are avaliable to use. Remember that shared_buffers needs to smaller than 8GB, then the query planner will prefer read the disk because it will be on memory.
           recomendations:
             "effective_cache_size: A practical example": https://www.cybertec-postgresql.com/en/effective_cache_size-a-practical-example/
             "effective_cache_size: What it means in PostgreSQL": https://www.cybertec-postgresql.com/en/effective_cache_size-what-it-means-in-postgresql/
-          type: integer
-          url: "{{ .DocWebSite}}/{{ .Version }}/static/runtime-config-query.html#GUC-EFFECTIVE-CACHE-SIZE"
         format: Bytes
         formula: |
           if environment_name == "Desktop":
@@ -30,16 +26,13 @@ categories:
           else:
               (TOTAL_RAM / 4) * 3
         name: effective_cache_size
-      - documentation:
+      - notes:
           abstract: This parameter defines how much a work_mem buffer can allocate. Each query can open many work_mem buffers when execute (normally one by subquery) if it uses any sort (or aggregate) operation. When work_mem its too small a temp file is created.
-          default_value: 4MB
           details:
             - Specifies the amount of memory to be used by internal sort operations and hash tables before writing to temporary disk files. The value defaults to four megabytes (4MB). Note that for a complex query, several sort or hash operations might be running in parallel; each operation will be allowed to use as much memory as this value specifies before it starts to write data into temporary files. Also, several running sessions could be doing such operations concurrently. Therefore, the total memory used could be many times the value of work_mem; it is necessary to keep this fact in mind when choosing the value. Sort operations are used for ORDER BY, DISTINCT, and merge joins. Hash tables are used in hash joins, hash-based aggregation, and hash-based processing of IN subqueries.
           recomendations:
             Configuring work_mem in Postgres: https://www.pgmustard.com/blog/work-mem
             "Understaning postgresql.conf: WORK_MEM": https://www.depesz.com/2011/07/03/understanding-postgresql-conf-work_mem/
-          type: integer
-          url: "{{ .DocWebSite}}/{{ .Version }}/static/runtime-config-resource.html#GUC-WORK-MEM"
         format: Bytes
         formula: |
           if environment_name in ["WEB", "OLTP"]:
@@ -49,17 +42,11 @@ categories:
           else:
             ((TOTAL_RAM / 6) / MAX_CONNECTIONS)
         name: work_mem
-      - documentation:
+      - notes:
           abstract: This parameter defines how much a maintenance operation (ALTER TABLE, VACUUM, REINDEX, AutoVACUUM worker, etc) buffer can use.
-          default_value: 64MB
-          details:
-            - Specifies the maximum amount of memory to be used by maintenance operations, such as VACUUM, CREATE INDEX, and ALTER TABLE ADD FOREIGN KEY. It defaults to 64 megabytes (64MB). Since only one of these operations can be executed at a time by a database session, and an installation normally doesn't have many of them running concurrently, it's safe to set this value significantly larger than work_mem. Larger settings might improve performance for vacuuming and for restoring database dumps.
-            - Note that when autovacuum runs, up to autovacuum_max_workers times this memory may be allocated, so be careful not to set the default value too high. It may be useful to control for this by separately setting autovacuum_work_mem.
           recomendations:
             Adjusting maintenance_work_mem: https://www.cybertec-postgresql.com/en/adjusting-maintenance_work_mem/
             How Much maintenance_work_mem Do I Need?: http://rhaas.blogspot.com/2019/01/how-much-maintenanceworkmem-do-i-need.html
-          type: integer
-          url: "{{ .DocWebSite}}/{{ .Version }}/static/runtime-config-resource.html#GUC-MAINTENANCE-WORK-MEM"
         format: Bytes
         formula: |
           if environment_name == "DW":
@@ -72,14 +59,12 @@ categories:
   - name: checkpoint_related
     description: Checkpoint Related Configuration
     parameters:
-      - documentation:
+      - notes:
           abstract: |
             This parameter defines the minimum size of the pg_wal directory. pg_wal directory contains the WAL files. 
             Older versions refer to it as the pg_xlog directory.
           recomendations:
             "Configuration changes in 9.5: transaction log size": http://www.databasesoup.com/2016/01/configuration-changes-in-95-transaction.html
-          type: integer
-          url: "{{ .DocWebSite}}/{{ .Version }}/static/runtime-config-wal.html#GUC-MIN-WAL-SIZE"
         format: Bytes
 
         # TODO: REVIEW ELSE
@@ -96,12 +81,10 @@ categories:
         min_value: 80MB
         min_version: 9.5
         name: min_wal_size
-      - documentation:
+      - notes:
           abstract: |
             This parameter defines the maximun size of the pg_wal directory. pg_wal directory contains the WAL files.
             Older versions refer to it as the pg_xlog directory.
-          type: integer
-          url: "{{ .DocWebSite}}/{{ .Version }}/static/runtime-config-wal.html#GUC-MAX-WAL-SIZE"
         format: Bytes
         formula: |
           if pg_version >= 9.5:
@@ -115,12 +98,10 @@ categories:
               1GB
         min_version: 9.5
         name: max_wal_size
-      - documentation:
+      - notes:
           abstract: This parameter defines a percentual of checkpoint_timeout as a target to write the CHECKPOINT data on the disk.
           recomendations:
             "Understaning postgresql.conf: CHECKPOINT_COMPLETION_TARGET": https://www.depesz.com/2010/11/03/checkpoint_completion_target/
-          type: floating
-          url: "{{ .DocWebSite}}/{{ .Version }}/static/runtime-config-wal.html#GUC-CHECKPOINT-COMPLETION-TARGET"
         format: Float
         formula: |
           if environment_name == "WEB":
@@ -130,16 +111,10 @@ categories:
           else:
             0.5
         name: checkpoint_completion_target
-      - documentation:
+      - notes:
           abstract: This parameter defines a buffer to store WAL changes before write it in the WAL file.
-          default_value: 3% of shared_buffers or 64KB at the minimum
-          details:
-            - The amount of shared memory used for WAL data that has not yet been written to disk. The default setting of -1 selects a size equal to 1/32nd (about 3%) of shared_buffers, but not less than 64kB nor more than the size of one WAL segment, typically 16MB. This value can be set manually if the automatic choice is too large or too small, but any positive value less than 32kB will be treated as 32kB. This parameter can only be set at server start.
-            - The contents of the WAL buffers are written out to disk at every transaction commit, so extremely large values are unlikely to provide a significant benefit. However, setting this value to at least a few megabytes can improve write performance on a busy server where many clients are committing at once. The auto-tuning selected by the default setting of -1 should give reasonable results in most cases.
           recomendations:
             Chapter 9 - Write Ahead Logging — WAL: http://www.interdb.jp/pg/pgsql09.html
-          type: integer
-          url: "{{ .DocWebSite}}/{{ .Version }}/static/runtime-config-wal.html#GUC-WAL-BUFFERS"
         format: Bytes
         formula: |
           if environment_name in ["WEB", "OLTP", "DW", "Mixed"]:
@@ -151,19 +126,15 @@ categories:
   - name: network_related
     description: Network Related Configuration
     parameters:
-      - documentation:
+      - notes:
           abstract: This parameter defines a network address to bind to.
-          type: string
-          url: "{{ .DocWebSite}}/{{ .Version }}/static/runtime-config-connection.html#GUC-LISTEN-ADDRESSES"
         format: String
         formula: "*"
         name: listen_addresses
-      - documentation:
+      - notes:
           abstract: This parameter defines a max connections allowed.
           recomendations:
             Tuning max_connections in PostgreSQL: https://www.cybertec-postgresql.com/en/tuning-max_connections-in-postgresql/
-          type: integer
-          url: "{{ .DocWebSite}}/{{ .Version }}/static/runtime-config-connection.html#GUC-MAX-CONNECTIONS"
         format: Decimal
         formula: |
           same as $max_connections (from url) 
@@ -171,12 +142,10 @@ categories:
   - name: storage_type
     description: Storage Configuration
     parameters:
-      - documentation:
+      - notes:
           abstract: Sets the planner's estimate of the cost of a non-sequentially-fetched disk page.
           recomendations:
             How a single PostgreSQL config change improved slow query performance by 50x: https://amplitude.engineering/how-a-single-postgresql-config-change-improved-slow-query-performance-by-50x-85593b8991b0
-          type: floating
-          url: "{{ .DocWebSite}}/{{ .Version }}/static/runtime-config-query.html#GUC-RANDOM-PAGE-COST"
         format: Float
         formula: |
           if disk_type == "HDD"
@@ -184,12 +153,10 @@ categories:
           elsif disk_type IN ["SSD", "SAN"]:
             1.1
         name: random_page_cost
-      - documentation:
+      - notes:
           abstract: Sets the number of concurrent disk I/O operations that PostgreSQL expects can be executed simultaneously.
           recomendations:
             "PostgreSQL: effective_io_concurrency benchmarked": https://portavita.github.io/2019-07-19-PostgreSQL_effective_io_concurrency_benchmarked/
-          type: integer
-          url: "{{ .DocWebSite}}/{{ .Version }}/static/runtime-config-resource.html#GUC-EFFECTIVE-IO-CONCURRENCY"
         format: Decimal
         formula: |
           if disk_type == "HDD"

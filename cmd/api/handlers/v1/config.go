@@ -40,7 +40,7 @@ func GetConfig(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	pgVersion, err := strconv.ParseFloat(c.Query("pg_version", "13"), 32)
+	pgVersion, err := strconv.ParseFloat(c.Query("pg_version", defaultPgVersion), 32)
 
 	if err != nil {
 		return err

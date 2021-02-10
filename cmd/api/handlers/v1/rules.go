@@ -3,12 +3,19 @@ package v1
 import (
 	"io/ioutil"
 	"log"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/pgconfig/api/pkg/docs"
 	"gopkg.in/yaml.v2"
 )
 
-var allCategories rulesFile
+const defaultPgVersion = "13"
+
+var (
+	allCategories rulesFile
+	pgDocs        docs.DocFile
+)
 
 func init() {
 	fileData, err := ioutil.ReadFile("./../../rules.yml")
@@ -20,6 +27,15 @@ func init() {
 	if err != nil {
 		log.Fatalf("could not parse rules config file: %v", err)
 	}
+	docFile, err := ioutil.ReadFile("./../../pg-docs.yml")
+	if err != nil {
+		log.Fatalf("could not open pg docs file: %v", err)
+	}
+
+	err = yaml.Unmarshal(docFile, &pgDocs)
+	if err != nil {
+		log.Fatalf("could not parse pg docs file: %v", err)
+	}
 }
 
 // GetRules is a function to list all categories and parameters rules
@@ -27,10 +43,29 @@ func init() {
 // @Description list of categories and parameters rules (used to compute get-config)
 // @Accept json
 // @Produce json
+// @Param pg_version query string false "PostgreSQL Version" default(13)
 // @Success 200 {object} ResponseHTTP{}
 // @Router /v1/tuning/get-rules [get]
 func GetRules(c *fiber.Ctx) error {
-	return c.JSON(v1Reponse(c, allCategories.Categories))
+	ver, err := strconv.ParseFloat(c.Query("pg_version", defaultPgVersion), 32)
+
+	if err != nil {
+		return err
+	}
+	pgVersion := docs.FormatVer(float32(ver))
+
+	var output = make([]category, len(allCategories.Categories))
+	copy(output, allCategories.Categories)
+
+	for c := 0; c < len(output); c++ {
+		for p := 0; p < len(output[c].Parameters); p++ {
+			output[c].Parameters[p].Documentation = pgDocs.Documentation[pgVersion][output[c].Parameters[p].Name]
+			output[c].Parameters[p].Documentation.Abstract = output[c].Parameters[p].Notes.Abstract
+			output[c].Parameters[p].Documentation.BlogRecomendations = output[c].Parameters[p].Notes.Recomendations
+		}
+	}
+
+	return c.JSON(v1Reponse(c, output))
 }
 
 type rulesFile struct {
@@ -40,11 +75,10 @@ type rulesFile struct {
 type documentation struct {
 	Abstract       string            `json:"abstract"`
 	Recomendations map[string]string `json:"recomendations,omitempty"`
-	Type           string            `json:"type"`
-	URL            string            `json:"url"`
 }
 type parameter struct {
-	Documentation documentation `json:"documentation"`
+	Notes         documentation `yaml:"notes" json:"-"`
+	Documentation docs.ParamDoc `json:"documentation"`
 	Format        string        `json:"format"`
 	Formula       string        `json:"formula"`
 	Name          string        `json:"name"`
