@@ -56,6 +56,10 @@ func New() *fiber.App {
 	}))
 
 	app.Get("/docs/*", swagger.Handler)
+	app.Get("/docs", func(c *fiber.Ctx) error {
+		return c.Redirect("/docs/index.html")
+	})
+
 	v1 := app.Group("/v1/tuning/")
 
 	v1.Get("/list-environments", handV1.ListEnvs)
