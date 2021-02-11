@@ -137,7 +137,7 @@ categories:
             Tuning max_connections in PostgreSQL: https://www.cybertec-postgresql.com/en/tuning-max_connections-in-postgresql/
         format: Decimal
         formula: |
-          same as $max_connections (from url) 
+          same as $max_connections (from url)
         name: max_connections
   - name: storage_type
     description: Storage Configuration
@@ -166,3 +166,64 @@ categories:
           elsif disk_type == "SAN":
             200
         name: effective_io_concurrency
+  - name: log_related
+    description: Log Configuration for PGBadger
+    parameters:
+      - name: logging_collector
+        notes:
+          value: on
+      - name: log_checkpoints
+        notes:
+          value: on
+      - name: log_connections
+        notes:
+          value: on
+      - name: log_disconnections
+        notes:
+          value: on
+      - name: log_lock_waits
+        notes:
+          value: on
+      - name: log_temp_files
+        notes:
+          value: 0
+      - name: lc_messages
+        notes:
+          value: C
+      - name: log_min_duration_statement
+        notes:
+          comment: Adjust the minimum time to collect data
+          value: 10s
+      - name: log_autovacuum_min_duration
+        notes:
+          value: 0
+  - name: log_related_stderr_config
+    description: "'stderr' format configuration"
+    parameters:
+      - name: log_destination
+        notes:
+          value: stderr
+      - name: log_line_prefix
+        notes:
+          value: "'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '"
+  - name: log_related_csvlog_config
+    description: "'csvlog' format configuration"
+    parameters:
+      - name: log_destination
+        notes:
+          value: csvlog
+  - name: log_related_syslog_config
+    description: "'syslog' format configuration"
+    parameters:
+      - name: log_destination
+        notes:
+          value: syslog
+      - name: log_line_prefix
+        notes:
+          value: "'user=%u,db=%d,app=%a,client=%h '"
+      - name: syslog_facility
+        notes:
+          value: LOCAL0
+      - name: syslog_ident
+        notes:
+          value: postgres

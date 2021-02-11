@@ -85,6 +85,8 @@ type rulesFile struct {
 type notes struct {
 	Abstract       string            `json:"abstract"`
 	Recomendations map[string]string `json:"recomendations,omitempty"`
+	Value          string            `json:"config_value,omitempty"`
+	Comment        string            `json:"comment,omitempty"`
 }
 type parameter struct {
 	Notes         notes          `yaml:"notes" json:"-"`
