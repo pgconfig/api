@@ -112,19 +112,19 @@ func Get(param string, ver float32) (ParamDoc, error) {
 	// default values
 	sel = doc.Find("div.box-body:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(2) > td:nth-child(2) > code:nth-child(1)")
 	for i := range sel.Nodes {
-		out.DefaultValue = t(sel.Eq(i).Text())
+		out.DefaultValue = sanitizeDefault(t(sel.Eq(i).Text()))
 	}
 
 	// min values
 	sel = doc.Find("div.box-body:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(2) > code:nth-child(1)")
 	for i := range sel.Nodes {
-		out.MinValue = t(sel.Eq(i).Text())
+		out.MinValue = sanitizeDefault(t(sel.Eq(i).Text()))
 	}
 
 	// max values
 	sel = doc.Find("div.box-body:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(2) > code:nth-child(1)")
 	for i := range sel.Nodes {
-		out.MaxValue = t(sel.Eq(i).Text())
+		out.MaxValue = sanitizeDefault(t(sel.Eq(i).Text()))
 	}
 
 	return out, nil
@@ -132,4 +132,21 @@ func Get(param string, ver float32) (ParamDoc, error) {
 
 func t(i string) string {
 	return strings.TrimSpace(i)
+}
+
+func sanitizeDefault(val string) string {
+
+	parts := strings.Fields(val)
+
+	if len(parts) > 1 {
+		if strings.HasPrefix(parts[1], "(") {
+			return strings.ReplaceAll(
+				strings.ReplaceAll(parts[1], "(", ""),
+				")",
+				"",
+			)
+		}
+	}
+
+	return val
 }

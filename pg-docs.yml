@@ -62,9 +62,9 @@ documentation:
         cache. This setting just helps the planner make good cost estimates; it does
         not actually allocate the memory.
       type: integer
-      default_value: 16384 (128MB)
-      min_value: 1 (8kB)
-      max_value: 2147483647 (17179869176kB)
+      default_value: 128MB
+      min_value: 8kB
+      max_value: 17179869176kB
     effective_io_concurrency:
       title: effective_io_concurrency
       short_desc: Number of simultaneous requests that can be handled efficiently
@@ -148,9 +148,9 @@ documentation:
         want to decrease this value so that they can't claim over 1/8 or 1/4 of available
         RAM.
       type: integer
-      default_value: 16384 (16MB)
-      min_value: 1024 (1MB)
-      max_value: 2147483647 (2147483647kB)
+      default_value: 16MB
+      min_value: 1MB
+      max_value: 2147483647kB
     max_connections:
       title: max_connections
       short_desc: Sets the maximum number of concurrent connections
@@ -240,9 +240,9 @@ documentation:
         more details.  Also note that shared_buffers over 2GB is  only supported on
         64-bit systems.'
       type: integer
-      default_value: 1024 (8MB)
-      min_value: 16 (128kB)
-      max_value: 1073741823 (8589934584kB)
+      default_value: 8MB
+      min_value: 128kB
+      max_value: 8589934584kB
     wal_buffers:
       title: wal_buffers
       short_desc: Sets the number of disk-page buffers in shared memory for WAL
@@ -267,9 +267,9 @@ documentation:
       recomendations_conf: On very busy, high-core machines it can be useful to raise
         this to as much as 128MB.
       type: integer
-      default_value: -1 (-1)
-      min_value: -1 (-1)
-      max_value: 262143 (2097144kB)
+      default_value: "-1"
+      min_value: "-1"
+      max_value: 2097144kB
     work_mem:
       title: work_mem
       short_desc: Sets the maximum memory to be used for query workspaces
@@ -294,9 +294,9 @@ documentation:
         is allocated by powers of two, so round to the nearest binary step.  The second
         formula is for reporting and DW servers which run a lot of complex queries.
       type: integer
-      default_value: 1024 (1MB)
-      min_value: 64 (64kB)
-      max_value: 2147483647 (2147483647kB)
+      default_value: 1MB
+      min_value: 64kB
+      max_value: 2147483647kB
   "9.2":
     checkpoint_completion_target:
       title: checkpoint_completion_target
@@ -359,9 +359,9 @@ documentation:
         cache. This setting just helps the planner make good cost estimates; it does
         not actually allocate the memory.
       type: integer
-      default_value: 16384 (128MB)
-      min_value: 1 (8kB)
-      max_value: 2147483647 (17179869176kB)
+      default_value: 128MB
+      min_value: 8kB
+      max_value: 17179869176kB
     effective_io_concurrency:
       title: effective_io_concurrency
       short_desc: Number of simultaneous requests that can be handled efficiently
@@ -445,9 +445,9 @@ documentation:
         want to decrease this value so that they can't claim over 1/8 or 1/4 of available
         RAM.
       type: integer
-      default_value: 16384 (16MB)
-      min_value: 1024 (1MB)
-      max_value: 2147483647 (2147483647kB)
+      default_value: 16MB
+      min_value: 1MB
+      max_value: 2147483647kB
     max_connections:
       title: max_connections
       short_desc: Sets the maximum number of concurrent connections
@@ -551,9 +551,9 @@ documentation:
         more details.  Also note that shared_buffers over 2GB is  only supported on
         64-bit systems.'
       type: integer
-      default_value: 1024 (8MB)
-      min_value: 16 (128kB)
-      max_value: 1073741823 (8589934584kB)
+      default_value: 8MB
+      min_value: 128kB
+      max_value: 8589934584kB
     wal_buffers:
       title: wal_buffers
       short_desc: Sets the number of disk-page buffers in shared memory for WAL
@@ -578,9 +578,9 @@ documentation:
       recomendations_conf: On very busy, high-core machines it can be useful to raise
         this to as much as 128MB.
       type: integer
-      default_value: -1 (-1)
-      min_value: -1 (-1)
-      max_value: 262143 (2097144kB)
+      default_value: "-1"
+      min_value: "-1"
+      max_value: 2097144kB
     work_mem:
       title: work_mem
       short_desc: Sets the maximum memory to be used for query workspaces
@@ -605,9 +605,9 @@ documentation:
         is allocated by powers of two, so round to the nearest binary step.  The second
         formula is for reporting and DW servers which run a lot of complex queries.
       type: integer
-      default_value: 1024 (1MB)
-      min_value: 64 (64kB)
-      max_value: 2147483647 (2147483647kB)
+      default_value: 1MB
+      min_value: 64kB
+      max_value: 2147483647kB
   "9.3":
     checkpoint_completion_target:
       title: checkpoint_completion_target
@@ -671,9 +671,9 @@ documentation:
         cache. This setting just helps the planner make good cost estimates; it does
         not actually allocate the memory.
       type: integer
-      default_value: 16384 (128MB)
-      min_value: 1 (8kB)
-      max_value: 2147483647 (17179869176kB)
+      default_value: 128MB
+      min_value: 8kB
+      max_value: 17179869176kB
     effective_io_concurrency:
       title: effective_io_concurrency
       short_desc: Number of simultaneous requests that can be handled efficiently
@@ -757,9 +757,9 @@ documentation:
         want to decrease this value so that they can't claim over 1/8 or 1/4 of available
         RAM.
       type: integer
-      default_value: 16384 (16MB)
-      min_value: 1024 (1MB)
-      max_value: 2147483647 (2147483647kB)
+      default_value: 16MB
+      min_value: 1MB
+      max_value: 2147483647kB
     max_connections:
       title: max_connections
       short_desc: Sets the maximum number of concurrent connections
@@ -856,9 +856,9 @@ documentation:
         more details.  Also note that shared_buffers over 2GB is  only supported on
         64-bit systems.'
       type: integer
-      default_value: 1024 (8MB)
-      min_value: 16 (128kB)
-      max_value: 1073741823 (8589934584kB)
+      default_value: 8MB
+      min_value: 128kB
+      max_value: 8589934584kB
     wal_buffers:
       title: wal_buffers
       short_desc: Sets the number of disk-page buffers in shared memory for WAL
@@ -880,9 +880,9 @@ documentation:
       recomendations_conf: On very busy, high-core machines it can be useful to raise
         this to as much as 128MB.
       type: integer
-      default_value: -1 (-1)
-      min_value: -1 (-1)
-      max_value: 262143 (2097144kB)
+      default_value: "-1"
+      min_value: "-1"
+      max_value: 2097144kB
     work_mem:
       title: work_mem
       short_desc: Sets the maximum memory to be used for query workspaces
@@ -907,9 +907,9 @@ documentation:
         is allocated by powers of two, so round to the nearest binary step.  The second
         formula is for reporting and DW servers which run a lot of complex queries.
       type: integer
-      default_value: 1024 (1MB)
-      min_value: 64 (64kB)
-      max_value: 2147483647 (2147483647kB)
+      default_value: 1MB
+      min_value: 64kB
+      max_value: 2147483647kB
   "9.4":
     checkpoint_completion_target:
       title: checkpoint_completion_target
@@ -973,9 +973,9 @@ documentation:
         cache. This setting just helps the planner make good cost estimates; it does
         not actually allocate the memory.
       type: integer
-      default_value: 524288 (4GB)
-      min_value: 1 (8kB)
-      max_value: 2147483647 (17179869176kB)
+      default_value: 4GB
+      min_value: 8kB
+      max_value: 17179869176kB
     effective_io_concurrency:
       title: effective_io_concurrency
       short_desc: Number of simultaneous requests that can be handled efficiently
@@ -1060,9 +1060,9 @@ documentation:
         want to decrease this value so that they can't claim over 1/8 or 1/4 of available
         RAM.
       type: integer
-      default_value: 65536 (64MB)
-      min_value: 1024 (1MB)
-      max_value: 2147483647 (2147483647kB)
+      default_value: 64MB
+      min_value: 1MB
+      max_value: 2147483647kB
     max_connections:
       title: max_connections
       short_desc: Sets the maximum number of concurrent connections
@@ -1177,9 +1177,9 @@ documentation:
         more details.  Also note that shared_buffers over 2GB is  only supported on
         64-bit systems.'
       type: integer
-      default_value: 1024 (8MB)
-      min_value: 16 (128kB)
-      max_value: 1073741823 (8589934584kB)
+      default_value: 8MB
+      min_value: 128kB
+      max_value: 8589934584kB
     wal_buffers:
       title: wal_buffers
       short_desc: Sets the number of disk-page buffers in shared memory for WAL
@@ -1201,9 +1201,9 @@ documentation:
       recomendations_conf: On very busy, high-core machines it can be useful to raise
         this to as much as 128MB.
       type: integer
-      default_value: -1 (-1)
-      min_value: -1 (-1)
-      max_value: 262143 (2097144kB)
+      default_value: "-1"
+      min_value: "-1"
+      max_value: 2097144kB
     work_mem:
       title: work_mem
       short_desc: Sets the maximum memory to be used for query workspaces
@@ -1229,9 +1229,9 @@ documentation:
         is allocated by powers of two, so round to the nearest binary step.  The second
         formula is for reporting and DW servers which run a lot of complex queries.
       type: integer
-      default_value: 4096 (4MB)
-      min_value: 64 (64kB)
-      max_value: 2147483647 (2147483647kB)
+      default_value: 4MB
+      min_value: 64kB
+      max_value: 2147483647kB
   "9.5":
     checkpoint_completion_target:
       title: checkpoint_completion_target
@@ -1273,9 +1273,9 @@ documentation:
         cache. This setting just helps the planner make good cost estimates; it does
         not actually allocate the memory.
       type: integer
-      default_value: 524288 (4GB)
-      min_value: 1 (8kB)
-      max_value: 2147483647 (17179869176kB)
+      default_value: 4GB
+      min_value: 8kB
+      max_value: 17179869176kB
     effective_io_concurrency:
       title: effective_io_concurrency
       short_desc: Number of simultaneous requests that can be handled efficiently
@@ -1361,9 +1361,9 @@ documentation:
         want to decrease this value so that they can't claim over 1/8 or 1/4 of available
         RAM.
       type: integer
-      default_value: 65536 (64MB)
-      min_value: 1024 (1MB)
-      max_value: 2147483647 (2147483647kB)
+      default_value: 64MB
+      min_value: 1MB
+      max_value: 2147483647kB
     max_connections:
       title: max_connections
       short_desc: Sets the maximum number of concurrent connections
@@ -1402,9 +1402,9 @@ documentation:
         data, in which case increase the size of the log so that it's at least an
         hour worth of logs
       type: integer
-      default_value: 64 (1GB)
-      min_value: 2 (32MB)
-      max_value: 2147483647 (34359738352MB)
+      default_value: 1GB
+      min_value: 32MB
+      max_value: 34359738352MB
     max_worker_processes:
       title: max_worker_processes
       short_desc: Maximum number of concurrent worker processes
@@ -1441,9 +1441,9 @@ documentation:
                                                 Need suggestion for POSTGRES Tuning
                                                 Postgres 12 - how to reduce size of wal-directory
       type: integer
-      default_value: 5 (80MB)
-      min_value: 2 (32MB)
-      max_value: 2147483647 (34359738352MB)
+      default_value: 80MB
+      min_value: 32MB
+      max_value: 34359738352MB
     random_page_cost:
       title: random_page_cost
       short_desc: Sets the planner's estimate of the cost of a nonsequentially fetched
@@ -1518,9 +1518,9 @@ documentation:
         more details.  Also note that shared_buffers over 2GB is  only supported on
         64-bit systems.'
       type: integer
-      default_value: 1024 (8MB)
-      min_value: 16 (128kB)
-      max_value: 1073741823 (8589934584kB)
+      default_value: 8MB
+      min_value: 128kB
+      max_value: 8589934584kB
     wal_buffers:
       title: wal_buffers
       short_desc: Sets the number of disk-page buffers in shared memory for WAL
@@ -1542,9 +1542,9 @@ documentation:
       recomendations_conf: On very busy, high-core machines it can be useful to raise
         this to as much as 128MB.
       type: integer
-      default_value: -1 (-1)
-      min_value: -1 (-1)
-      max_value: 262143 (2097144kB)
+      default_value: "-1"
+      min_value: "-1"
+      max_value: 2097144kB
     work_mem:
       title: work_mem
       short_desc: Sets the maximum memory to be used for query workspaces
@@ -1570,9 +1570,9 @@ documentation:
         is allocated by powers of two, so round to the nearest binary step.  The second
         formula is for reporting and DW servers which run a lot of complex queries.
       type: integer
-      default_value: 4096 (4MB)
-      min_value: 64 (64kB)
-      max_value: 2147483647 (2147483647kB)
+      default_value: 4MB
+      min_value: 64kB
+      max_value: 2147483647kB
   "9.6":
     checkpoint_completion_target:
       title: checkpoint_completion_target
@@ -1614,9 +1614,9 @@ documentation:
         cache. This setting just helps the planner make good cost estimates; it does
         not actually allocate the memory.
       type: integer
-      default_value: 524288 (4GB)
-      min_value: 1 (8kB)
-      max_value: 2147483647 (17179869176kB)
+      default_value: 4GB
+      min_value: 8kB
+      max_value: 17179869176kB
     effective_io_concurrency:
       title: effective_io_concurrency
       short_desc: Number of simultaneous requests that can be handled efficiently
@@ -1703,9 +1703,9 @@ documentation:
         want to decrease this value so that they can't claim over 1/8 or 1/4 of available
         RAM.
       type: integer
-      default_value: 65536 (64MB)
-      min_value: 1024 (1MB)
-      max_value: 2147483647 (2147483647kB)
+      default_value: 64MB
+      min_value: 1MB
+      max_value: 2147483647kB
     max_connections:
       title: max_connections
       short_desc: Sets the maximum number of concurrent connections
@@ -1774,9 +1774,9 @@ documentation:
         data, in which case increase the size of the log so that it's at least an
         hour worth of logs
       type: integer
-      default_value: 64 (1GB)
-      min_value: 2 (32MB)
-      max_value: 2147483647 (34359738352MB)
+      default_value: 1GB
+      min_value: 32MB
+      max_value: 34359738352MB
     max_worker_processes:
       title: max_worker_processes
       short_desc: Maximum number of concurrent worker processes
@@ -1813,9 +1813,9 @@ documentation:
                                                 Need suggestion for POSTGRES Tuning
                                                 Postgres 12 - how to reduce size of wal-directory
       type: integer
-      default_value: 5 (80MB)
-      min_value: 2 (32MB)
-      max_value: 2147483647 (34359738352MB)
+      default_value: 80MB
+      min_value: 32MB
+      max_value: 34359738352MB
     random_page_cost:
       title: random_page_cost
       short_desc: Sets the planner's estimate of the cost of a nonsequentially fetched
@@ -1890,9 +1890,9 @@ documentation:
         more details.  Also note that shared_buffers over 2GB is  only supported on
         64-bit systems.'
       type: integer
-      default_value: 1024 (8MB)
-      min_value: 16 (128kB)
-      max_value: 1073741823 (8589934584kB)
+      default_value: 8MB
+      min_value: 128kB
+      max_value: 8589934584kB
     wal_buffers:
       title: wal_buffers
       short_desc: Sets the number of disk-page buffers in shared memory for WAL
@@ -1914,9 +1914,9 @@ documentation:
       recomendations_conf: On very busy, high-core machines it can be useful to raise
         this to as much as 128MB.
       type: integer
-      default_value: -1 (-1)
-      min_value: -1 (-1)
-      max_value: 262143 (2097144kB)
+      default_value: "-1"
+      min_value: "-1"
+      max_value: 2097144kB
     work_mem:
       title: work_mem
       short_desc: Sets the maximum memory to be used for query workspaces
@@ -1942,9 +1942,9 @@ documentation:
         is allocated by powers of two, so round to the nearest binary step.  The second
         formula is for reporting and DW servers which run a lot of complex queries.
       type: integer
-      default_value: 4096 (4MB)
-      min_value: 64 (64kB)
-      max_value: 2147483647 (2147483647kB)
+      default_value: 4MB
+      min_value: 64kB
+      max_value: 2147483647kB
   "10":
     checkpoint_completion_target:
       title: checkpoint_completion_target
@@ -1986,9 +1986,9 @@ documentation:
         cache. This setting just helps the planner make good cost estimates; it does
         not actually allocate the memory.
       type: integer
-      default_value: 524288 (4GB)
-      min_value: 1 (8kB)
-      max_value: 2147483647 (17179869176kB)
+      default_value: 4GB
+      min_value: 8kB
+      max_value: 17179869176kB
     effective_io_concurrency:
       title: effective_io_concurrency
       short_desc: Number of simultaneous requests that can be handled efficiently
@@ -2075,9 +2075,9 @@ documentation:
         want to decrease this value so that they can't claim over 1/8 or 1/4 of available
         RAM.
       type: integer
-      default_value: 65536 (64MB)
-      min_value: 1024 (1MB)
-      max_value: 2147483647 (2147483647kB)
+      default_value: 64MB
+      min_value: 1MB
+      max_value: 2147483647kB
     max_connections:
       title: max_connections
       short_desc: Sets the maximum number of concurrent connections
@@ -2166,9 +2166,9 @@ documentation:
         data, in which case increase the size of the log so that it's at least an
         hour worth of logs
       type: integer
-      default_value: 1024 (1GB)
-      min_value: 2 (2MB)
-      max_value: 2147483647 (2147483647MB)
+      default_value: 1GB
+      min_value: 2MB
+      max_value: 2147483647MB
     max_worker_processes:
       title: max_worker_processes
       short_desc: Maximum number of concurrent worker processes
@@ -2207,9 +2207,9 @@ documentation:
                                                 Need suggestion for POSTGRES Tuning
                                                 Postgres 12 - how to reduce size of wal-directory
       type: integer
-      default_value: 80 (80MB)
-      min_value: 2 (2MB)
-      max_value: 2147483647 (2147483647MB)
+      default_value: 80MB
+      min_value: 2MB
+      max_value: 2147483647MB
     random_page_cost:
       title: random_page_cost
       short_desc: Sets the planner's estimate of the cost of a nonsequentially fetched
@@ -2280,9 +2280,9 @@ documentation:
         more details.  Also note that shared_buffers over 2GB is  only supported on
         64-bit systems.'
       type: integer
-      default_value: 1024 (8MB)
-      min_value: 16 (128kB)
-      max_value: 1073741823 (8589934584kB)
+      default_value: 8MB
+      min_value: 128kB
+      max_value: 8589934584kB
     wal_buffers:
       title: wal_buffers
       short_desc: Sets the number of disk-page buffers in shared memory for WAL
@@ -2304,9 +2304,9 @@ documentation:
       recomendations_conf: On very busy, high-core machines it can be useful to raise
         this to as much as 128MB.
       type: integer
-      default_value: -1 (-1)
-      min_value: -1 (-1)
-      max_value: 262143 (2097144kB)
+      default_value: "-1"
+      min_value: "-1"
+      max_value: 2097144kB
     work_mem:
       title: work_mem
       short_desc: Sets the maximum memory to be used for query workspaces
@@ -2332,9 +2332,9 @@ documentation:
         is allocated by powers of two, so round to the nearest binary step.  The second
         formula is for reporting and DW servers which run a lot of complex queries.
       type: integer
-      default_value: 4096 (4MB)
-      min_value: 64 (64kB)
-      max_value: 2147483647 (2147483647kB)
+      default_value: 4MB
+      min_value: 64kB
+      max_value: 2147483647kB
   "11":
     checkpoint_completion_target:
       title: checkpoint_completion_target
@@ -2376,9 +2376,9 @@ documentation:
         cache. This setting just helps the planner make good cost estimates; it does
         not actually allocate the memory.
       type: integer
-      default_value: 524288 (4GB)
-      min_value: 1 (8kB)
-      max_value: 2147483647 (17179869176kB)
+      default_value: 4GB
+      min_value: 8kB
+      max_value: 17179869176kB
     effective_io_concurrency:
       title: effective_io_concurrency
       short_desc: Number of simultaneous requests that can be handled efficiently
@@ -2465,9 +2465,9 @@ documentation:
         want to decrease this value so that they can't claim over 1/8 or 1/4 of available
         RAM.
       type: integer
-      default_value: 65536 (64MB)
-      min_value: 1024 (1MB)
-      max_value: 2147483647 (2147483647kB)
+      default_value: 64MB
+      min_value: 1MB
+      max_value: 2147483647kB
     max_connections:
       title: max_connections
       short_desc: Sets the maximum number of concurrent connections
@@ -2556,9 +2556,9 @@ documentation:
         data, in which case increase the size of the log so that it's at least an
         hour worth of logs
       type: integer
-      default_value: 1024 (1GB)
-      min_value: 2 (2MB)
-      max_value: 2147483647 (2147483647MB)
+      default_value: 1GB
+      min_value: 2MB
+      max_value: 2147483647MB
     max_worker_processes:
       title: max_worker_processes
       short_desc: Maximum number of concurrent worker processes
@@ -2597,9 +2597,9 @@ documentation:
                                                 Need suggestion for POSTGRES Tuning
                                                 Postgres 12 - how to reduce size of wal-directory
       type: integer
-      default_value: 80 (80MB)
-      min_value: 2 (2MB)
-      max_value: 2147483647 (2147483647MB)
+      default_value: 80MB
+      min_value: 2MB
+      max_value: 2147483647MB
     random_page_cost:
       title: random_page_cost
       short_desc: Sets the planner's estimate of the cost of a nonsequentially fetched
@@ -2670,9 +2670,9 @@ documentation:
         more details.  Also note that shared_buffers over 2GB is  only supported on
         64-bit systems.'
       type: integer
-      default_value: 1024 (8MB)
-      min_value: 16 (128kB)
-      max_value: 1073741823 (8589934584kB)
+      default_value: 8MB
+      min_value: 128kB
+      max_value: 8589934584kB
     wal_buffers:
       title: wal_buffers
       short_desc: Sets the number of disk-page buffers in shared memory for WAL
@@ -2694,9 +2694,9 @@ documentation:
       recomendations_conf: On very busy, high-core machines it can be useful to raise
         this to as much as 128MB.
       type: integer
-      default_value: -1 (-1)
-      min_value: -1 (-1)
-      max_value: 262143 (2097144kB)
+      default_value: "-1"
+      min_value: "-1"
+      max_value: 2097144kB
     work_mem:
       title: work_mem
       short_desc: Sets the maximum memory to be used for query workspaces
@@ -2722,9 +2722,9 @@ documentation:
         is allocated by powers of two, so round to the nearest binary step.  The second
         formula is for reporting and DW servers which run a lot of complex queries.
       type: integer
-      default_value: 4096 (4MB)
-      min_value: 64 (64kB)
-      max_value: 2147483647 (2147483647kB)
+      default_value: 4MB
+      min_value: 64kB
+      max_value: 2147483647kB
   "12":
     checkpoint_completion_target:
       title: checkpoint_completion_target
@@ -2768,9 +2768,9 @@ documentation:
         cache. This setting just helps the planner make good cost estimates; it does
         not actually allocate the memory.
       type: integer
-      default_value: 524288 (4GB)
-      min_value: 1 (8kB)
-      max_value: 2147483647 (17179869176kB)
+      default_value: 4GB
+      min_value: 8kB
+      max_value: 17179869176kB
     effective_io_concurrency:
       title: effective_io_concurrency
       short_desc: Number of simultaneous requests that can be handled efficiently
@@ -2858,9 +2858,9 @@ documentation:
         want to decrease this value so that they can't claim over 1/8 or 1/4 of available
         RAM.
       type: integer
-      default_value: 65536 (64MB)
-      min_value: 1024 (1MB)
-      max_value: 2147483647 (2147483647kB)
+      default_value: 64MB
+      min_value: 1MB
+      max_value: 2147483647kB
     max_connections:
       title: max_connections
       short_desc: Sets the maximum number of concurrent connections
@@ -2950,9 +2950,9 @@ documentation:
         data, in which case increase the size of the log so that it's at least an
         hour worth of logs
       type: integer
-      default_value: 1024 (1GB)
-      min_value: 2 (2MB)
-      max_value: 2147483647 (2147483647MB)
+      default_value: 1GB
+      min_value: 2MB
+      max_value: 2147483647MB
     max_worker_processes:
       title: max_worker_processes
       short_desc: Maximum number of concurrent worker processes
@@ -2992,9 +2992,9 @@ documentation:
                                                 Need suggestion for POSTGRES Tuning
                                                 Postgres 12 - how to reduce size of wal-directory
       type: integer
-      default_value: 80 (80MB)
-      min_value: 2 (2MB)
-      max_value: 2147483647 (2147483647MB)
+      default_value: 80MB
+      min_value: 2MB
+      max_value: 2147483647MB
     random_page_cost:
       title: random_page_cost
       short_desc: Sets the planner's estimate of the cost of a nonsequentially fetched
@@ -3067,9 +3067,9 @@ documentation:
         more details.  Also note that shared_buffers over 2GB is  only supported on
         64-bit systems.'
       type: integer
-      default_value: 1024 (8MB)
-      min_value: 16 (128kB)
-      max_value: 1073741823 (8589934584kB)
+      default_value: 8MB
+      min_value: 128kB
+      max_value: 8589934584kB
     wal_buffers:
       title: wal_buffers
       short_desc: Sets the number of disk-page buffers in shared memory for WAL
@@ -3093,9 +3093,9 @@ documentation:
       recomendations_conf: On very busy, high-core machines it can be useful to raise
         this to as much as 128MB.
       type: integer
-      default_value: -1 (-1)
-      min_value: -1 (-1)
-      max_value: 262143 (2097144kB)
+      default_value: "-1"
+      min_value: "-1"
+      max_value: 2097144kB
     work_mem:
       title: work_mem
       short_desc: Sets the maximum memory to be used for query workspaces
@@ -3122,9 +3122,9 @@ documentation:
         is allocated by powers of two, so round to the nearest binary step.  The second
         formula is for reporting and DW servers which run a lot of complex queries.
       type: integer
-      default_value: 4096 (4MB)
-      min_value: 64 (64kB)
-      max_value: 2147483647 (2147483647kB)
+      default_value: 4MB
+      min_value: 64kB
+      max_value: 2147483647kB
   "13":
     checkpoint_completion_target:
       title: checkpoint_completion_target
@@ -3168,9 +3168,9 @@ documentation:
         cache. This setting just helps the planner make good cost estimates; it does
         not actually allocate the memory.
       type: integer
-      default_value: 524288 (4GB)
-      min_value: 1 (8kB)
-      max_value: 2147483647 (17179869176kB)
+      default_value: 4GB
+      min_value: 8kB
+      max_value: 17179869176kB
     effective_io_concurrency:
       title: effective_io_concurrency
       short_desc: Number of simultaneous requests that can be handled efficiently
@@ -3258,9 +3258,9 @@ documentation:
         want to decrease this value so that they can't claim over 1/8 or 1/4 of available
         RAM.
       type: integer
-      default_value: 65536 (64MB)
-      min_value: 1024 (1MB)
-      max_value: 2147483647 (2147483647kB)
+      default_value: 64MB
+      min_value: 1MB
+      max_value: 2147483647kB
     max_connections:
       title: max_connections
       short_desc: Sets the maximum number of concurrent connections
@@ -3350,9 +3350,9 @@ documentation:
         data, in which case increase the size of the log so that it's at least an
         hour worth of logs
       type: integer
-      default_value: 1024 (1GB)
-      min_value: 2 (2MB)
-      max_value: 2147483647 (2147483647MB)
+      default_value: 1GB
+      min_value: 2MB
+      max_value: 2147483647MB
     max_worker_processes:
       title: max_worker_processes
       short_desc: Maximum number of concurrent worker processes
@@ -3392,9 +3392,9 @@ documentation:
                                                 Need suggestion for POSTGRES Tuning
                                                 Postgres 12 - how to reduce size of wal-directory
       type: integer
-      default_value: 80 (80MB)
-      min_value: 2 (2MB)
-      max_value: 2147483647 (2147483647MB)
+      default_value: 80MB
+      min_value: 2MB
+      max_value: 2147483647MB
     random_page_cost:
       title: random_page_cost
       short_desc: Sets the planner's estimate of the cost of a nonsequentially fetched
@@ -3467,9 +3467,9 @@ documentation:
         more details.  Also note that shared_buffers over 2GB is  only supported on
         64-bit systems.'
       type: integer
-      default_value: 1024 (8MB)
-      min_value: 16 (128kB)
-      max_value: 1073741823 (8589934584kB)
+      default_value: 8MB
+      min_value: 128kB
+      max_value: 8589934584kB
     wal_buffers:
       title: wal_buffers
       short_desc: Sets the number of disk-page buffers in shared memory for WAL
@@ -3493,9 +3493,9 @@ documentation:
       recomendations_conf: On very busy, high-core machines it can be useful to raise
         this to as much as 128MB.
       type: integer
-      default_value: -1 (-1)
-      min_value: -1 (-1)
-      max_value: 262143 (2097144kB)
+      default_value: "-1"
+      min_value: "-1"
+      max_value: 2097144kB
     work_mem:
       title: work_mem
       short_desc: Sets the maximum memory to be used for query workspaces
@@ -3527,7 +3527,7 @@ documentation:
         is allocated by powers of two, so round to the nearest binary step.  The second
         formula is for reporting and DW servers which run a lot of complex queries.
       type: integer
-      default_value: 4096 (4MB)
-      min_value: 64 (64kB)
-      max_value: 2147483647 (2147483647kB)
+      default_value: 4MB
+      min_value: 64kB
+      max_value: 2147483647kB
 
