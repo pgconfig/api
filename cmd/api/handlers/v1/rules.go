@@ -1,42 +1,13 @@
 package v1
 
 import (
-	"io/ioutil"
-	"log"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/pgconfig/api/pkg/docs"
-	"gopkg.in/yaml.v2"
 )
 
 const defaultPgVersion = "13"
-
-var (
-	allCategories rulesFile
-	pgDocs        docs.DocFile
-)
-
-func init() {
-	fileData, err := ioutil.ReadFile("./../../rules.yml")
-	if err != nil {
-		log.Fatalf("could not open rules config file: %v", err)
-	}
-
-	err = yaml.Unmarshal(fileData, &allCategories)
-	if err != nil {
-		log.Fatalf("could not parse rules config file: %v", err)
-	}
-	docFile, err := ioutil.ReadFile("./../../pg-docs.yml")
-	if err != nil {
-		log.Fatalf("could not open pg docs file: %v", err)
-	}
-
-	err = yaml.Unmarshal(docFile, &pgDocs)
-	if err != nil {
-		log.Fatalf("could not parse pg docs file: %v", err)
-	}
-}
 
 // GetRules is a function to list all categories and parameters rules
 // @Summary Get a list of rules
@@ -76,28 +47,4 @@ func addDocTORules(pgVersion string, showDoc bool) []outputCategory {
 	}
 
 	return output
-}
-
-type rulesFile struct {
-	Categories []outputCategory `json:"categories"`
-}
-
-type notes struct {
-	Abstract       string            `json:"abstract"`
-	Recomendations map[string]string `json:"recomendations,omitempty"`
-	Value          string            `json:"config_value,omitempty"`
-	Comment        string            `json:"comment,omitempty"`
-}
-type parameter struct {
-	Notes         notes          `yaml:"notes" json:"-"`
-	Documentation *docs.ParamDoc `json:"documentation,omitempty"`
-	Format        string         `json:"format"`
-	Formula       string         `json:"formula"`
-	Name          string         `json:"name"`
-	Value         string         `json:"config_value,omitempty"`
-}
-type outputCategory struct {
-	Name        string       `json:"category" yaml:"name"`
-	Description string       `json:"description"`
-	Parameters  []*parameter `json:"parameters"`
 }

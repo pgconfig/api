@@ -11,6 +11,7 @@ func ValidArch(arch string) error {
 	switch arch {
 	case "386":
 	case "amd64":
+	case "x86-64":
 	case "arm":
 	case "arm64":
 	default:
