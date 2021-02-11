@@ -36,54 +36,99 @@ import (
 // @Router /v1/tuning/get-config [get]
 func GetConfig(c *fiber.Ctx) error {
 
-	cpuCount, err := strconv.Atoi(c.Query("cpus", "2"))
+	args, err := parseConfigArgs(c)
 
 	if err != nil {
-		return err
+		return fmt.Errorf("could not parse args: %w", err)
 	}
-	maxConn, err := strconv.Atoi(c.Query("max_connections", "100"))
+
+	finalData, err := processConfig(c, args)
 
 	if err != nil {
-		return err
-	}
-	pgVersion, err := strconv.ParseFloat(c.Query("pg_version", defaultPgVersion), 32)
-
-	if err != nil {
-		return err
+		return fmt.Errorf("could not process config: %w", err)
 	}
 
+	switch args.outFormat {
+	case "alter_system":
+		return c.SendString(formatConf(c, args.outFormat, finalData))
+	case "conf":
+		return c.SendString(formatConf(c, args.outFormat, finalData))
+	default:
+		return c.JSON(v1Reponse(c, finalData))
+	}
+}
+
+func processConfig(c *fiber.Ctx, args *configArgs) ([]outputCategory, error) {
 	input := *config.NewInput(
-		c.Query("os_type", "linux"),
-		c.Query("arch", "amd64"),
-		parseRAM(strings.ToUpper(c.Query("total_ram", "2GB"))),
-		cpuCount,
-		c.Query("environment_name", "WEB"),
-		c.Query("drive_type", "HDD"),
-		maxConn,
-		float32(pgVersion),
-	)
+		args.osType,
+		args.arch,
+		args.totalRAM,
+		args.cpuCount,
+		args.envName,
+		args.driveType,
+		args.maxConn,
+		args.pgVersion)
 
 	tune, err := rules.Compute(input)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	showDocs := c.Query("show_doc", "false") == "true"
-	output := addDocTORules(docs.FormatVer(float32(pgVersion)), showDocs)
+	output := addDocTORules(docs.FormatVer(args.pgVersion), args.showDoc)
 
-	finalData := setValues(output, tune, c.Query("include_pgbadger", "false") == "true", c.Query("log_format", "stderr"))
+	return setValues(output, tune, args.includePgbadger, args.logFormat), nil
 
-	format := c.Query("format", "json")
+}
 
-	switch format {
-	case "alter_system":
-		return c.SendString(formatConf(c, format, finalData))
-	case "conf":
-		return c.SendString(formatConf(c, format, finalData))
-	default:
-		return c.JSON(v1Reponse(c, finalData))
+func parseConfigArgs(c *fiber.Ctx) (*configArgs, error) {
+
+	pgVersion, err := strconv.ParseFloat(c.Query("pg_version", defaultPgVersion), 32)
+
+	if err != nil {
+		return nil, err
 	}
+	maxConn, err := strconv.Atoi(c.Query("max_connections", "100"))
+
+	if err != nil {
+		return nil, err
+	}
+
+	cpuCount, err := strconv.Atoi(c.Query("cpus", "2"))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &configArgs{
+		pgVersion:       float32(pgVersion),
+		totalRAM:        parseRAM(strings.ToUpper(c.Query("total_ram", "2GB"))),
+		maxConn:         maxConn,
+		envName:         c.Query("environment_name", "WEB"),
+		osType:          c.Query("os_type", "linux"),
+		arch:            c.Query("arch", "amd64"),
+		driveType:       c.Query("drive_type", "HDD"),
+		cpuCount:        cpuCount,
+		outFormat:       c.Query("format", "json"),
+		showDoc:         c.Query("show_doc", "false") == "true",
+		includePgbadger: c.Query("include_pgbadger", "false") == "true",
+		logFormat:       c.Query("log_format", "stderr"),
+	}, nil
+}
+
+type configArgs struct {
+	pgVersion       float32
+	totalRAM        config.Byte
+	maxConn         int
+	envName         string
+	osType          string
+	arch            string
+	driveType       string
+	cpuCount        int
+	outFormat       string
+	showDoc         bool
+	includePgbadger bool
+	logFormat       string
 }
 
 type templateData struct {
