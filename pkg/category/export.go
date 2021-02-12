@@ -6,11 +6,11 @@ import (
 
 // ExportCfg is the final report
 type ExportCfg struct {
-	Memory     *MemoryCfg     `json:"Memory Configuration"`
-	Checkpoint *CheckpointCfg `json:"Checkpoint Related Configuration"`
-	Network    *NetworkCfg    `json:"Network Related Configuration"`
-	Storage    *StorageCfg    `json:"Storage Configuration"`
-	Worker     *WorkerCfg     `json:"Worker Processes Configuration,omitempty"`
+	Memory     *MemoryCfg     `id:"memory_related" desc:"Memory Configuration"`
+	Checkpoint *CheckpointCfg `id:"checkpoint_related" desc:"Checkpoint Related Configuration"`
+	Network    *NetworkCfg    `id:"network_related" desc:"Network Related Configuration"`
+	Storage    *StorageCfg    `id:"storage_type" desc:"Storage Configuration"`
+	Worker     *WorkerCfg     `id:"worker_related" desc:"Worker Processes Configuration,omitempty"`
 }
 
 // NewExportCfg creates a new ExportCfg with the basic values

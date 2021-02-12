@@ -72,7 +72,7 @@ var tuneCmd = &cobra.Command{
 
 		switch format {
 		case "json":
-			b, err := json.MarshalIndent(out, "", "  ")
+			b, err := json.MarshalIndent(out.ToSlice(), "", "  ")
 			if err != nil {
 				panic(err)
 			}
