@@ -28,10 +28,16 @@ func (e *ExportCfg) ToSlice(pgVersion float32) []SliceOutput {
 		id, _ := t.Field(i).Tag.Lookup("id")
 		desc, _ := t.Field(i).Tag.Lookup("desc")
 
+		params := loadParams(f, pgVersion)
+
+		if len(params) == 0 {
+			continue
+		}
+
 		out = append(out, SliceOutput{
 			Name:        strings.Split(id, ",")[0],
 			Description: strings.Split(desc, ",")[0],
-			Parameters:  loadParams(f, pgVersion),
+			Parameters:  params,
 		})
 		// fmt.Printf("%d: %s %s = %v\n", i,
 		// 	typeOfT.Field(i).Name, f.Type(), f.Interface())

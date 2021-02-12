@@ -4,9 +4,9 @@ import "github.com/pgconfig/api/pkg/config"
 
 // WorkerCfg is the main workers category
 type WorkerCfg struct {
-	MaxWorkerProcesses         int `json:"max_worker_processes,"`
-	MaxParallelWorkerPerGather int `json:"max_parallel_workers_per_gather,omitempty"`
-	MaxParallelWorkers         int `json:"max_parallel_workers,omitempty"`
+	MaxWorkerProcesses         int `json:"max_worker_processes" min_version:"9.4"`
+	MaxParallelWorkerPerGather int `json:"max_parallel_workers_per_gather" min_version:"9.6"`
+	MaxParallelWorkers         int `json:"max_parallel_workers" min_version:"10"`
 }
 
 // NewWorkerCfg creates a new Worker Configuration

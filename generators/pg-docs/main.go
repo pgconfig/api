@@ -57,22 +57,22 @@ func main() {
 	}
 
 	allParams := []string{
-		"checkpoint_completion_target",
-		"checkpoint_segments",
-		"effective_cache_size",
-		"effective_io_concurrency",
-		"listen_addresses",
-		"maintenance_work_mem",
-		"max_connections",
-		"max_parallel_workers",
-		"max_parallel_workers_per_gather",
-		"max_wal_size",
-		"max_worker_processes",
-		"min_wal_size",
-		"random_page_cost",
 		"shared_buffers",
-		"wal_buffers",
+		"effective_cache_size",
 		"work_mem",
+		"maintenance_work_mem",
+		"min_wal_size",
+		"max_wal_size",
+		"checkpoint_segments",
+		"checkpoint_completion_target",
+		"wal_buffers",
+		"listen_addresses",
+		"max_connections",
+		"random_page_cost",
+		"effective_io_concurrency",
+		"max_worker_processes",
+		"max_parallel_workers_per_gather",
+		"max_parallel_workers",
 	}
 
 	for _, ver := range allVersions {
