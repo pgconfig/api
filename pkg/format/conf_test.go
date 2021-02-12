@@ -80,8 +80,4 @@ max_parallel_workers = 2
 		t.Errorf("Result not as expected:\n%v", diff.LineDiff(e, a))
 	}
 
-	if out != sample {
-		t.Error()
-	}
-
 }
