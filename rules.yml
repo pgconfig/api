@@ -1,39 +1,32 @@
 categories:
-  - name: memory_related
-    description: Memory Configuration
-    parameters:
-      - notes:
-          abstract: This parameter allocate memory slots used by all process when the database starts. Mainly works as the disk cache and its similar to oracle's SGA buffer.
-          recomendations:
-            Tuning Your PostgreSQL Server: https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server#shared_buffers
-            Tuning shared_buffers and wal_buffers: http://rhaas.blogspot.com.br/2012/03/tuning-sharedbuffers-and-walbuffers.html
-        format: Bytes
-        formula: |
-          if environment_name == "Desktop":
-              parameter["formula"] = "TOTAL_RAM / 16"
-          else:
-              parameter["formula"] = "TOTAL_RAM / 4"
-        name: shared_buffers
-      - notes:
-          abstract: This parameter does not allocate any resource, just tells to the query planner how much of the operating system cache are avaliable to use. Remember that shared_buffers needs to smaller than 8GB, then the query planner will prefer read the disk because it will be on memory.
-          recomendations:
-            "effective_cache_size: A practical example": https://www.cybertec-postgresql.com/en/effective_cache_size-a-practical-example/
-            "effective_cache_size: What it means in PostgreSQL": https://www.cybertec-postgresql.com/en/effective_cache_size-what-it-means-in-postgresql/
-        format: Bytes
+  memory_related:
+    shared_buffers:
+      abstract: This parameter allocate memory slots used by all process when the database starts. Mainly works as the disk cache and its similar to oracle's SGA buffer.
+      recomendations:
+        Tuning Your PostgreSQL Server: https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server#shared_buffers
+        Tuning shared_buffers and wal_buffers: http://rhaas.blogspot.com.br/2012/03/tuning-sharedbuffers-and-walbuffers.html
+      formula: |
+        if environment_name == "Desktop":
+            parameter["formula"] = "TOTAL_RAM / 16"
+        else:
+            parameter["formula"] = "TOTAL_RAM / 4"
+      effective_cache_size:
+        abstract: This parameter does not allocate any resource, just tells to the query planner how much of the operating system cache are avaliable to use. Remember that shared_buffers needs to smaller than 8GB, then the query planner will prefer read the disk because it will be on memory.
+        recomendations:
+          "effective_cache_size: A practical example": https://www.cybertec-postgresql.com/en/effective_cache_size-a-practical-example/
+          "effective_cache_size: What it means in PostgreSQL": https://www.cybertec-postgresql.com/en/effective_cache_size-what-it-means-in-postgresql/
         formula: |
           if environment_name == "Desktop":
               TOTAL_RAM / 4
           else:
               (TOTAL_RAM / 4) * 3
-        name: effective_cache_size
-      - notes:
-          abstract: This parameter defines how much a work_mem buffer can allocate. Each query can open many work_mem buffers when execute (normally one by subquery) if it uses any sort (or aggregate) operation. When work_mem its too small a temp file is created.
-          details:
-            - Specifies the amount of memory to be used by internal sort operations and hash tables before writing to temporary disk files. The value defaults to four megabytes (4MB). Note that for a complex query, several sort or hash operations might be running in parallel; each operation will be allowed to use as much memory as this value specifies before it starts to write data into temporary files. Also, several running sessions could be doing such operations concurrently. Therefore, the total memory used could be many times the value of work_mem; it is necessary to keep this fact in mind when choosing the value. Sort operations are used for ORDER BY, DISTINCT, and merge joins. Hash tables are used in hash joins, hash-based aggregation, and hash-based processing of IN subqueries.
-          recomendations:
-            Configuring work_mem in Postgres: https://www.pgmustard.com/blog/work-mem
-            "Understaning postgresql.conf: WORK_MEM": https://www.depesz.com/2011/07/03/understanding-postgresql-conf-work_mem/
-        format: Bytes
+      work_mem:
+        abstract: This parameter defines how much a work_mem buffer can allocate. Each query can open many work_mem buffers when execute (normally one by subquery) if it uses any sort (or aggregate) operation. When work_mem its too small a temp file is created.
+        details:
+          - Specifies the amount of memory to be used by internal sort operations and hash tables before writing to temporary disk files. The value defaults to four megabytes (4MB). Note that for a complex query, several sort or hash operations might be running in parallel; each operation will be allowed to use as much memory as this value specifies before it starts to write data into temporary files. Also, several running sessions could be doing such operations concurrently. Therefore, the total memory used could be many times the value of work_mem; it is necessary to keep this fact in mind when choosing the value. Sort operations are used for ORDER BY, DISTINCT, and merge joins. Hash tables are used in hash joins, hash-based aggregation, and hash-based processing of IN subqueries.
+        recomendations:
+          Configuring work_mem in Postgres: https://www.pgmustard.com/blog/work-mem
+          "Understaning postgresql.conf: WORK_MEM": https://www.depesz.com/2011/07/03/understanding-postgresql-conf-work_mem/
         formula: |
           if environment_name in ["WEB", "OLTP"]:
             (TOTAL_RAM / MAX_CONNECTIONS)
@@ -41,189 +34,96 @@ categories:
             ((TOTAL_RAM / 2) / MAX_CONNECTIONS)
           else:
             ((TOTAL_RAM / 6) / MAX_CONNECTIONS)
-        name: work_mem
-      - notes:
-          abstract: This parameter defines how much a maintenance operation (ALTER TABLE, VACUUM, REINDEX, AutoVACUUM worker, etc) buffer can use.
-          recomendations:
-            Adjusting maintenance_work_mem: https://www.cybertec-postgresql.com/en/adjusting-maintenance_work_mem/
-            How Much maintenance_work_mem Do I Need?: http://rhaas.blogspot.com/2019/01/how-much-maintenanceworkmem-do-i-need.html
-        format: Bytes
+      maintenance_work_mem:
+        abstract: This parameter defines how much a maintenance operation (ALTER TABLE, VACUUM, REINDEX, AutoVACUUM worker, etc) buffer can use.
+        recomendations:
+          Adjusting maintenance_work_mem: https://www.cybertec-postgresql.com/en/adjusting-maintenance_work_mem/
+          How Much maintenance_work_mem Do I Need?: http://rhaas.blogspot.com/2019/01/how-much-maintenanceworkmem-do-i-need.html
         formula: |
           if environment_name == "DW":
             (TOTAL_RAM / 8)
           else:
             (TOTAL_RAM / 16)
-        # TODO: review max values
-        max_value: 2GB
-        name: maintenance_work_mem
-  - name: checkpoint_related
-    description: Checkpoint Related Configuration
-    parameters:
-      - notes:
-          abstract: |
-            This parameter defines the minimum size of the pg_wal directory. pg_wal directory contains the WAL files. 
-            Older versions refer to it as the pg_xlog directory.
-          recomendations:
-            "Configuration changes in 9.5: transaction log size": http://www.databasesoup.com/2016/01/configuration-changes-in-95-transaction.html
-        format: Bytes
-
-        # TODO: REVIEW ELSE
-        formula: |
-          if pg_version >= 9.5
-            if environment_name in ["WEB", "Mixed"]:
-              512MB
-            elif environment_name == "OLTP":
-              1GB
-            elif environment_name == "DW":
-              2GB
-            else:
-              2GB
-        min_value: 80MB
-        min_version: 9.5
-        name: min_wal_size
-      - notes:
-          abstract: |
-            This parameter defines the maximun size of the pg_wal directory. pg_wal directory contains the WAL files.
-            Older versions refer to it as the pg_xlog directory.
-        format: Bytes
-        formula: |
-          if pg_version >= 9.5:
-            if environment_name in ["WEB", "Mixed"]:
-              1536MB
-            elif environment_name == "OLTP":
-              3GB
-            elif environment_name == "DW":
-              6GB
-            else:
-              1GB
-        min_version: 9.5
-        name: max_wal_size
-      - notes:
-          abstract: This parameter defines a percentual of checkpoint_timeout as a target to write the CHECKPOINT data on the disk.
-          recomendations:
-            "Understaning postgresql.conf: CHECKPOINT_COMPLETION_TARGET": https://www.depesz.com/2010/11/03/checkpoint_completion_target/
-        format: Float
-        formula: |
-          if environment_name == "WEB":
-            0.7
-          elif environment_name in ["OLTP", "DW", "Mixed"]:
-            0.9
+  checkpoint_related:
+    min_wal_size:
+      abstract: |
+        This parameter defines the minimum size of the pg_wal directory. pg_wal directory contains the WAL files. 
+        Older versions refer to it as the pg_xlog directory.
+      recomendations:
+        "Configuration changes in 9.5: transaction log size": http://www.databasesoup.com/2016/01/configuration-changes-in-95-transaction.html
+      # TODO: REVIEW ELSE
+      formula: |
+        if pg_version >= 9.5
+          if environment_name in ["WEB", "Mixed"]:
+            512MB
+          elif environment_name == "OLTP":
+            1GB
+          elif environment_name == "DW":
+            2GB
           else:
-            0.5
-        name: checkpoint_completion_target
-      - notes:
-          abstract: This parameter defines a buffer to store WAL changes before write it in the WAL file.
-          recomendations:
-            Chapter 9 - Write Ahead Logging — WAL: http://www.interdb.jp/pg/pgsql09.html
-        format: Bytes
-        formula: |
-          if environment_name in ["WEB", "OLTP", "DW", "Mixed"]:
-            (TOTAL_RAM / 4 ) * 0.03
+            2GB
+    max_wal_size:
+      abstract: |
+        This parameter defines the maximun size of the pg_wal directory. pg_wal directory contains the WAL files.
+        Older versions refer to it as the pg_xlog directory.
+      formula: |
+        if pg_version >= 9.5:
+          if environment_name in ["WEB", "Mixed"]:
+            1536MB
+          elif environment_name == "OLTP":
+            3GB
+          elif environment_name == "DW":
+            6GB
           else:
-            (TOTAL_RAM / 16 ) * 0.03
-        max_value: 16MB
-        name: wal_buffers
-  - name: network_related
-    description: Network Related Configuration
-    parameters:
-      - notes:
-          abstract: This parameter defines a network address to bind to.
-        format: String
-        formula: "*"
-        name: listen_addresses
-      - notes:
-          abstract: This parameter defines a max connections allowed.
-          recomendations:
-            Tuning max_connections in PostgreSQL: https://www.cybertec-postgresql.com/en/tuning-max_connections-in-postgresql/
-        format: Decimal
-        formula: |
-          same as $max_connections (from url)
-        name: max_connections
-  - name: storage_type
-    description: Storage Configuration
-    parameters:
-      - notes:
-          abstract: Sets the planner's estimate of the cost of a non-sequentially-fetched disk page.
-          recomendations:
-            How a single PostgreSQL config change improved slow query performance by 50x: https://amplitude.engineering/how-a-single-postgresql-config-change-improved-slow-query-performance-by-50x-85593b8991b0
-        format: Float
-        formula: |
-          if disk_type == "HDD"
-            4.0
-          elsif disk_type IN ["SSD", "SAN"]:
-            1.1
-        name: random_page_cost
-      - notes:
-          abstract: Sets the number of concurrent disk I/O operations that PostgreSQL expects can be executed simultaneously.
-          recomendations:
-            "PostgreSQL: effective_io_concurrency benchmarked": https://portavita.github.io/2019-07-19-PostgreSQL_effective_io_concurrency_benchmarked/
-        format: Decimal
-        formula: |
-          if disk_type == "HDD"
-            2
-          elsif disk_type == "SSD":
-            200
-          elsif disk_type == "SAN":
-            200
-        name: effective_io_concurrency
-  - name: log_related
-    description: Log Configuration for PGBadger
-    parameters:
-      - name: logging_collector
-        notes:
-          value: on
-      - name: log_checkpoints
-        notes:
-          value: on
-      - name: log_connections
-        notes:
-          value: on
-      - name: log_disconnections
-        notes:
-          value: on
-      - name: log_lock_waits
-        notes:
-          value: on
-      - name: log_temp_files
-        notes:
-          value: 0
-      - name: lc_messages
-        notes:
-          value: C
-      - name: log_min_duration_statement
-        notes:
-          comment: Adjust the minimum time to collect data
-          value: 10s
-      - name: log_autovacuum_min_duration
-        notes:
-          value: 0
-  - name: log_related_stderr_config
-    description: "'stderr' format configuration"
-    parameters:
-      - name: log_destination
-        notes:
-          value: stderr
-      - name: log_line_prefix
-        notes:
-          value: "'%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '"
-  - name: log_related_csvlog_config
-    description: "'csvlog' format configuration"
-    parameters:
-      - name: log_destination
-        notes:
-          value: csvlog
-  - name: log_related_syslog_config
-    description: "'syslog' format configuration"
-    parameters:
-      - name: log_destination
-        notes:
-          value: syslog
-      - name: log_line_prefix
-        notes:
-          value: "'user=%u,db=%d,app=%a,client=%h '"
-      - name: syslog_facility
-        notes:
-          value: LOCAL0
-      - name: syslog_ident
-        notes:
-          value: postgres
+            1GB
+    checkpoint_completion_target:
+      abstract: This parameter defines a percentual of checkpoint_timeout as a target to write the CHECKPOINT data on the disk.
+      recomendations:
+        "Understaning postgresql.conf: CHECKPOINT_COMPLETION_TARGET": https://www.depesz.com/2010/11/03/checkpoint_completion_target/
+      formula: |
+        if environment_name == "WEB":
+          0.7
+        elif environment_name in ["OLTP", "DW", "Mixed"]:
+          0.9
+        else:
+          0.5
+    wal_buffers:
+      abstract: This parameter defines a buffer to store WAL changes before write it in the WAL file.
+      recomendations:
+        Chapter 9 - Write Ahead Logging — WAL: http://www.interdb.jp/pg/pgsql09.html
+      formula: |
+        if environment_name in ["WEB", "OLTP", "DW", "Mixed"]:
+          (TOTAL_RAM / 4 ) * 0.03
+        else:
+          (TOTAL_RAM / 16 ) * 0.03
+  network_related:
+    listen_addresses:
+      abstract: This parameter defines a network address to bind to.
+      formula: "*"
+    max_connections:
+      abstract: This parameter defines a max connections allowed.
+      recomendations:
+        Tuning max_connections in PostgreSQL: https://www.cybertec-postgresql.com/en/tuning-max_connections-in-postgresql/
+      formula: |
+        same as $max_connections (from url)
+  storage_type:
+    random_page_cost:
+      abstract: Sets the planner's estimate of the cost of a non-sequentially-fetched disk page.
+      recomendations:
+        How a single PostgreSQL config change improved slow query performance by 50x: https://amplitude.engineering/how-a-single-postgresql-config-change-improved-slow-query-performance-by-50x-85593b8991b0
+      formula: |
+        if disk_type == "HDD"
+          4.0
+        elsif disk_type IN ["SSD", "SAN"]:
+          1.1
+    effective_io_concurrency:
+      abstract: Sets the number of concurrent disk I/O operations that PostgreSQL expects can be executed simultaneously.
+      recomendations:
+        "PostgreSQL: effective_io_concurrency benchmarked": https://portavita.github.io/2019-07-19-PostgreSQL_effective_io_concurrency_benchmarked/
+      formula: |
+        if disk_type == "HDD"
+          2
+        elsif disk_type == "SSD":
+          200
+        elsif disk_type == "SAN":
+          200

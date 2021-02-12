@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/pgconfig/api/pkg/category"
 	"github.com/pgconfig/api/pkg/profile"
 )
 
@@ -53,6 +54,6 @@ func GetConfigEnvs(c *fiber.Ctx) error {
 }
 
 type allEnvsOutput struct {
-	EnvName string           `json:"environment"`
-	Config  []outputCategory `json:"configuration"`
+	EnvName string                 `json:"environment"`
+	Config  []category.SliceOutput `json:"configuration"`
 }

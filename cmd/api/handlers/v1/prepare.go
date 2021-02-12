@@ -9,32 +9,18 @@ import (
 )
 
 type rulesFileContent struct {
-	Categories []outputCategory `json:"categories"`
+	Categories map[string]map[string]parameter `json:"categories"`
 }
 
-type notes struct {
+type parameter struct {
 	Abstract       string            `json:"abstract"`
 	Recomendations map[string]string `json:"recomendations,omitempty"`
-	Value          string            `json:"config_value,omitempty"`
-	Comment        string            `json:"comment,omitempty"`
-}
-type parameter struct {
-	Notes         notes          `yaml:"notes" json:"-"`
-	Documentation *docs.ParamDoc `json:"documentation,omitempty"`
-	Format        string         `json:"format"`
-	Formula       string         `json:"formula"`
-	Name          string         `json:"name"`
-	Value         string         `json:"config_value,omitempty"`
-}
-type outputCategory struct {
-	Name        string       `json:"category" yaml:"name"`
-	Description string       `json:"description"`
-	Parameters  []*parameter `json:"parameters"`
+	Formula        string            `json:"formula"`
 }
 
 var (
-	allCategories rulesFileContent
-	pgDocs        docs.DocFile
+	allRules rulesFileContent
+	pgDocs   docs.DocFile
 )
 
 // Prepare loads the necessary files to the api server
@@ -44,7 +30,7 @@ func Prepare(rulesFile, docsFile string) {
 		log.Fatalf("could not open rules config file: %v", err)
 	}
 
-	err = yaml.Unmarshal(fileData, &allCategories)
+	err = yaml.Unmarshal(fileData, &allRules)
 	if err != nil {
 		log.Fatalf("could not parse rules config file: %v", err)
 	}

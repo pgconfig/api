@@ -48,7 +48,9 @@ func New() *fiber.App {
 	})
 	app.Use(cors.New())
 
-	app.Use(recover.New())
+	app.Use(recover.New(recover.Config{
+		EnableStackTrace: true,
+	}))
 	app.Use(logger.New(logger.Config{
 		Format:     "${cyan}[${time}] ${white}${pid} ${red}${status} ${blue}[${method}] ${white}${path}\n",
 		TimeFormat: "02-Jan-2006 15:04:05",
