@@ -76,7 +76,7 @@ func processConfig(c *fiber.Ctx, args *configArgs) ([]category.SliceOutput, erro
 		return nil, err
 	}
 
-	output := tune.ToSlice()
+	output := tune.ToSlice(args.pgVersion)
 
 	if args.showDoc {
 		doc := pgDocs.Documentation[docs.FormatVer(args.pgVersion)]
