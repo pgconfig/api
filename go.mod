@@ -8,14 +8,19 @@ require (
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
 	github.com/arsmn/fiber-swagger/v2 v2.3.0
 	github.com/davecgh/go-spew v1.1.1
+	github.com/go-openapi/spec v0.20.3 // indirect
 	github.com/gofiber/fiber v1.14.5
 	github.com/gofiber/fiber/v2 v2.5.0
 	github.com/gorilla/schema v1.2.0 // indirect
 	github.com/mackerelio/go-osstat v0.1.0
+	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.7.1
 	github.com/swaggo/swag v1.7.0
+	golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c // indirect
+	golang.org/x/tools v0.1.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 )

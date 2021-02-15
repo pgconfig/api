@@ -10,10 +10,27 @@ import (
 	"github.com/pgconfig/api/pkg/docs"
 )
 
+
+var PGBadgerConfig = SliceOutput{
+	Name: "log_config",
+	Description: "Logging configuration for pgbadger",
+	Parameters: []ParamSliceOutput{
+		ParamSliceOutput{Format:"bool", Name: "logging_collector", Value: "on"},
+		ParamSliceOutput{Format:"bool", Name: "log_checkpoints", Value: "on"},
+		ParamSliceOutput{Format:"bool", Name: "log_connections", Value: "on"},
+		ParamSliceOutput{Format:"bool", Name: "log_disconnections", Value: "on"},
+		ParamSliceOutput{Format:"bool", Name: "log_lock_waits", Value: "on"},
+		ParamSliceOutput{Format:"int", Name: "log_temp_files", Value: "0"},
+		ParamSliceOutput{Format:"string", Name: "lc_messages", Value: "C"},
+		ParamSliceOutput{Format:"string", Name: "log_min_duration_statement", Value: "10s", Comment:"Adjust the minimum time to collect the data"},
+		ParamSliceOutput{Format:"int", Name: "log_autovacuum_min_duration", Value: "0"},
+	},
+}
+
 // ToSlice converts de report into a slice
 // with categories and parameters like that is used today on the
 // api.pgconfig website.
-func (e *ExportCfg) ToSlice(pgVersion float32) []SliceOutput {
+func (e *ExportCfg) ToSlice(pgVersion float32, includePGBadger bool) []SliceOutput {
 
 	var out []SliceOutput
 
@@ -43,6 +60,10 @@ func (e *ExportCfg) ToSlice(pgVersion float32) []SliceOutput {
 		// 	typeOfT.Field(i).Name, f.Type(), f.Interface())
 	}
 
+	if includePGBadger {
+		out = append(out, PGBadgerConfig)
+	}
+
 	return out
 }
 
@@ -60,6 +81,7 @@ type ParamSliceOutput struct {
 	Value         string         `json:"config_value"`
 	Format        string         `json:"format"`
 	Documentation *docs.ParamDoc `json:"documentation,omitempty"`
+	Comment       string         `json:"comment,omitempty"`
 }
 
 func loadParams(cat reflect.Value, pgVersion float32) []ParamSliceOutput {

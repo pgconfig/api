@@ -37,15 +37,16 @@ import (
 )
 
 var (
-	pgVersion      float32
-	osName         string
-	arch           string
-	totalCPU       int
-	totalRAM       int64
-	maxConnections int
-	diskType       string
-	profile        string
-	outputFormat   string
+	pgVersion       float32
+	osName          string
+	arch            string
+	totalCPU        int
+	totalRAM        int64
+	maxConnections  int
+	diskType        string
+	profile         string
+	outputFormat    string
+	includePgbadger bool
 )
 
 // tuneCmd represents the tune command
@@ -72,15 +73,15 @@ var tuneCmd = &cobra.Command{
 
 		switch outputFormat {
 		case "json":
-			b, err := json.MarshalIndent(out.ToSlice(pgVersion), "", "  ")
+			b, err := json.MarshalIndent(out.ToSlice(pgVersion, includePgbadger), "", "  ")
 			if err != nil {
 				panic(err)
 			}
 			fmt.Println(string(b))
 		case "conf", "unix":
-			export("config", out.ToSlice(pgVersion))
+			export("config", out.ToSlice(pgVersion, includePgbadger))
 		case "alter-system", "sql":
-			export("sql", out.ToSlice(pgVersion))
+			export("sql", out.ToSlice(pgVersion, includePgbadger))
 		default:
 			fmt.Println("Invalid format")
 			os.Exit(1)
@@ -108,6 +109,7 @@ func init() {
 	tuneCmd.PersistentFlags().IntVarP(&totalCPU, "cpus", "c", runtime.NumCPU(), "Total CPU cores")
 	tuneCmd.PersistentFlags().Int64VarP(&totalRAM, "ram", "", int64(memory.Total), "Total Memory in bytes")
 	tuneCmd.PersistentFlags().IntVarP(&maxConnections, "max-connections", "M", 100, "Max expected connections")
+	tuneCmd.PersistentFlags().BoolVarP(&includePgbadger, "include-pgbadger", "B", false, "Include pgbadger params?")
 }
 
 func export(f string, report []category.SliceOutput) {

@@ -31,6 +31,8 @@ ALTER SYSTEM SET effective_io_concurrency TO '1';
 
 -- Worker Processes Configuration
 ALTER SYSTEM SET max_worker_processes TO '8';
+
+-- foo bar
 ALTER SYSTEM SET max_parallel_workers_per_gather TO '2';
 ALTER SYSTEM SET max_parallel_workers TO '2';
 `

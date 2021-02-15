@@ -1,6 +1,8 @@
 before:
   hooks:
     - go mod download
+    - go get -u github.com/swaggo/swag/cmd/swag
+    - cd cmd/api ; swag init
 
 builds:
   - id: pgconfigctl

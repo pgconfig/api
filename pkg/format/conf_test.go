@@ -43,7 +43,7 @@ var sliceConfSample = []category.SliceOutput{
 		Description: "Worker Processes Configuration",
 		Parameters: []category.ParamSliceOutput{
 			category.ParamSliceOutput{Name: "max_worker_processes", Value: "8", Format: "int"},
-			category.ParamSliceOutput{Name: "max_parallel_workers_per_gather", Value: "2", Format: "int"},
+			category.ParamSliceOutput{Name: "max_parallel_workers_per_gather", Comment: "foo bar", Value: "2", Format: "int"},
 			category.ParamSliceOutput{Name: "max_parallel_workers", Value: "2", Format: "int"}}}}
 
 func TestConfigFile(t *testing.T) {
@@ -70,6 +70,8 @@ effective_io_concurrency = 1
 
 # Worker Processes Configuration
 max_worker_processes = 8
+
+# foo bar
 max_parallel_workers_per_gather = 2
 max_parallel_workers = 2
 `

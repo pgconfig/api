@@ -11,7 +11,7 @@ func ValidOS(os string) error {
 	switch os {
 	case "windows":
 	case "linux":
-	case "unix":
+	case "unix", "darwin":
 	default:
 		return errors.ErrorInvalidOS
 	}
