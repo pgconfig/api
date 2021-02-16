@@ -29,6 +29,7 @@ import (
 
 	"github.com/pgconfig/api/pkg/category"
 	"github.com/pgconfig/api/pkg/config"
+	"github.com/pgconfig/api/pkg/defaults"
 	"github.com/pgconfig/api/pkg/format"
 	"github.com/pgconfig/api/pkg/rules"
 	"github.com/spf13/cobra"
@@ -47,6 +48,7 @@ var (
 	profile         string
 	outputFormat    string
 	includePgbadger bool
+	logFormat       string
 )
 
 // tuneCmd represents the tune command
@@ -71,17 +73,19 @@ var tuneCmd = &cobra.Command{
 			panic(err)
 		}
 
+		data := out.ToSlice(pgVersion, includePgbadger, logFormat)
+
 		switch outputFormat {
 		case "json":
-			b, err := json.MarshalIndent(out.ToSlice(pgVersion, includePgbadger), "", "  ")
+			b, err := json.MarshalIndent(data, "", "  ")
 			if err != nil {
 				panic(err)
 			}
 			fmt.Println(string(b))
 		case "conf", "unix":
-			export("config", out.ToSlice(pgVersion, includePgbadger))
+			export("config", data)
 		case "alter-system", "sql":
-			export("sql", out.ToSlice(pgVersion, includePgbadger))
+			export("sql", data)
 		default:
 			fmt.Println("Invalid format")
 			os.Exit(1)
@@ -105,11 +109,12 @@ func init() {
 	tuneCmd.PersistentFlags().StringVarP(&diskType, "disk-type", "D", "SSD", "Disk type (possible values are SSD, HDD and SAN)")
 	tuneCmd.PersistentFlags().StringVarP(&profile, "profile", "", "WEB", "Tuning profile (possible values are WEB, HDD and SAN)")
 	tuneCmd.PersistentFlags().StringVarP(&outputFormat, "format", "", "conf", "config file format (possible values are unix, alter-system, and json) - file extension also work (conf, sql, json)")
-	tuneCmd.PersistentFlags().Float32VarP(&pgVersion, "version", "", 13.1, "PostgreSQL Version")
+	tuneCmd.PersistentFlags().Float32VarP(&pgVersion, "version", "", defaults.PGVersionF, "PostgreSQL Version")
 	tuneCmd.PersistentFlags().IntVarP(&totalCPU, "cpus", "c", runtime.NumCPU(), "Total CPU cores")
 	tuneCmd.PersistentFlags().Int64VarP(&totalRAM, "ram", "", int64(memory.Total), "Total Memory in bytes")
 	tuneCmd.PersistentFlags().IntVarP(&maxConnections, "max-connections", "M", 100, "Max expected connections")
 	tuneCmd.PersistentFlags().BoolVarP(&includePgbadger, "include-pgbadger", "B", false, "Include pgbadger params?")
+	tuneCmd.PersistentFlags().StringVarP(&logFormat, "log-format", "L", "csvlog", "Default log format")
 }
 
 func export(f string, report []category.SliceOutput) {

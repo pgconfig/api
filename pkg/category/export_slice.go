@@ -10,27 +10,10 @@ import (
 	"github.com/pgconfig/api/pkg/docs"
 )
 
-
-var PGBadgerConfig = SliceOutput{
-	Name: "log_config",
-	Description: "Logging configuration for pgbadger",
-	Parameters: []ParamSliceOutput{
-		ParamSliceOutput{Format:"bool", Name: "logging_collector", Value: "on"},
-		ParamSliceOutput{Format:"bool", Name: "log_checkpoints", Value: "on"},
-		ParamSliceOutput{Format:"bool", Name: "log_connections", Value: "on"},
-		ParamSliceOutput{Format:"bool", Name: "log_disconnections", Value: "on"},
-		ParamSliceOutput{Format:"bool", Name: "log_lock_waits", Value: "on"},
-		ParamSliceOutput{Format:"int", Name: "log_temp_files", Value: "0"},
-		ParamSliceOutput{Format:"string", Name: "lc_messages", Value: "C"},
-		ParamSliceOutput{Format:"string", Name: "log_min_duration_statement", Value: "10s", Comment:"Adjust the minimum time to collect the data"},
-		ParamSliceOutput{Format:"int", Name: "log_autovacuum_min_duration", Value: "0"},
-	},
-}
-
 // ToSlice converts de report into a slice
 // with categories and parameters like that is used today on the
 // api.pgconfig website.
-func (e *ExportCfg) ToSlice(pgVersion float32, includePGBadger bool) []SliceOutput {
+func (e *ExportCfg) ToSlice(pgVersion float32, includePGBadger bool, logFormat string) []SliceOutput {
 
 	var out []SliceOutput
 
@@ -62,6 +45,7 @@ func (e *ExportCfg) ToSlice(pgVersion float32, includePGBadger bool) []SliceOutp
 
 	if includePGBadger {
 		out = append(out, PGBadgerConfig)
+		out = append(out, LogOptions[logFormat])
 	}
 
 	return out

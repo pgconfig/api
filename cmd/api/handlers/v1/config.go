@@ -11,6 +11,7 @@ import (
 
 	"github.com/pgconfig/api/pkg/category"
 	"github.com/pgconfig/api/pkg/config"
+	"github.com/pgconfig/api/pkg/defaults"
 	"github.com/pgconfig/api/pkg/docs"
 	"github.com/pgconfig/api/pkg/format"
 	"github.com/pgconfig/api/pkg/rules"
@@ -76,7 +77,7 @@ func processConfig(c *fiber.Ctx, args *configArgs) ([]category.SliceOutput, erro
 		return nil, err
 	}
 
-	output := tune.ToSlice(args.pgVersion, args.includePgbadger)
+	output := tune.ToSlice(args.pgVersion, args.includePgbadger, args.logFormat)
 
 	if args.showDoc {
 		doc := pgDocs.Documentation[docs.FormatVer(args.pgVersion)]
@@ -113,7 +114,7 @@ func processConfig(c *fiber.Ctx, args *configArgs) ([]category.SliceOutput, erro
 
 func parseConfigArgs(c *fiber.Ctx) (*configArgs, error) {
 
-	pgVersion, err := strconv.ParseFloat(c.Query("pg_version", defaultPgVersion), 32)
+	pgVersion, err := strconv.ParseFloat(c.Query("pg_version", defaults.PGVersion), 32)
 
 	if err != nil {
 		return nil, err

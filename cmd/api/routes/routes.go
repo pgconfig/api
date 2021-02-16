@@ -65,7 +65,6 @@ func New() *fiber.App {
 	v1 := app.Group("/v1/tuning/")
 
 	v1.Get("/list-environments", handV1.ListEnvs)
-	v1.Get("/get-rules", handV1.GetRules)
 	v1.Get("/get-config", handV1.GetConfig)
 	v1.Get("/get-config-all-environments", handV1.GetConfigEnvs)
 
