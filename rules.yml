@@ -126,4 +126,4 @@ categories:
         elsif disk_type == "SSD":
           200
         elsif disk_type == "SAN":
-          200
+          300
