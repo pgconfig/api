@@ -2,7 +2,9 @@ before:
   hooks:
     - go mod download
     - go get -u github.com/swaggo/swag/cmd/swag
-    - cd cmd/api ; swag init
+    - rm -rfv ./cmd/api/docs
+    - mkdir -p ./cmd/api/docs
+    - swag init --dir ./cmd/api --output ./cmd/api/docs
 
 builds:
   - id: pgconfigctl
@@ -111,9 +113,9 @@ dockers:
     ids:
       - api
     image_templates:
-      - "pgconfig/api:{{ .Tag }}"
-      - "pgconfig/api:{{ .Major }}.{{ .Minor }}"
-      - "pgconfig/api:latest"
+      - "pgconfig/api:arm64-{{ .Tag }}"
+      - "pgconfig/api:arm64-{{ .Major }}.{{ .Minor }}"
+      - "pgconfig/api:arm64-latest"
     use_buildx: true
 
     # Template of the docker build flags.
@@ -125,6 +127,30 @@ dockers:
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--platform=linux/arm64"
+
+    extra_files:
+      - rules.yml
+      - pg-docs.yml
+
+  - dockerfile: cmd/api/Dockerfile
+    goarch: amd64
+    ids:
+      - api
+    image_templates:
+      - "pgconfig/api:amd64-{{ .Tag }}"
+      - "pgconfig/api:amd64-{{ .Major }}.{{ .Minor }}"
+      - "pgconfig/api:amd64-latest"
+    use_buildx: true
+
+    # Template of the docker build flags.
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title=pgconfig-{{.ProjectName}}"
+      - "--label=org.opencontainers.image.website=pgconfig.org"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--platform=linux/amd64"
 
     extra_files:
       - rules.yml
