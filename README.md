@@ -11,10 +11,10 @@ PGConfig.org API v2.
 
 1. host the v2 api of pgconfig.org (not started):
 
-    * [ ] Create new API using fiber
+    * [x] Create new API using fiber
         * [x] Route compare
-        * [ ] other routes
-    * [ ] Update Release with and build the docker images
+        * [x] other routes
+    * [x] Update Release with and build the docker images
 
 
 1. build and release the pgconfigctl (wip):
@@ -25,14 +25,15 @@ PGConfig.org API v2.
         * [x] Network Related Configuration
         * [x] Storage Configuration
         * [x] Worker Processes Configuration
-    * [ ] Implement compute filters:
+    * [x] Implement compute filters:
         * [x] Arch
         * [x] OS
-        * [ ] Storage
-        * [ ] CPU Count
-        * [ ] Total RAM
-        * [ ] Profile
+        * [x] Storage
+        * [x] CPU Count
+        * [x] Total RAM
+        * [x] Profile
         * [x] Version
+    * [ ] Review all metrics
 
 
 
