@@ -25,6 +25,16 @@ func Test_computeOS(t *testing.T) {
 	}
 
 	in = fakeInput()
+	in.OS = "windows"
+	in.PostgresVersion = 12.0
+
+	out, _ = computeOS(in, category.NewExportCfg(*in))
+
+	if out.Storage.EffectiveIOConcurrency > 0 {
+		t.Error("should limit effective_io_concurrency to 0 on platforms that lack posix_fadvise()")
+	}
+
+	in = fakeInput()
 	in.TotalRAM = 120 * config.GB
 
 	out, _ = computeOS(in, category.NewExportCfg(*in))

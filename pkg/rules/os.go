@@ -30,5 +30,9 @@ func computeOS(in *config.Input, cfg *category.ExportCfg) (*category.ExportCfg, 
 		cfg.Memory.SharedBuffers = 512 * config.MB
 	}
 
+	if in.OS == "windows" {
+		cfg.Storage.EffectiveIOConcurrency = 0
+	}
+
 	return cfg, nil
 }
