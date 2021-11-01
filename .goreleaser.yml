@@ -82,7 +82,7 @@ dockers:
       - pgconfigctl
     goarch: amd64
     image_templates:
-      - "pgconfig/pgconfigctl:amd64-{{ .Tag }}"
+      - "pgconfig/pgconfigctl:amd64-v{{ .Tag }}"
 
     use: buildx
 
@@ -98,7 +98,7 @@ dockers:
       - pgconfigctl
     goarch: arm64
     image_templates:
-      - "pgconfig/pgconfigctl:arm64-{{ .Tag }}"
+      - "pgconfig/pgconfigctl:arm64-v{{ .Tag }}"
 
     use: buildx
 
@@ -115,7 +115,7 @@ dockers:
     ids:
       - api
     image_templates:
-      - "pgconfig/api:arm64-{{ .Tag }}"
+      - "pgconfig/api:arm64-v{{ .Tag }}"
     use: buildx
 
     build_flag_templates:
@@ -134,7 +134,7 @@ dockers:
     ids:
       - api
     image_templates:
-      - "pgconfig/api:amd64-{{ .Tag }}"
+      - "pgconfig/api:amd64-v{{ .Tag }}"
     use: buildx
     build_flag_templates:
       - "--label=org.opencontainers.image.created={{.Date}}"
