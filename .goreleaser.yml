@@ -17,12 +17,10 @@ builds:
       - windows
       - darwin
     ignore:
-      - goos: darwin
-        goarch: 386
+      - goos: windows
+        goarch: arm64
     goarch:
       - amd64
-      - 386
-      - arm
       - arm64
 
   - id: api
@@ -35,12 +33,10 @@ builds:
       - windows
       - darwin
     ignore:
-      - goos: darwin
-        goarch: 386
+      - goos: windows
+        goarch: arm64
     goarch:
       - amd64
-      - 386
-      - arm
       - arm64
     ldflags:
       - -s -w -X version.Tag={{.Version}} -X version.Commit={{.Commit}}
@@ -58,7 +54,7 @@ nfpms:
       darwin: macOS
 
     homepage: https://pgconfig.org/
-    maintainer: Sebastian Webber <sebastian@swebber.me>
+    maintainer: Sebastian Webber <sebastian@pgconfig.org>
     description: CLI for the pgconfig.org website
 
     license: MIT
@@ -71,13 +67,11 @@ archives:
   - id: pgconfigctl
     builds:
       - pgconfigctl
-    name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "{{ .Binary }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
     replacements:
-      darwin: Darwin
+      darwin: MacOS
       linux: Linux
       windows: Windows
-      386: i386
-      amd64: x86_64
     format: binary
 checksum:
   name_template: "checksums.txt"
@@ -92,21 +86,33 @@ dockers:
       - pgconfigctl
     goarch: amd64
     image_templates:
-      - "pgconfig/pgconfigctl:{{ .Tag }}"
-      - "pgconfig/pgconfigctl:{{ .Major }}.{{ .Minor }}"
-      - "pgconfig/pgconfigctl:latest"
+      - "pgconfig/pgconfigctl:amd64-{{ .Tag }}"
 
-    use_buildx: true
+    use: buildx
 
     build_flag_templates:
-      - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title=pgconfig-{{.ProjectName}}"
       - "--label=org.opencontainers.image.website=pgconfig.org"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--platform=linux/amd64"
+  - dockerfile: cmd/pgconfigctl/Dockerfile
+    ids:
+      - pgconfigctl
+    goarch: arm64
+    image_templates:
+      - "pgconfig/pgconfigctl:arm64-{{ .Tag }}"
 
+    use: buildx
+
+    build_flag_templates:
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title=pgconfig-{{.ProjectName}}"
+      - "--label=org.opencontainers.image.website=pgconfig.org"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--platform=linux/arm64"
 
   - dockerfile: cmd/api/Dockerfile
     goarch: arm64
@@ -114,13 +120,9 @@ dockers:
       - api
     image_templates:
       - "pgconfig/api:arm64-{{ .Tag }}"
-      - "pgconfig/api:arm64-{{ .Major }}.{{ .Minor }}"
-      - "pgconfig/api:arm64-latest"
-    use_buildx: true
+    use: buildx
 
-    # Template of the docker build flags.
     build_flag_templates:
-      - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title=pgconfig-{{.ProjectName}}"
       - "--label=org.opencontainers.image.website=pgconfig.org"
@@ -131,27 +133,53 @@ dockers:
     extra_files:
       - rules.yml
       - pg-docs.yml
-
   - dockerfile: cmd/api/Dockerfile
     goarch: amd64
     ids:
       - api
     image_templates:
       - "pgconfig/api:amd64-{{ .Tag }}"
-      - "pgconfig/api:amd64-{{ .Major }}.{{ .Minor }}"
-      - "pgconfig/api:amd64-latest"
-    use_buildx: true
-
-    # Template of the docker build flags.
+    use: buildx
     build_flag_templates:
-      - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title=pgconfig-{{.ProjectName}}"
       - "--label=org.opencontainers.image.website=pgconfig.org"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--platform=linux/amd64"
-
     extra_files:
       - rules.yml
       - pg-docs.yml
+docker_manifests:
+  - name_template: pgconfig/api:v{{ .Tag }}
+    image_templates:
+      - "pgconfig/api:arm64-v{{ .Tag }}"
+      - "pgconfig/api:amd64-v{{ .Tag }}"
+  - name_template: "pgconfig/api:v{{ .Major }}.{{ .Minor }}"
+    image_templates:
+      - "pgconfig/api:arm64-v{{ .Tag }}"
+      - "pgconfig/api:amd64-v{{ .Tag }}"
+  - name_template: "pgconfig/api:v{{ .Major }}"
+    image_templates:
+      - "pgconfig/api:arm64-v{{ .Tag }}"
+      - "pgconfig/api:amd64-v{{ .Tag }}"
+  - name_template: "pgconfig/api:latest"
+    image_templates:
+      - "pgconfig/api:arm64-v{{ .Tag }}"
+      - "pgconfig/api:amd64-v{{ .Tag }}"
+  - name_template: pgconfig/pgconfigctl:v{{ .Tag }}
+    image_templates:
+      - "pgconfig/pgconfigctl:arm64-v{{ .Tag }}"
+      - "pgconfig/pgconfigctl:amd64-v{{ .Tag }}"
+  - name_template: "pgconfig/pgconfigctl:v{{ .Major }}.{{ .Minor }}"
+    image_templates:
+      - "pgconfig/pgconfigctl:arm64-v{{ .Tag }}"
+      - "pgconfig/pgconfigctl:amd64-v{{ .Tag }}"
+  - name_template: "pgconfig/pgconfigctl:v{{ .Major }}"
+    image_templates:
+      - "pgconfig/pgconfigctl:arm64-v{{ .Tag }}"
+      - "pgconfig/pgconfigctl:amd64-v{{ .Tag }}"
+  - name_template: "pgconfig/pgconfigctl:latest"
+    image_templates:
+      - "pgconfig/pgconfigctl:arm64-v{{ .Tag }}"
+      - "pgconfig/pgconfigctl:amd64-v{{ .Tag }}"
