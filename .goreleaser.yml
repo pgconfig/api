@@ -1,10 +1,6 @@
 before:
   hooks:
-    - go mod download
-    - go get -u github.com/swaggo/swag/cmd/swag
-    - rm -rfv ./cmd/api/docs
-    - mkdir -p ./cmd/api/docs
-    - swag init --dir ./cmd/api --output ./cmd/api/docs
+    - make docs
 
 builds:
   - id: pgconfigctl

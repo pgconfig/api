@@ -1,33 +1,31 @@
-name: CoverALL
-on: [push, pull_request]
-jobs:
+on: ["push", "pull_request"]
 
+name: Test Coveralls Parallel
+
+jobs:
   test:
+    env:
+      CGO_ENABLED: 0
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
-        go: ['1.17']
-
+        go:
+          - "1.15"
+          - "1.16"
+          - "1.17"
     steps:
       - uses: actions/setup-go@v1
         with:
           go-version: ${{ matrix.go }}
       - uses: actions/checkout@v2
-      - run: go test -v -coverprofile=profile.cov ./...
+      - run: make test
 
-      - name: Send coverage
-        uses: shogo82148/actions-goveralls@v1
-        with:
-          path-to-profile: profile.cov
-          flag-name: Go-${{ matrix.go }}
-          parallel: true
-
-  # notifies that all test jobs are finished.
   finish:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: shogo82148/actions-goveralls@v1
-        with:
-          parallel-finished: true
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        parallel-finished: true

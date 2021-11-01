@@ -18,3 +18,5 @@ dist/
 cmd/api/docs/**/*
 cmd/api/tmp/**/*
 tmp/
+
+profile.cov
