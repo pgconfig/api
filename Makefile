@@ -4,6 +4,7 @@ GOBIN := "$(GOPATH)/bin"
 mod:
 	go mod download
 	go install github.com/swaggo/swag/cmd/swag
+	go install golang.org/x/lint/golint
 
 docs: mod
 	rm -rfv ./cmd/api/docs
@@ -12,3 +13,9 @@ docs: mod
 
 test: docs
 	go test -v -coverprofile=profile.cov ./...
+
+
+check: lint
+
+lint: mod
+	$(GOBIN)/golint -set_exit_status ./...

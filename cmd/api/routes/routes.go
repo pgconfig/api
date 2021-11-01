@@ -20,7 +20,7 @@ func New() *fiber.App {
 			// Statuscode defaults to 500
 			code := fiber.StatusInternalServerError
 
-			// Retreive the custom statuscode if it's an fiber.*Error
+			// Retrieve the custom statuscode if it's an fiber.*Error
 			if e, ok := err.(*fiber.Error); ok {
 				code = e.Code
 			}

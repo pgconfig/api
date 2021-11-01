@@ -1,9 +1,17 @@
 package profile
 
 const (
-	Web   = "WEB"
-	OLTP  = "OLTP"
-	DW    = "DW"
+
+	// Web profile
+	Web = "WEB"
+
+	// OLTP profile
+	OLTP = "OLTP"
+
+	// DW profile
+	DW = "DW"
+
+	// Mixed profile
 	Mixed = "Mixed"
 
 	// Desktop is the development machine on any non-production server

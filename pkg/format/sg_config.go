@@ -20,18 +20,8 @@ type spec struct {
 	Config          map[string]string `yaml:"postgresql.conf"`
 }
 
-// apiVersion: stackgres.io/v1
-// kind: SGPostgresConfig
-// metadata:
-//   name: postgresconf
-// spec:
-//   postgresVersion: "11"
-//   postgresql.conf:
-//     password_encryption: 'scram-sha-256'
-//     random_page_cost: '1.5'
-//     shared_buffers: '256MB'
-//     wal_compression: 'on'
-
+// SGConfigFile exports the config file in the CRD SGPostgresConfig
+// used by the Stackgres.io operator.
 func SGConfigFile(report []category.SliceOutput, pgVersion string) string {
 
 	out := sgPostgresConfig{

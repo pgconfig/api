@@ -20,12 +20,12 @@ const (
 // Follows ISO/IEC 80000 spec.
 type Byte int64
 
-// MarshalJSON converst the byte
+// MarshalJSON converts the byte
 func (b *Byte) MarshalJSON() ([]byte, error) {
 	return marshalBytes(b)
 }
 
-// String converst bytes into human bytes
+// String converts bytes into human bytes
 func (b *Byte) String() string {
 	return formatBytes(*b)
 }

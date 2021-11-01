@@ -3,8 +3,15 @@ package errors
 import "errors"
 
 var (
-	ErrorInvalidSchema       = errors.New("Invalid schema")
+	// ErrorInvalidSchema error
+	ErrorInvalidSchema = errors.New("Invalid schema")
+
+	// ErrorInputMaxConnections error
 	ErrorInputMaxConnections = errors.New("Please set a value > 0")
-	ErrorInvalidOS           = errors.New("Invalid OS")
-	ErrorInvalidArch         = errors.New("Invalid Architecture")
+
+	// ErrorInvalidOS error
+	ErrorInvalidOS = errors.New("Invalid OS")
+
+	// ErrorInvalidArch error
+	ErrorInvalidArch = errors.New("Invalid Architecture")
 )

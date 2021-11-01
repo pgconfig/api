@@ -9,42 +9,42 @@ import (
 )
 
 var sliceConfSample = []category.SliceOutput{
-	category.SliceOutput{
+	{
 		Name:        "memory_related",
 		Description: "Memory Configuration",
 		Parameters: []category.ParamSliceOutput{
-			category.ParamSliceOutput{Name: "shared_buffers", Value: "23GB", Format: "Byte"},
-			category.ParamSliceOutput{Name: "effective_cache_size", Value: "70GB", Format: "Byte"},
-			category.ParamSliceOutput{Name: "work_mem", Value: "965MB", Format: "Byte"},
-			category.ParamSliceOutput{Name: "maintenance_work_mem", Value: "5GB", Format: "Byte"}}},
-	category.SliceOutput{
+			{Name: "shared_buffers", Value: "23GB", Format: "Byte"},
+			{Name: "effective_cache_size", Value: "70GB", Format: "Byte"},
+			{Name: "work_mem", Value: "965MB", Format: "Byte"},
+			{Name: "maintenance_work_mem", Value: "5GB", Format: "Byte"}}},
+	{
 		Name:        "checkpoint_related",
 		Description: "Checkpoint Related Configuration",
 		Parameters: []category.ParamSliceOutput{
-			category.ParamSliceOutput{Name: "min_wal_size", Value: "2GB", Format: "Byte"},
-			category.ParamSliceOutput{Name: "max_wal_size", Value: "3GB", Format: "Byte"},
-			category.ParamSliceOutput{Name: "checkpoint_completion_target", Value: "0.5", Format: "float32"},
-			category.ParamSliceOutput{Name: "wal_buffers", Value: "-1", Format: "Byte"},
+			{Name: "min_wal_size", Value: "2GB", Format: "Byte"},
+			{Name: "max_wal_size", Value: "3GB", Format: "Byte"},
+			{Name: "checkpoint_completion_target", Value: "0.5", Format: "float32"},
+			{Name: "wal_buffers", Value: "-1", Format: "Byte"},
 		}},
-	category.SliceOutput{
+	{
 		Name:        "network_related",
 		Description: "Network Related Configuration",
 		Parameters: []category.ParamSliceOutput{
-			category.ParamSliceOutput{Name: "listen_addresses", Value: "*", Format: "string"},
-			category.ParamSliceOutput{Name: "max_connections", Value: "100", Format: "int"}}},
-	category.SliceOutput{
+			{Name: "listen_addresses", Value: "*", Format: "string"},
+			{Name: "max_connections", Value: "100", Format: "int"}}},
+	{
 		Name:        "storage_type",
 		Description: "Storage Configuration",
 		Parameters: []category.ParamSliceOutput{
-			category.ParamSliceOutput{Name: "random_page_cost", Value: "4.0", Format: "float32"},
-			category.ParamSliceOutput{Name: "effective_io_concurrency", Value: "1", Format: "int"}}},
-	category.SliceOutput{
+			{Name: "random_page_cost", Value: "4.0", Format: "float32"},
+			{Name: "effective_io_concurrency", Value: "1", Format: "int"}}},
+	{
 		Name:        "worker_related",
 		Description: "Worker Processes Configuration",
 		Parameters: []category.ParamSliceOutput{
-			category.ParamSliceOutput{Name: "max_worker_processes", Value: "8", Format: "int"},
-			category.ParamSliceOutput{Name: "max_parallel_workers_per_gather", Comment: "foo bar", Value: "2", Format: "int"},
-			category.ParamSliceOutput{Name: "max_parallel_workers", Value: "2", Format: "int"}}}}
+			{Name: "max_worker_processes", Value: "8", Format: "int"},
+			{Name: "max_parallel_workers_per_gather", Comment: "foo bar", Value: "2", Format: "int"},
+			{Name: "max_parallel_workers", Value: "2", Format: "int"}}}}
 
 func TestConfigFile(t *testing.T) {
 	sample := `
