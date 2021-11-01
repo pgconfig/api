@@ -3,7 +3,7 @@ on: ["push", "pull_request"]
 name: Test Coveralls Parallel
 
 jobs:
-  test:
+  build:
     env:
       CGO_ENABLED: 0
     runs-on: ubuntu-latest
@@ -18,7 +18,23 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
       - uses: actions/checkout@v2
-      - run: make lint
+      - run: make build
+  test:
+    needs: build
+    env:
+      CGO_ENABLED: 0
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go:
+          - "1.15"
+          - "1.16"
+          - "1.17"
+    steps:
+      - uses: actions/setup-go@v1
+        with:
+          go-version: ${{ matrix.go }}
+      - uses: actions/checkout@v2
       - run: make test
 
       - name: Coveralls
@@ -27,6 +43,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           flag-name: go-v${{ matrix.go }}
           parallel: true
+          path-to-lcov: profile.cov
 
   finish:
     needs: test
