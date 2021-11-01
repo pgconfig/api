@@ -20,3 +20,4 @@ cmd/api/tmp/**/*
 tmp/
 
 profile.cov
+covprofile

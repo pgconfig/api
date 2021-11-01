@@ -5,12 +5,11 @@ name: Test Coveralls Parallel
 jobs:
   build:
     env:
-      CGO_ENABLED: 0
+      CGO_ENABLED: 1
     runs-on: ubuntu-latest
     strategy:
       matrix:
         go:
-          - "1.15"
           - "1.16"
           - "1.17"
     steps:
@@ -22,12 +21,11 @@ jobs:
   test:
     needs: build
     env:
-      CGO_ENABLED: 0
+      CGO_ENABLED: 1
     runs-on: ubuntu-latest
     strategy:
       matrix:
         go:
-          - "1.15"
           - "1.16"
           - "1.17"
     steps:
@@ -36,21 +34,7 @@ jobs:
           go-version: ${{ matrix.go }}
       - uses: actions/checkout@v2
       - run: make test
-
-      - name: Coveralls
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          flag-name: go-v${{ matrix.go }}
-          parallel: true
-          path-to-lcov: profile.cov
-
-  finish:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Coveralls Finished
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          parallel-finished: true
+      - name: Send coverage
+        env:
+          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: make goveralls-push
