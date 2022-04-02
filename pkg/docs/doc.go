@@ -104,9 +104,17 @@ func Get(param string, ver float32) (ParamDoc, error) {
 	}
 
 	// recomendations
+	sel = doc.Find("body > div.wrapper > div > section.content > div > div.col-md-8 > div:nth-child(3) > div.box-header.with-border > h4")
+	previousSession := ""
+	for i := range sel.Nodes {
+		previousSession = t(sel.Eq(i).Text())
+	}
+
 	sel = doc.Find("body > div.wrapper > div > section.content > div > div.col-md-8 > div:nth-child(3) > div.box-body")
 	for i := range sel.Nodes {
-		out.RecomendationsConf = t(sel.Eq(i).Text())
+		if previousSession == "Recommendations" {
+			out.RecomendationsConf = t(sel.Eq(i).Text())
+		}
 	}
 
 	// default values

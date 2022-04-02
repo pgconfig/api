@@ -15,6 +15,8 @@ PGConfig.org API v2.
         * [x] Route compare
         * [x] other routes
     * [x] Update Release with and build the docker images
+    * [ ] Add JSON format option
+    * [ ] Remove "blocked" params in the SGPostgresConfig format
 
 
 1. build and release the pgconfigctl (wip):
