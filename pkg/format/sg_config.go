@@ -38,6 +38,10 @@ func SGConfigFile(report []category.SliceOutput, pgVersion string) string {
 
 	for _, cat := range report {
 		for _, param := range cat.Parameters {
+			if sgBlockedParam(param.Name) {
+				continue
+			}
+
 			out.Spec.Config[param.Name] = param.Value
 		}
 	}
@@ -45,4 +49,34 @@ func SGConfigFile(report []category.SliceOutput, pgVersion string) string {
 	d, _ := yaml.Marshal(&out)
 
 	return string(d)
+}
+
+var blockedParamsForSG = []string{
+	"listen_addresses",
+	"port",
+	"cluster_name",
+	"hot_standby",
+	"fsync",
+	"full_page_writes",
+	"log_destination",
+	"logging_collector",
+	"max_replication_slots",
+	"max_wal_senders",
+	"wal_keep_segments",
+	"wal_level",
+	"wal_log_hints",
+	"archive_mode",
+	"archive_command",
+}
+
+// sgBlockedParam checks if the param is in the StackGres
+// Blocked list and removes it from the output
+func sgBlockedParam(paramName string) bool {
+	for i := 0; i < len(blockedParamsForSG); i++ {
+		if blockedParamsForSG[i] == paramName {
+			return true
+		}
+	}
+
+	return false
 }

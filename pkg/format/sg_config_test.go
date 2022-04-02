@@ -20,7 +20,6 @@ spec:
     checkpoint_completion_target: "0.5"
     effective_cache_size: 70GB
     effective_io_concurrency: "1"
-    listen_addresses: '*'
     maintenance_work_mem: 5GB
     max_connections: "100"
     max_parallel_workers: "2"
