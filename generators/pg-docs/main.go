@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/pgconfig/api/pkg/defaults"
 	"github.com/pgconfig/api/pkg/docs"
 	"gopkg.in/yaml.v2"
 )
@@ -15,7 +16,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&targetFile, "target-file", "/home/seba/projetos/github.com/pgconfig/api/pg-docs.yml", "default target doc file")
+	flag.StringVar(&targetFile, "target-file", "/Users/seba/projetos/github.com/pgconfig/api/pg-docs.yml", "default target doc file")
 	flag.Parse()
 }
 
@@ -43,18 +44,7 @@ func main() {
 		Documentation: make(map[string]docs.Doc),
 	}
 
-	allVersions := []float32{
-		9.1,
-		9.2,
-		9.3,
-		9.4,
-		9.5,
-		9.6,
-		10.0,
-		11.0,
-		12.0,
-		13.0,
-	}
+	allVersions := defaults.SupportedVersions
 
 	allParams := []string{
 		"shared_buffers",
