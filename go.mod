@@ -18,6 +18,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
+	github.com/smartystreets/goconvey v1.7.2 // indirect
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.7.1
 	github.com/swaggo/swag v1.7.4

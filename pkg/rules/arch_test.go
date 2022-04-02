@@ -5,26 +5,32 @@ import (
 
 	"github.com/pgconfig/api/pkg/category"
 	"github.com/pgconfig/api/pkg/config"
+
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func Test_computeArch(t *testing.T) {
 
-	_, err := computeArch(&config.Input{Arch: "xpto-invalid-arch"}, nil)
+	Convey("Validations", t, func() {
+		Convey("Should thow an error when the arch is invalid", func() {
+			_, err := computeArch(&config.Input{Arch: "xpto-invalid-arch"}, nil)
+			So(err, ShouldNotBeNil)
+		})
+		Convey("Should thow an error when the arch is 386 or i686 and has memory values over 4GiB", func() {
 
-	if err == nil {
-		t.Error("should support only 386, amd64, arm and arm64")
-	}
+			similarArchs := []string{"386", "i686"}
 
-	in := fakeInput()
-	in.Arch = "386"
-	in.TotalRAM = 1 * config.TB
+			for _, newArch := range similarArchs {
+				in := fakeInput()
+				in.Arch = newArch
+				in.TotalRAM = 1 * config.TB
 
-	out, _ := computeArch(in, category.NewExportCfg(*in))
+				out, _ := computeArch(in, category.NewExportCfg(*in))
+				So(out.Memory.SharedBuffers, ShouldBeLessThanOrEqualTo, 4*config.GB)
+				So(out.Memory.WorkMem, ShouldBeLessThanOrEqualTo, 4*config.GB)
+				So(out.Memory.MaintenanceWorkMem, ShouldBeLessThanOrEqualTo, 4*config.GB)
+			}
 
-	if out.Memory.SharedBuffers > 4*config.GB ||
-		out.Memory.WorkMem > 4*config.GB ||
-		out.Memory.MaintenanceWorkMem > 4*config.GB {
-		t.Error("should limit ANY memory parameter to a max of 4GB in a 32 bits system")
-	}
-
+		})
+	})
 }
