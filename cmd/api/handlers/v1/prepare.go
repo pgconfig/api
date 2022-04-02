@@ -15,7 +15,7 @@ type rulesFileContent struct {
 type parameter struct {
 	Abstract       string            `json:"abstract"`
 	Recomendations map[string]string `json:"recomendations,omitempty"`
-	Formula        string            `json:"formula"`
+	Formula        string            `json:"formula,omitempty"`
 }
 
 var (
