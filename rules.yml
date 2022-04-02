@@ -5,23 +5,23 @@ categories:
       recomendations:
         Tuning Your PostgreSQL Server: https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server#shared_buffers
         Tuning shared_buffers and wal_buffers: http://rhaas.blogspot.com.br/2012/03/tuning-sharedbuffers-and-walbuffers.html
-      effective_cache_size:
-        abstract: This parameter does not allocate any resource, just tells to the query planner how much of the operating system cache are avaliable to use. Remember that shared_buffers needs to smaller than 8GB, then the query planner will prefer read the disk because it will be on memory.
-        recomendations:
+    effective_cache_size:
+      abstract: This parameter does not allocate any resource, just tells to the query planner how much of the operating system cache are avaliable to use. Remember that shared_buffers needs to smaller than 8GB, then the query planner will prefer read the disk because it will be on memory.
+      recomendations:
           "effective_cache_size: A practical example": https://www.cybertec-postgresql.com/en/effective_cache_size-a-practical-example/
           "effective_cache_size: What it means in PostgreSQL": https://www.cybertec-postgresql.com/en/effective_cache_size-what-it-means-in-postgresql/
-      work_mem:
-        abstract: This parameter defines how much a work_mem buffer can allocate. Each query can open many work_mem buffers when execute (normally one by subquery) if it uses any sort (or aggregate) operation. When work_mem its too small a temp file is created.
-        details:
+    work_mem:
+      abstract: This parameter defines how much a work_mem buffer can allocate. Each query can open many work_mem buffers when execute (normally one by subquery) if it uses any sort (or aggregate) operation. When work_mem its too small a temp file is created.
+      details:
           - Specifies the amount of memory to be used by internal sort operations and hash tables before writing to temporary disk files. The value defaults to four megabytes (4MB). Note that for a complex query, several sort or hash operations might be running in parallel; each operation will be allowed to use as much memory as this value specifies before it starts to write data into temporary files. Also, several running sessions could be doing such operations concurrently. Therefore, the total memory used could be many times the value of work_mem; it is necessary to keep this fact in mind when choosing the value. Sort operations are used for ORDER BY, DISTINCT, and merge joins. Hash tables are used in hash joins, hash-based aggregation, and hash-based processing of IN subqueries.
-        recomendations:
-          Configuring work_mem in Postgres: https://www.pgmustard.com/blog/work-mem
-          "Understaning postgresql.conf: WORK_MEM": https://www.depesz.com/2011/07/03/understanding-postgresql-conf-work_mem/
-      maintenance_work_mem:
-        abstract: This parameter defines how much a maintenance operation (ALTER TABLE, VACUUM, REINDEX, AutoVACUUM worker, etc) buffer can use.
-        recomendations:
-          Adjusting maintenance_work_mem: https://www.cybertec-postgresql.com/en/adjusting-maintenance_work_mem/
-          How Much maintenance_work_mem Do I Need?: http://rhaas.blogspot.com/2019/01/how-much-maintenanceworkmem-do-i-need.html
+      recomendations:
+        Configuring work_mem in Postgres: https://www.pgmustard.com/blog/work-mem
+        "Understaning postgresql.conf: WORK_MEM": https://www.depesz.com/2011/07/03/understanding-postgresql-conf-work_mem/
+    maintenance_work_mem:
+      abstract: This parameter defines how much a maintenance operation (ALTER TABLE, VACUUM, REINDEX, AutoVACUUM worker, etc) buffer can use.
+      recomendations:
+        Adjusting maintenance_work_mem: https://www.cybertec-postgresql.com/en/adjusting-maintenance_work_mem/
+        How Much maintenance_work_mem Do I Need?: http://rhaas.blogspot.com/2019/01/how-much-maintenanceworkmem-do-i-need.html
   checkpoint_related:
     min_wal_size:
       abstract: |
