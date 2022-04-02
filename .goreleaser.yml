@@ -18,6 +18,11 @@ builds:
     goarch:
       - amd64
       - arm64
+    ldflags:
+      - -s
+      - -w
+      - -X github.com/pgconfig/api/pkg/version.Tag={{.Version}}
+      - -X github.com/pgconfig/api/pkg/version.Commit={{.Commit}}
 
   - id: api
     binary: api
@@ -35,7 +40,10 @@ builds:
       - amd64
       - arm64
     ldflags:
-      - -s -w -X version.Tag={{.Version}} -X version.Commit={{.Commit}}
+      - -s
+      - -w
+      - -X github.com/pgconfig/api/pkg/version.Tag={{.Version}}
+      - -X github.com/pgconfig/api/pkg/version.Commit={{.Commit}}
 nfpms:
   - id: default
     package_name: pgconfigctl

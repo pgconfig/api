@@ -26,13 +26,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-)
 
-var (
-	version = "development"
-	commit  = "latest"
-	date    = "TBD"
-	builtBy = "hand"
+	"github.com/pgconfig/api/pkg/version"
 )
 
 // versionCmd represents the version command
@@ -40,7 +35,7 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Displays version information",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("%s (%s) on %s - built by %s\n", version, commit, date, builtBy)
+		fmt.Printf("pgconfigctl - %s\n", version.Pretty())
 	},
 }
 

@@ -28,7 +28,7 @@ func init() {
 }
 
 func main() {
-	log.Printf("%s (%s)\n", version.Tag, version.Commit)
+	log.Printf("PGConfig API - %s\n", version.Pretty())
 
 	app := routes.New()
 	if err := app.Listen(fmt.Sprintf(":%d", port)); err != nil {
