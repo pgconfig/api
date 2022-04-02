@@ -57,3 +57,16 @@ categories:
       abstract: Sets the number of concurrent disk I/O operations that PostgreSQL expects can be executed simultaneously.
       recomendations:
         "PostgreSQL: effective_io_concurrency benchmarked": https://portavita.github.io/2019-07-19-PostgreSQL_effective_io_concurrency_benchmarked/
+  worker_related:
+    max_worker_processes:
+      abstract: Sets the maximum number of background processes that the system can support.
+      recomendations:
+        "Comprehensive guide on how to tune database parameters and configuration in PostgreSQL": https://www.enterprisedb.com/postgres-tutorials/comprehensive-guide-how-tune-database-parameters-and-configuration-postgresql
+    max_parallel_workers_per_gather:
+      abstract: Sets the maximum number of parallel processes per executor node.
+      recomendations:
+        "Comprehensive guide on how to tune database parameters and configuration in PostgreSQL": https://www.enterprisedb.com/postgres-tutorials/comprehensive-guide-how-tune-database-parameters-and-configuration-postgresql
+    max_parallel_workers:
+      abstract: Sets the maximum number of parallel workers that can be active at one time
+      recomendations:
+        "Comprehensive guide on how to tune database parameters and configuration in PostgreSQL": https://www.enterprisedb.com/postgres-tutorials/comprehensive-guide-how-tune-database-parameters-and-configuration-postgresql
