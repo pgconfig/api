@@ -15,14 +15,24 @@ type MemoryCfg struct {
 
 // Memory changes inspired by https://www.enterprisedb.com/postgres-tutorials/how-tune-postgresql-memory
 
-// MaxMemoryPercent limits the maximum memory used
+// MaxMemoryBuffersPercent limits the maximum memory used
 // for the profile when computing per connection buffers
-var MaxMemoryPercent = map[string]float32{
+var MaxMemoryBuffersPercent = map[string]float32{
 	profile.Web:     0.25,
 	profile.OLTP:    0.35,
 	profile.DW:      0.50,
 	profile.Mixed:   0.2,
 	profile.Desktop: 0.1,
+}
+
+// MaxMemoryProfilePercent limits the max memory used
+// in the profile.
+var MaxMemoryProfilePercent = map[string]float32{
+	profile.Web:     1,
+	profile.OLTP:    1,
+	profile.DW:      1,
+	profile.Mixed:   0.5,
+	profile.Desktop: 0.2,
 }
 
 const (
@@ -39,10 +49,12 @@ const (
 // NewMemoryCfg creates a new Memory Configuration
 func NewMemoryCfg(in config.Input) *MemoryCfg {
 
+	totalRAM := float32(in.TotalRAM) * MaxMemoryProfilePercent[in.Profile]
+
 	return &MemoryCfg{
-		SharedBuffers:      config.Byte(float32(in.TotalRAM) * SharedBufferPerc),
-		EffectiveCacheSize: config.Byte(float32(in.TotalRAM) * EffectiveCacheSizePerc),
-		WorkMem:            config.Byte(float32(in.TotalRAM) * MaxMemoryPercent[in.Profile] / float32(in.MaxConnections)),
-		MaintenanceWorkMem: config.Byte(float32(in.TotalRAM) * 0.05),
+		SharedBuffers:      config.Byte(totalRAM * SharedBufferPerc),
+		EffectiveCacheSize: config.Byte(totalRAM * EffectiveCacheSizePerc),
+		WorkMem:            config.Byte(totalRAM * MaxMemoryBuffersPercent[in.Profile] / float32(in.MaxConnections)),
+		MaintenanceWorkMem: config.Byte(totalRAM * 0.05),
 	}
 }
