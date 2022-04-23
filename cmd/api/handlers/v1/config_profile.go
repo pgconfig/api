@@ -36,8 +36,8 @@ func GetConfigEnvs(c *fiber.Ctx) error {
 
 	var out []allEnvsOutput
 
-	for _, env := range profile.AllProfiles {
-		args.envName = env
+	for _, profile := range profile.AllProfiles {
+		args.envName = profile
 		finalData, err := processConfig(c, args)
 
 		if err != nil {
@@ -45,7 +45,7 @@ func GetConfigEnvs(c *fiber.Ctx) error {
 		}
 
 		out = append(out, allEnvsOutput{
-			EnvName: env,
+			EnvName: profile,
 			Config:  finalData,
 		})
 	}
@@ -54,6 +54,6 @@ func GetConfigEnvs(c *fiber.Ctx) error {
 }
 
 type allEnvsOutput struct {
-	EnvName string                 `json:"environment"`
+	EnvName profile.Profile        `json:"environment"`
 	Config  []category.SliceOutput `json:"configuration"`
 }
