@@ -1,11 +1,8 @@
 package v1
 
 import (
-	"bytes"
 	"fmt"
 	"strconv"
-	"strings"
-	"unicode"
 
 	"github.com/gofiber/fiber/v2"
 
@@ -113,25 +110,30 @@ func processConfig(c *fiber.Ctx, args *configArgs) ([]category.SliceOutput, erro
 func parseConfigArgs(c *fiber.Ctx) (*configArgs, error) {
 
 	pgVersion, err := strconv.ParseFloat(c.Query("pg_version", defaults.PGVersion), 32)
-
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not parse pg version: %w", err)
 	}
 	maxConn, err := strconv.Atoi(c.Query("max_connections", "100"))
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not parse max connections: %w", err)
 	}
 
 	cpuCount, err := strconv.Atoi(c.Query("cpus", "2"))
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not parse cpus: %w", err)
+	}
+
+	parsedRAM, err := config.Parse(c.Query("total_ram", "2GB"))
+
+	if err != nil {
+		return nil, fmt.Errorf("could not parse total ram: %w", err)
 	}
 
 	return &configArgs{
 		pgVersion:       float32(pgVersion),
-		totalRAM:        parseRAM(strings.ToUpper(c.Query("total_ram", "2GB"))),
+		totalRAM:        parsedRAM,
 		maxConn:         maxConn,
 		envName:         profile.Profile(c.Query("environment_name", "WEB")),
 		osType:          c.Query("os_type", "linux"),
@@ -164,41 +166,4 @@ func formatConf(c *fiber.Ctx, f format.ExportFormat, output []category.SliceOutp
 	extra := fmt.Sprintf("%s%s\n", c.BaseURL(), c.OriginalURL())
 
 	return format.ExportConf(f, output, pgVersion, extra)
-}
-
-func parseRAM(compared string) config.Byte {
-
-	val := extractNumber([]rune(compared))
-
-	switch {
-	case strings.HasSuffix(compared, "KB"):
-		return val * config.KB
-	case strings.HasSuffix(compared, "MB"):
-		return val * config.MB
-	case strings.HasSuffix(compared, "GB"):
-		return val * config.GB
-	case strings.HasSuffix(compared, "TB"):
-		return val * config.TB
-	default:
-		return val
-	}
-}
-
-func extractNumber(val []rune) config.Byte {
-
-	var b bytes.Buffer
-
-	for i := 0; i < len(val); i++ {
-		if unicode.IsNumber(val[i]) {
-			b.WriteRune(val[i])
-		}
-	}
-
-	num, err := strconv.Atoi(b.String())
-
-	if err != nil {
-		panic(err)
-	}
-
-	return config.Byte(num)
 }
