@@ -32,6 +32,7 @@ import (
 	"github.com/pgconfig/api/pkg/config"
 	"github.com/pgconfig/api/pkg/defaults"
 	"github.com/pgconfig/api/pkg/format"
+	"github.com/pgconfig/api/pkg/profile"
 	"github.com/pgconfig/api/pkg/rules"
 	"github.com/pgconfig/api/pkg/version"
 	"github.com/spf13/cobra"
@@ -44,10 +45,10 @@ var (
 	osName          string
 	arch            string
 	totalCPU        int
-	totalRAM        int64
+	totalRAM        config.Byte
 	maxConnections  int
 	diskType        string
-	profile         string
+	profileName     profile.Profile
 	outputFormat    string
 	includePgbadger bool
 	logFormat       string
@@ -64,9 +65,9 @@ var tuneCmd = &cobra.Command{
 			*config.NewInput(
 				osName,
 				arch,
-				config.Byte(totalRAM),
+				totalRAM,
 				totalCPU,
-				profile,
+				profileName,
 				diskType,
 				maxConnections,
 				pgVersion))
@@ -91,7 +92,7 @@ var tuneCmd = &cobra.Command{
 		case "stackgres", "sg", "sgpostgresconfig":
 			exportStackgres("stackgres", data)
 		default:
-			fmt.Println("Invalid format")
+			fmt.Println("Invalid export format")
 			os.Exit(1)
 		}
 
@@ -106,21 +107,27 @@ func init() {
 		return
 	}
 
+	totalRAM = config.Byte(memory.Total)
+	profileName = profile.Web
+
 	rootCmd.AddCommand(tuneCmd)
 
 	tuneCmd.PersistentFlags().StringVarP(&osName, "os", "", runtime.GOOS, "Operating system")
 	tuneCmd.PersistentFlags().StringVarP(&arch, "arch", "", runtime.GOARCH, "PostgreSQL Version")
 	tuneCmd.PersistentFlags().StringVarP(&diskType, "disk-type", "D", "SSD", "Disk type (possible values are SSD, HDD and SAN)")
-	tuneCmd.PersistentFlags().StringVarP(&profile, "profile", "", "WEB", "Tuning profile (possible values are WEB, OLTP, DW, Mixed, and Desktop")
-	tuneCmd.PersistentFlags().StringVarP(&profile, "env-name", "", "WEB", "Tuning profile (possible values are WEB, OLTP, DW, Mixed, and Desktop")
 	tuneCmd.PersistentFlags().StringVarP(&outputFormat, "format", "", "conf", "config file format (possible values are unix, alter-system, stackgres, and json) - file extension also work (conf, sql, json)")
 	tuneCmd.PersistentFlags().Float32VarP(&pgVersion, "version", "", defaults.PGVersionF, "PostgreSQL Version")
 	tuneCmd.PersistentFlags().IntVarP(&totalCPU, "cpus", "c", runtime.NumCPU(), "Total CPU cores")
 	tuneCmd.PersistentFlags().MarkDeprecated("env-name", "please use --profile instead")
-	tuneCmd.PersistentFlags().Int64VarP(&totalRAM, "ram", "", int64(memory.Total), "Total Memory in bytes")
 	tuneCmd.PersistentFlags().IntVarP(&maxConnections, "max-connections", "M", 100, "Max expected connections")
 	tuneCmd.PersistentFlags().BoolVarP(&includePgbadger, "include-pgbadger", "B", false, "Include pgbadger params?")
 	tuneCmd.PersistentFlags().StringVarP(&logFormat, "log-format", "L", "csvlog", "Default log format")
+
+	tuneCmd.PersistentFlags().VarP(&totalRAM, "ram", "", "Total Memory in bytes")
+	tuneCmd.PersistentFlags().Lookup("ram").DefValue = config.FormatBytes(totalRAM)
+	tuneCmd.PersistentFlags().VarP(&profileName, "profile", "", "Tuning profile")
+	tuneCmd.PersistentFlags().Lookup("profile").DefValue = string(profileName)
+	tuneCmd.PersistentFlags().Parse(os.Args[1:])
 }
 
 func export(f string, report []category.SliceOutput) {

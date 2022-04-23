@@ -20,6 +20,7 @@ require (
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/smartystreets/goconvey v1.7.2 // indirect
 	github.com/spf13/cobra v1.0.0
+	github.com/spf13/pflag v1.0.3 // indirect
 	github.com/spf13/viper v1.7.1
 	github.com/swaggo/swag v1.7.4
 	golang.org/x/net v0.0.0-20211101193420-4a448f8816b3 // indirect

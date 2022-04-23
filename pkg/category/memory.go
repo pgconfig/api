@@ -17,7 +17,7 @@ type MemoryCfg struct {
 
 // MaxMemoryBuffersPercent limits the maximum memory used
 // for the profile when computing per connection buffers
-var MaxMemoryBuffersPercent = map[string]float32{
+var MaxMemoryBuffersPercent = map[profile.Profile]float32{
 	profile.Web:     0.25,
 	profile.OLTP:    0.35,
 	profile.DW:      0.50,
@@ -27,7 +27,7 @@ var MaxMemoryBuffersPercent = map[string]float32{
 
 // MaxMemoryProfilePercent limits the max memory used
 // in the profile.
-var MaxMemoryProfilePercent = map[string]float32{
+var MaxMemoryProfilePercent = map[profile.Profile]float32{
 	profile.Web:     1,
 	profile.OLTP:    1,
 	profile.DW:      1,

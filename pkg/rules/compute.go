@@ -23,7 +23,6 @@ var allRules = []rule{
 
 // Compute evaluate all parameters
 func Compute(in config.Input) (*category.ExportCfg, error) {
-
 	var (
 		out *category.ExportCfg
 		err error
