@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/pgconfig/api/pkg/version"
 )
 
 func v1Reponse(c *fiber.Ctx, data interface{}) ResponseHTTP {
@@ -19,7 +20,7 @@ func v1Reponse(c *fiber.Ctx, data interface{}) ResponseHTTP {
 		},
 		Meta: meta{
 			Copyright: "PGConfig API",
-			Version:   "2.0 beta",
+			Version:   version.Pretty(),
 			Arguments: queryParams,
 		},
 	}
