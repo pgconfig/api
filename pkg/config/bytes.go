@@ -3,6 +3,7 @@ package config
 import (
 	"bytes"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"unicode"
@@ -54,27 +55,30 @@ func marshalBytes(b *Byte) ([]byte, error) {
 
 // ideas from https://github.com/dustin/go-humanize/blob/master/bytes.go#L68
 func FormatBytes(i Byte) string {
-
 	if i <= 0 {
-		return fmt.Sprintf("%d", i)
+		return printByte("%.0f", i, B)
 	}
 	if i < 1024 {
-		return fmt.Sprintf("%dB", i)
+		return printByte("%.0fB", i, B)
 	}
 	if i < 1024*KB {
-		return fmt.Sprintf("%dKB", i/KB)
+		return printByte("%.0fKB", i, KB)
 	}
 	if i < 1024*MB {
-		return fmt.Sprintf("%dMB", i/MB)
+		return printByte("%.0fMB", i, MB)
 	}
 	if i < 1024*GB {
-		return fmt.Sprintf("%dGB", i/GB)
+		return printByte("%.0fGB", i, GB)
 	}
 	if i < 1024*TB {
-		return fmt.Sprintf("%dTB", i/TB)
+		return printByte("%.0fTB", i, TB)
 	}
 
 	return ""
+}
+
+func printByte(mask string, input Byte, unity Byte) string {
+	return fmt.Sprintf(mask, math.Round(float64(input)/float64(unity)))
 }
 
 // Parses a postgres-like bytes string into Bytes
