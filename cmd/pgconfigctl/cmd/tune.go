@@ -49,7 +49,7 @@ var (
 	maxConnections  int
 	diskType        string
 	profileName     profile.Profile
-	outputFormat    string
+	outputFormat    format.ExportFormat
 	includePgbadger bool
 	logFormat       string
 )
@@ -79,17 +79,17 @@ var tuneCmd = &cobra.Command{
 		data := out.ToSlice(pgVersion, includePgbadger, logFormat)
 
 		switch outputFormat {
-		case "json":
+		case format.JSON:
 			b, err := json.MarshalIndent(data, "", "  ")
 			if err != nil {
 				panic(err)
 			}
 			fmt.Println(string(b))
-		case "conf", "unix":
+		case format.Config, format.UNIX:
 			export("config", data)
-		case "alter-system", "sql":
+		case format.SQL, format.AlterSystemFormat:
 			export("sql", data)
-		case "stackgres", "sg", "sgpostgresconfig":
+		case format.StackGres, format.StackGresShort, format.SGPGConfig, format.YAML:
 			exportStackgres("stackgres", data)
 		default:
 			fmt.Println("Invalid export format")
@@ -109,13 +109,13 @@ func init() {
 
 	totalRAM = config.Byte(memory.Total)
 	profileName = profile.Web
+	outputFormat = format.Config
 
 	rootCmd.AddCommand(tuneCmd)
 
 	tuneCmd.PersistentFlags().StringVarP(&osName, "os", "", runtime.GOOS, "Operating system")
 	tuneCmd.PersistentFlags().StringVarP(&arch, "arch", "", runtime.GOARCH, "PostgreSQL Version")
 	tuneCmd.PersistentFlags().StringVarP(&diskType, "disk-type", "D", "SSD", "Disk type (possible values are SSD, HDD and SAN)")
-	tuneCmd.PersistentFlags().StringVarP(&outputFormat, "format", "", "conf", "config file format (possible values are unix, alter-system, stackgres, and json) - file extension also work (conf, sql, json)")
 	tuneCmd.PersistentFlags().Float32VarP(&pgVersion, "version", "", defaults.PGVersionF, "PostgreSQL Version")
 	tuneCmd.PersistentFlags().IntVarP(&totalCPU, "cpus", "c", runtime.NumCPU(), "Total CPU cores")
 	tuneCmd.PersistentFlags().MarkDeprecated("env-name", "please use --profile instead")
@@ -126,7 +126,9 @@ func init() {
 	tuneCmd.PersistentFlags().VarP(&totalRAM, "ram", "", "Total Memory in bytes")
 	tuneCmd.PersistentFlags().Lookup("ram").DefValue = config.FormatBytes(totalRAM)
 	tuneCmd.PersistentFlags().VarP(&profileName, "profile", "", "Tuning profile")
-	tuneCmd.PersistentFlags().Lookup("profile").DefValue = string(profileName)
+	tuneCmd.PersistentFlags().Lookup("profile").DefValue = profileName.String()
+	tuneCmd.PersistentFlags().VarP(&outputFormat, "format", "F", "config file format (possible values are unix, alter-system, stackgres, and json) - file extension also work (conf, sql, json, yaml)")
+	tuneCmd.PersistentFlags().Lookup("format").DefValue = outputFormat.String()
 	tuneCmd.PersistentFlags().Parse(os.Args[1:])
 }
 
