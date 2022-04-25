@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pgconfig/api/pkg/config"
 	"github.com/pgconfig/api/pkg/docs"
+	"github.com/pgconfig/api/pkg/input/bytes"
 )
 
 // ToSlice converts de report into a slice
@@ -140,7 +140,7 @@ func formatParam(p reflect.Value) string {
 
 	switch p.Type().Name() {
 	case "Byte":
-		val := p.Interface().(config.Byte)
+		val := p.Interface().(bytes.Byte)
 		return val.String()
 	case "int":
 		val := p.Interface().(int)

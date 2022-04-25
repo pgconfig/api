@@ -5,7 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/pgconfig/api/pkg/category"
-	"github.com/pgconfig/api/pkg/profile"
+	"github.com/pgconfig/api/pkg/input/profile"
 )
 
 // GetConfigEnvs is a function to that computes the input and suggests a tuning configuration for all supported profiles

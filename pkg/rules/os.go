@@ -2,8 +2,9 @@ package rules
 
 import (
 	"github.com/pgconfig/api/pkg/category"
-	"github.com/pgconfig/api/pkg/config"
 	"github.com/pgconfig/api/pkg/errors"
+	"github.com/pgconfig/api/pkg/input"
+	"github.com/pgconfig/api/pkg/input/bytes"
 )
 
 // ValidOS validates the Operating System
@@ -18,7 +19,7 @@ func ValidOS(os string) error {
 	return nil
 }
 
-func computeOS(in *config.Input, cfg *category.ExportCfg) (*category.ExportCfg, error) {
+func computeOS(in *input.Input, cfg *category.ExportCfg) (*category.ExportCfg, error) {
 
 	var err error
 
@@ -26,8 +27,8 @@ func computeOS(in *config.Input, cfg *category.ExportCfg) (*category.ExportCfg, 
 		return nil, err
 	}
 
-	if in.PostgresVersion <= 9.6 {
-		cfg.Memory.SharedBuffers = 512 * config.MB
+	if cfg.Memory.SharedBuffers > 512*bytes.MB && in.PostgresVersion <= 9.6 {
+		cfg.Memory.SharedBuffers = 512 * bytes.MB
 	}
 
 	if in.OS == "windows" {

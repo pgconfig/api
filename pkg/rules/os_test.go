@@ -4,11 +4,12 @@ import (
 	"testing"
 
 	"github.com/pgconfig/api/pkg/category"
-	"github.com/pgconfig/api/pkg/config"
+	"github.com/pgconfig/api/pkg/input"
+	"github.com/pgconfig/api/pkg/input/bytes"
 )
 
 func Test_computeOS(t *testing.T) {
-	_, err := computeOS(&config.Input{OS: "xpto-wrong-os"}, &category.ExportCfg{})
+	_, err := computeOS(&input.Input{OS: "xpto-wrong-os"}, &category.ExportCfg{})
 
 	if err == nil {
 		t.Error("should support only windows, linux and unix")
@@ -20,7 +21,7 @@ func Test_computeOS(t *testing.T) {
 
 	out, _ := computeOS(in, category.NewExportCfg(*in))
 
-	if out.Memory.SharedBuffers > 512*config.MB {
+	if out.Memory.SharedBuffers > 512*bytes.MB {
 		t.Error("should limit shared_buffers to 512MB until pg 10 on windows")
 	}
 
@@ -35,11 +36,11 @@ func Test_computeOS(t *testing.T) {
 	}
 
 	in = fakeInput()
-	in.TotalRAM = 120 * config.GB
+	in.TotalRAM = 120 * bytes.GB
 
 	out, _ = computeOS(in, category.NewExportCfg(*in))
 
-	if out.Memory.SharedBuffers < 25*config.GB {
+	if out.Memory.SharedBuffers < 25*bytes.GB {
 		t.Error("should not limit shared_buffers on versions greater or equal than pg 11")
 	}
 }

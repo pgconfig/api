@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/pgconfig/api/pkg/category"
-	"github.com/pgconfig/api/pkg/config"
+	"github.com/pgconfig/api/pkg/input"
 )
 
-type rule func(*config.Input, *category.ExportCfg) (*category.ExportCfg, error)
+type rule func(*input.Input, *category.ExportCfg) (*category.ExportCfg, error)
 
 var allRules = []rule{
 	computeArch,
@@ -22,7 +22,7 @@ var allRules = []rule{
 }
 
 // Compute evaluate all parameters
-func Compute(in config.Input) (*category.ExportCfg, error) {
+func Compute(in input.Input) (*category.ExportCfg, error) {
 	var (
 		out *category.ExportCfg
 		err error

@@ -7,11 +7,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/pgconfig/api/pkg/category"
-	"github.com/pgconfig/api/pkg/config"
 	"github.com/pgconfig/api/pkg/defaults"
 	"github.com/pgconfig/api/pkg/docs"
 	"github.com/pgconfig/api/pkg/format"
-	"github.com/pgconfig/api/pkg/profile"
+	"github.com/pgconfig/api/pkg/input"
+	"github.com/pgconfig/api/pkg/input/bytes"
+	"github.com/pgconfig/api/pkg/input/profile"
 	"github.com/pgconfig/api/pkg/rules"
 )
 
@@ -56,7 +57,7 @@ func GetConfig(c *fiber.Ctx) error {
 }
 
 func processConfig(c *fiber.Ctx, args *configArgs) ([]category.SliceOutput, error) {
-	input := *config.NewInput(
+	input := *input.NewInput(
 		args.osType,
 		args.arch,
 		args.totalRAM,
@@ -125,8 +126,7 @@ func parseConfigArgs(c *fiber.Ctx) (*configArgs, error) {
 		return nil, fmt.Errorf("could not parse cpus: %w", err)
 	}
 
-	parsedRAM, err := config.Parse(c.Query("total_ram", "2GB"))
-
+	parsedRAM, err := bytes.Parse(c.Query("total_ram", "2GB"))
 	if err != nil {
 		return nil, fmt.Errorf("could not parse total ram: %w", err)
 	}
@@ -149,7 +149,7 @@ func parseConfigArgs(c *fiber.Ctx) (*configArgs, error) {
 
 type configArgs struct {
 	pgVersion       float32
-	totalRAM        config.Byte
+	totalRAM        bytes.Byte
 	maxConn         int
 	envName         profile.Profile
 	osType          string

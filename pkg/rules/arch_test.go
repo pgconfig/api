@@ -4,7 +4,8 @@ import (
 	"testing"
 
 	"github.com/pgconfig/api/pkg/category"
-	"github.com/pgconfig/api/pkg/config"
+	"github.com/pgconfig/api/pkg/input"
+	"github.com/pgconfig/api/pkg/input/bytes"
 
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -13,7 +14,7 @@ func Test_computeArch(t *testing.T) {
 
 	Convey("Validations", t, func() {
 		Convey("Should thow an error when the arch is invalid", func() {
-			_, err := computeArch(&config.Input{Arch: "xpto-invalid-arch"}, nil)
+			_, err := computeArch(&input.Input{Arch: "xpto-invalid-arch"}, nil)
 			So(err, ShouldNotBeNil)
 		})
 		Convey("Should thow an error when the arch is 386 or i686 and has memory values over 4GiB", func() {
@@ -23,12 +24,12 @@ func Test_computeArch(t *testing.T) {
 			for _, newArch := range similarArchs {
 				in := fakeInput()
 				in.Arch = newArch
-				in.TotalRAM = 1 * config.TB
+				in.TotalRAM = 1 * bytes.TB
 
 				out, _ := computeArch(in, category.NewExportCfg(*in))
-				So(out.Memory.SharedBuffers, ShouldBeLessThanOrEqualTo, 4*config.GB)
-				So(out.Memory.WorkMem, ShouldBeLessThanOrEqualTo, 4*config.GB)
-				So(out.Memory.MaintenanceWorkMem, ShouldBeLessThanOrEqualTo, 4*config.GB)
+				So(out.Memory.SharedBuffers, ShouldBeLessThanOrEqualTo, 4*bytes.GB)
+				So(out.Memory.WorkMem, ShouldBeLessThanOrEqualTo, 4*bytes.GB)
+				So(out.Memory.MaintenanceWorkMem, ShouldBeLessThanOrEqualTo, 4*bytes.GB)
 			}
 
 		})

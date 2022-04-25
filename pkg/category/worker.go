@@ -1,6 +1,6 @@
 package category
 
-import "github.com/pgconfig/api/pkg/config"
+import "github.com/pgconfig/api/pkg/input"
 
 // WorkerCfg is the main workers category
 type WorkerCfg struct {
@@ -10,7 +10,7 @@ type WorkerCfg struct {
 }
 
 // NewWorkerCfg creates a new Worker Configuration
-func NewWorkerCfg(in config.Input) *WorkerCfg {
+func NewWorkerCfg(in input.Input) *WorkerCfg {
 	return &WorkerCfg{
 		MaxWorkerProcesses:         8, /* pg >= 9.4 */
 		MaxParallelWorkerPerGather: 2, /* pg >= 9.6 */

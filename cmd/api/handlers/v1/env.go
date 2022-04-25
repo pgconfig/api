@@ -2,7 +2,7 @@ package v1
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/pgconfig/api/pkg/profile"
+	"github.com/pgconfig/api/pkg/input/profile"
 )
 
 // ListEnvs is a function to list all environments

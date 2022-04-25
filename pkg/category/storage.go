@@ -1,6 +1,6 @@
 package category
 
-import "github.com/pgconfig/api/pkg/config"
+import "github.com/pgconfig/api/pkg/input"
 
 // StorageCfg is the main memory category
 type StorageCfg struct {
@@ -12,7 +12,7 @@ type StorageCfg struct {
 //
 // both random_page_cost and effective_io_concurrency are set
 // with the default value.
-func NewStorageCfg(in config.Input) *StorageCfg {
+func NewStorageCfg(in input.Input) *StorageCfg {
 	return &StorageCfg{
 		RandomPageCost:         4.0,
 		EffectiveIOConcurrency: 1,

@@ -1,12 +1,15 @@
-package config
+package input
 
-import "github.com/pgconfig/api/pkg/profile"
+import (
+	"github.com/pgconfig/api/pkg/input/bytes"
+	"github.com/pgconfig/api/pkg/input/profile"
+)
 
 // Input are all needed values to compute all parameters
 type Input struct {
 	OS              string          `json:"os"`
 	Arch            string          `json:"arch"`
-	TotalRAM        Byte            `json:"total_ram"`
+	TotalRAM        bytes.Byte      `json:"total_ram"`
 	Profile         profile.Profile `json:"profile"`
 	DiskType        string          `json:"disk_type"`
 	MaxConnections  int             `json:"max_connections"`
@@ -15,7 +18,7 @@ type Input struct {
 }
 
 // NewInput creates a Input
-func NewInput(os string, arch string, totalRAM Byte, totalCPU int, profile profile.Profile, diskType string, maxConnections int, postgresVersion float32) *Input {
+func NewInput(os string, arch string, totalRAM bytes.Byte, totalCPU int, profile profile.Profile, diskType string, maxConnections int, postgresVersion float32) *Input {
 
 	return &Input{
 		OS:              os,

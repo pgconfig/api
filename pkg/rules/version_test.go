@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/pgconfig/api/pkg/category"
-	"github.com/pgconfig/api/pkg/config"
+	"github.com/pgconfig/api/pkg/input/bytes"
 )
 
 func Test_computeVersion(t *testing.T) {
@@ -55,11 +55,11 @@ func Test_computeVersion(t *testing.T) {
 
 	in = fakeInput()
 	in.PostgresVersion = 9.5
-	in.TotalRAM = 1 * config.TB
+	in.TotalRAM = 1 * bytes.TB
 
 	out, _ = computeVersion(in, category.NewExportCfg(*in))
 
-	if out.Memory.SharedBuffers > 8*config.GB {
+	if out.Memory.SharedBuffers > 8*bytes.GB {
 		t.Error("should limit shared_buffers up to 8gb on versions <= 9.5")
 	}
 }

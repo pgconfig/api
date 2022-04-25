@@ -1,6 +1,6 @@
 package category
 
-import "github.com/pgconfig/api/pkg/config"
+import "github.com/pgconfig/api/pkg/input"
 
 // NetworkCfg is the main memory category
 type NetworkCfg struct {
@@ -9,7 +9,7 @@ type NetworkCfg struct {
 }
 
 // NewNetworkCfg creates a new Network Configuration
-func NewNetworkCfg(in config.Input) *NetworkCfg {
+func NewNetworkCfg(in input.Input) *NetworkCfg {
 	return &NetworkCfg{
 		ListenAddresses: "*",
 		MaxConnections:  in.MaxConnections,

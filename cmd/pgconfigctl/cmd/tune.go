@@ -27,10 +27,11 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/pgconfig/api/pkg/config"
 	"github.com/pgconfig/api/pkg/defaults"
 	"github.com/pgconfig/api/pkg/format"
-	"github.com/pgconfig/api/pkg/profile"
+	"github.com/pgconfig/api/pkg/input"
+	"github.com/pgconfig/api/pkg/input/bytes"
+	"github.com/pgconfig/api/pkg/input/profile"
 	"github.com/pgconfig/api/pkg/rules"
 	"github.com/spf13/cobra"
 
@@ -42,7 +43,7 @@ var (
 	osName          string
 	arch            string
 	totalCPU        int
-	totalRAM        config.Byte
+	totalRAM        bytes.Byte
 	maxConnections  int
 	diskType        string
 	profileName     profile.Profile
@@ -59,7 +60,7 @@ var tuneCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		out, err := rules.Compute(
-			*config.NewInput(
+			*input.NewInput(
 				osName,
 				arch,
 				totalRAM,
@@ -86,7 +87,7 @@ func init() {
 		return
 	}
 
-	totalRAM = config.Byte(memory.Total)
+	totalRAM = bytes.Byte(memory.Total)
 	profileName = profile.Web
 	outputFormat = format.Config
 
@@ -103,7 +104,7 @@ func init() {
 	tuneCmd.PersistentFlags().StringVarP(&logFormat, "log-format", "L", "csvlog", "Default log format")
 
 	tuneCmd.PersistentFlags().VarP(&totalRAM, "ram", "", "Total Memory in bytes")
-	tuneCmd.PersistentFlags().Lookup("ram").DefValue = config.FormatBytes(totalRAM)
+	tuneCmd.PersistentFlags().Lookup("ram").DefValue = bytes.FormatBytes(totalRAM)
 	tuneCmd.PersistentFlags().VarP(&profileName, "profile", "", "Tuning profile")
 	tuneCmd.PersistentFlags().Lookup("profile").DefValue = profileName.String()
 	tuneCmd.PersistentFlags().VarP(&outputFormat, "format", "F", "config file format (possible values are unix, alter-system, stackgres, and json) - file extension also work (conf, sql, json, yaml)")

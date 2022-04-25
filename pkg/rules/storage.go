@@ -2,10 +2,10 @@ package rules
 
 import (
 	"github.com/pgconfig/api/pkg/category"
-	"github.com/pgconfig/api/pkg/config"
+	"github.com/pgconfig/api/pkg/input"
 )
 
-func computeStorage(in *config.Input, cfg *category.ExportCfg) (*category.ExportCfg, error) {
+func computeStorage(in *input.Input, cfg *category.ExportCfg) (*category.ExportCfg, error) {
 
 	switch in.DiskType {
 	case "SSD":

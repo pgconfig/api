@@ -1,8 +1,6 @@
 package category
 
-import (
-	"github.com/pgconfig/api/pkg/config"
-)
+import "github.com/pgconfig/api/pkg/input"
 
 // ExportCfg is the final report
 type ExportCfg struct {
@@ -15,7 +13,7 @@ type ExportCfg struct {
 
 // NewExportCfg creates a new ExportCfg with the basic values
 // to be processed by the input rules
-func NewExportCfg(in config.Input) *ExportCfg {
+func NewExportCfg(in input.Input) *ExportCfg {
 	return &ExportCfg{
 		Memory:     NewMemoryCfg(in),
 		Checkpoint: NewCheckpointCfg(in),
