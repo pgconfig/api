@@ -1,6 +1,6 @@
 # PGConfig API
 
-[![Coverage Status](https://coveralls.io/repos/github/pgconfig/api/badge.svg?branch=master)](https://coveralls.io/github/pgconfig/api?branch=master) [![Go Report Card](https://goreportcard.com/badge/github.com/pgconfig/api)](https://goreportcard.com/report/github.com/pgconfig/api) ![GoReleaser](https://github.com/pgconfig/api/workflows/goreleaser/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/pgconfig/api/badge.svg?branch=main)](https://coveralls.io/github/pgconfig/api?branch=main) [![Go Report Card](https://goreportcard.com/badge/github.com/pgconfig/api)](https://goreportcard.com/report/github.com/pgconfig/api) ![GoReleaser](https://github.com/pgconfig/api/workflows/goreleaser/badge.svg)
 
 
 > This project is a VERY BIG WORK IN PROGRESS.
@@ -36,6 +36,10 @@ PGConfig.org API v2.
         * [x] Profile
         * [x] Version
     * [ ] Review all metrics
+    * [x] move all inputs to the `pkg/input` pkg
+        * [x] update pgconfigctl to use the new inputs
+        * [x] update api to use the new inputs
+
 
 
 
