@@ -3,11 +3,11 @@ package routes
 import (
 	"fmt"
 
-	swagger "github.com/arsmn/fiber-swagger/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/gofiber/swagger"
 
 	handV1 "github.com/pgconfig/api/cmd/api/handlers/v1"
 )
@@ -57,7 +57,8 @@ func New() *fiber.App {
 		TimeZone:   "America/Sao_paulo",
 	}))
 
-	app.Get("/docs/*", swagger.Handler)
+	app.Get("/docs/*", swagger.HandlerDefault)
+
 	app.Get("/docs", func(c *fiber.Ctx) error {
 		return c.Redirect("/docs/index.html")
 	})
