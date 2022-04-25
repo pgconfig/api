@@ -9,17 +9,17 @@ PGConfig.org API v2.
 
 ## Objectives of this repo
 
-1. host the v2 api of pgconfig.org (not started):
+1. host the v2 api of pgconfig.org:
 
     * [x] Create new API using fiber
         * [x] Route compare
         * [x] other routes
     * [x] Update Release with and build the docker images
-    * [ ] Add JSON format option
-    * [ ] Remove "blocked" params in the SGPostgresConfig format
+    * [x] Add JSON format option
+    * [x] Remove "blocked" params in the SGPostgresConfig format
 
 
-1. build and release the pgconfigctl (wip):
+1. build and release the pgconfigctl:
 
     * [x] Migrate/Review all Categories:
         * [x] Memory Configuration
@@ -35,11 +35,16 @@ PGConfig.org API v2.
         * [x] Total RAM
         * [x] Profile
         * [x] Version
-    * [ ] Review all metrics
+    * [x] Review all metrics
     * [x] move all inputs to the `pkg/input` pkg
         * [x] update pgconfigctl to use the new inputs
         * [x] update api to use the new inputs
 
+1. review metrics
+    * [ ] based in stackgres list: https://gitlab.com/ongresinc/stackgres/-/issues/486#note_360442486
+    * [ ] based in the old api: 
+         * [ ] https://github.com/sebastianwebber/pgconfig-api/blob/master/advisors/tuning.py
+         * [ ] https://github.com/sebastianwebber/pgconfig-api/blob/master/advisors/config.py
 
 
 
