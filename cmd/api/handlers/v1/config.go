@@ -163,7 +163,9 @@ type configArgs struct {
 }
 
 func formatConf(c *fiber.Ctx, f format.ExportFormat, output []category.SliceOutput, pgVersion float32) string {
-	extra := fmt.Sprintf("%s%s\n", c.BaseURL(), c.OriginalURL())
+	extra := []string{
+		fmt.Sprintf("%s%s\n", c.BaseURL(), c.OriginalURL()),
+	}
 
 	return format.ExportConf(f, output, pgVersion, extra)
 }

@@ -75,7 +75,7 @@ var tuneCmd = &cobra.Command{
 		}
 
 		data := out.ToSlice(pgVersion, includePgbadger, logFormat)
-		fmt.Println(format.ExportConf(outputFormat, data, pgVersion, ""))
+		fmt.Println(format.ExportConf(outputFormat, data, pgVersion, nil))
 	},
 }
 
@@ -104,7 +104,7 @@ func init() {
 	tuneCmd.PersistentFlags().StringVarP(&logFormat, "log-format", "L", "csvlog", "Default log format")
 
 	tuneCmd.PersistentFlags().VarP(&totalRAM, "ram", "", "Total Memory in bytes")
-	tuneCmd.PersistentFlags().Lookup("ram").DefValue = bytes.FormatBytes(totalRAM)
+	tuneCmd.PersistentFlags().Lookup("ram").DefValue = totalRAM.String()
 	tuneCmd.PersistentFlags().VarP(&profileName, "profile", "", "Tuning profile")
 	tuneCmd.PersistentFlags().Lookup("profile").DefValue = profileName.String()
 	tuneCmd.PersistentFlags().VarP(&outputFormat, "format", "F", "config file format (possible values are unix, alter-system, stackgres, and json) - file extension also work (conf, sql, json, yaml)")

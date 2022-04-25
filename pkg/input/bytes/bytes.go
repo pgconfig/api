@@ -31,9 +31,10 @@ func (b *Byte) MarshalJSON() ([]byte, error) {
 
 // String converts bytes into human bytes
 func (b *Byte) String() string {
-	return FormatBytes(*b)
+	return formatBytes(*b)
 }
 
+// Set validates the input and set the parsed Byte value
 func (b *Byte) Set(v string) error {
 	val, err := Parse(v)
 	*b = val
@@ -41,6 +42,7 @@ func (b *Byte) Set(v string) error {
 	return err
 }
 
+// Type defines the Type for the Byte data type
 func (b *Byte) Type() string {
 	return "Byte"
 }
@@ -48,13 +50,13 @@ func (b *Byte) Type() string {
 func marshalBytes(b *Byte) ([]byte, error) {
 
 	buffer := bytes.NewBufferString("")
-	buffer.WriteString(fmt.Sprintf(`"%s"`, FormatBytes(Byte(*b))))
+	buffer.WriteString(fmt.Sprintf(`"%s"`, formatBytes(Byte(*b))))
 
 	return buffer.Bytes(), nil
 }
 
 // ideas from https://github.com/dustin/go-humanize/blob/master/bytes.go#L68
-func FormatBytes(i Byte) string {
+func formatBytes(i Byte) string {
 	if i <= 0 {
 		return printByte("%.0f", i, B)
 	}
@@ -81,7 +83,7 @@ func printByte(mask string, input Byte, unity Byte) string {
 	return fmt.Sprintf(mask, math.Round(float64(input)/float64(unity)))
 }
 
-// Parses a postgres-like bytes string into Bytes
+// Parse a postgres-like bytes string into Byte
 func Parse(s string) (Byte, error) {
 
 	if len(strings.TrimSpace(s)) == 0 {

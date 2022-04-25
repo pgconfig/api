@@ -32,7 +32,7 @@ func Test_Bytes(t *testing.T) {
 			}
 			for _, tt := range tests {
 				Convey(fmt.Sprintf("should format %s", tt.desc), func() {
-					got := FormatBytes(tt.args)
+					got := formatBytes(tt.args)
 					So(got, ShouldEqual, tt.want)
 				})
 			}

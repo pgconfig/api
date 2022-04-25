@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Profile defines the Profile type
 type Profile string
 
 const (
