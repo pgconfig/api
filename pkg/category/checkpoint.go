@@ -22,7 +22,7 @@ func NewCheckpointCfg(in input.Input) *CheckpointCfg {
 	return &CheckpointCfg{
 		MinWALSize:                 bytes.Byte(2 * bytes.GB),
 		MaxWALSize:                 bytes.Byte(3 * bytes.GB),
-		CheckpointCompletionTarget: 0.5,
+		CheckpointCompletionTarget: 0.9,
 		WALBuffers:                 -1, // -1 means automatic tuning
 		CheckpointSegments:         16,
 	}
