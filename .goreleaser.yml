@@ -136,7 +136,7 @@ dockers:
     ids:
       - api
     image_templates:
-      - "pgconfig/api:arm64-v{{ .Commit }}"
+      - "docker.io/pgconfig/api:arm64-v{{ .Commit }}"
       - "ghcr.io/pgconfig/api:arm64-v{{ .Commit }}"
     use: buildx
 
