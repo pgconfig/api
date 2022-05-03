@@ -90,7 +90,8 @@ dockers:
       - pgconfigctl
     goarch: amd64
     image_templates:
-      - "pgconfig/pgconfigctl:amd64-v{{ .Tag }}"
+      - "docker.io/pgconfig/pgconfigctl:amd64-v{{ .Commit }}"
+      - "ghcr.io/pgconfig/pgconfigctl:amd64-v{{ .Commit }}"
 
     use: buildx
 
@@ -106,7 +107,8 @@ dockers:
       - pgconfigctl
     goarch: arm64
     image_templates:
-      - "pgconfig/pgconfigctl:arm64-v{{ .Tag }}"
+      - "docker.io/pgconfig/pgconfigctl:arm64-v{{ .Commit }}"
+      - "ghcr.io/pgconfig/pgconfigctl:arm64-v{{ .Commit }}"
 
     use: buildx
 
@@ -123,7 +125,8 @@ dockers:
     ids:
       - api
     image_templates:
-      - "pgconfig/api:arm64-v{{ .Tag }}"
+      - "pgconfig/api:arm64-v{{ .Commit }}"
+      - "ghcr.io/pgconfig/api:arm64-v{{ .Commit }}"
     use: buildx
 
     build_flag_templates:
@@ -142,7 +145,8 @@ dockers:
     ids:
       - api
     image_templates:
-      - "pgconfig/api:amd64-v{{ .Tag }}"
+      - "docker.io/pgconfig/api:amd64-v{{ .Commit }}"
+      - "ghcr.io/pgconfig/api:amd64-v{{ .Commit }}"
     use: buildx
     build_flag_templates:
       - "--label=org.opencontainers.image.created={{.Date}}"
@@ -155,35 +159,67 @@ dockers:
       - rules.yml
       - pg-docs.yml
 docker_manifests:
-  - name_template: pgconfig/api:v{{ .Tag }}
+  - name_template: docker.io/pgconfig/api:v{{ .Tag }}
     image_templates:
-      - "pgconfig/api:arm64-v{{ .Tag }}"
-      - "pgconfig/api:amd64-v{{ .Tag }}"
+      - "docker.io/pgconfig/api:arm64-v{{ .Commit }}"
+      - "docker.io/pgconfig/api:amd64-v{{ .Commit }}"
   - name_template: "pgconfig/api:v{{ .Major }}.{{ .Minor }}"
     image_templates:
-      - "pgconfig/api:arm64-v{{ .Tag }}"
-      - "pgconfig/api:amd64-v{{ .Tag }}"
+      - "docker.io/pgconfig/api:arm64-v{{ .Commit }}"
+      - "docker.io/pgconfig/api:amd64-v{{ .Commit }}"
   - name_template: "pgconfig/api:v{{ .Major }}"
     image_templates:
-      - "pgconfig/api:arm64-v{{ .Tag }}"
-      - "pgconfig/api:amd64-v{{ .Tag }}"
+      - "docker.io/pgconfig/api:arm64-v{{ .Commit }}"
+      - "docker.io/pgconfig/api:amd64-v{{ .Commit }}"
   - name_template: "pgconfig/api:latest"
     image_templates:
-      - "pgconfig/api:arm64-v{{ .Tag }}"
-      - "pgconfig/api:amd64-v{{ .Tag }}"
+      - "docker.io/pgconfig/api:arm64-v{{ .Commit }}"
+      - "docker.io/pgconfig/api:amd64-v{{ .Commit }}"
   - name_template: pgconfig/pgconfigctl:v{{ .Tag }}
     image_templates:
-      - "pgconfig/pgconfigctl:arm64-v{{ .Tag }}"
-      - "pgconfig/pgconfigctl:amd64-v{{ .Tag }}"
+      - "docker.io/pgconfig/pgconfigctl:arm64-v{{ .Commit }}"
+      - "docker.io/pgconfig/pgconfigctl:amd64-v{{ .Commit }}"
   - name_template: "pgconfig/pgconfigctl:v{{ .Major }}.{{ .Minor }}"
     image_templates:
-      - "pgconfig/pgconfigctl:arm64-v{{ .Tag }}"
-      - "pgconfig/pgconfigctl:amd64-v{{ .Tag }}"
+      - "docker.io/pgconfig/pgconfigctl:arm64-v{{ .Commit }}"
+      - "docker.io/pgconfig/pgconfigctl:amd64-v{{ .Commit }}"
   - name_template: "pgconfig/pgconfigctl:v{{ .Major }}"
     image_templates:
-      - "pgconfig/pgconfigctl:arm64-v{{ .Tag }}"
-      - "pgconfig/pgconfigctl:amd64-v{{ .Tag }}"
+      - "docker.io/pgconfig/pgconfigctl:arm64-v{{ .Commit }}"
+      - "docker.io/pgconfig/pgconfigctl:amd64-v{{ .Commit }}"
   - name_template: "pgconfig/pgconfigctl:latest"
     image_templates:
-      - "pgconfig/pgconfigctl:arm64-v{{ .Tag }}"
-      - "pgconfig/pgconfigctl:amd64-v{{ .Tag }}"
+      - "docker.io/pgconfig/pgconfigctl:arm64-v{{ .Commit }}"
+      - "docker.io/pgconfig/pgconfigctl:amd64-v{{ .Commit }}"
+  - name_template: ghcr.io/pgconfig/api:v{{ .Tag }}
+    image_templates:
+      - "ghcr.io/pgconfig/api:arm64-v{{ .Commit }}"
+      - "ghcr.io/pgconfig/api:amd64-v{{ .Commit }}"
+  - name_template: "pgconfig/api:v{{ .Major }}.{{ .Minor }}"
+    image_templates:
+      - "ghcr.io/pgconfig/api:arm64-v{{ .Commit }}"
+      - "ghcr.io/pgconfig/api:amd64-v{{ .Commit }}"
+  - name_template: "pgconfig/api:v{{ .Major }}"
+    image_templates:
+      - "ghcr.io/pgconfig/api:arm64-v{{ .Commit }}"
+      - "ghcr.io/pgconfig/api:amd64-v{{ .Commit }}"
+  - name_template: "pgconfig/api:latest"
+    image_templates:
+      - "ghcr.io/pgconfig/api:arm64-v{{ .Commit }}"
+      - "ghcr.io/pgconfig/api:amd64-v{{ .Commit }}"
+  - name_template: pgconfig/pgconfigctl:v{{ .Tag }}
+    image_templates:
+      - "ghcr.io/pgconfig/pgconfigctl:arm64-v{{ .Commit }}"
+      - "ghcr.io/pgconfig/pgconfigctl:amd64-v{{ .Commit }}"
+  - name_template: "pgconfig/pgconfigctl:v{{ .Major }}.{{ .Minor }}"
+    image_templates:
+      - "ghcr.io/pgconfig/pgconfigctl:arm64-v{{ .Commit }}"
+      - "ghcr.io/pgconfig/pgconfigctl:amd64-v{{ .Commit }}"
+  - name_template: "pgconfig/pgconfigctl:v{{ .Major }}"
+    image_templates:
+      - "ghcr.io/pgconfig/pgconfigctl:arm64-v{{ .Commit }}"
+      - "ghcr.io/pgconfig/pgconfigctl:amd64-v{{ .Commit }}"
+  - name_template: "pgconfig/pgconfigctl:latest"
+    image_templates:
+      - "ghcr.io/pgconfig/pgconfigctl:arm64-v{{ .Commit }}"
+      - "ghcr.io/pgconfig/pgconfigctl:amd64-v{{ .Commit }}"
