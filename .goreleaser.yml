@@ -81,8 +81,19 @@ checksum:
   name_template: "checksums.txt"
 snapshot:
   name_template: "{{ .Tag }}-next"
+
 changelog:
   sort: asc
+  use: github
+  groups:
+    - title: Features
+      regexp: "^.*(feat|chore)[(\\w)]*:+.*$"
+      order: 0
+    - title: "Bug fixes"
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 1
+    - title: Others
+      order: 999
 
 dockers:
   - dockerfile: cmd/pgconfigctl/Dockerfile
