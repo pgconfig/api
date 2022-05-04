@@ -52,8 +52,7 @@ func New() *fiber.App {
 		EnableStackTrace: true,
 	}))
 	app.Use(logger.New(logger.Config{
-		Format:     "${cyan}[${time}] ${white}${pid} ${red}${status} ${blue}[${method}] ${white}${path}\n",
-		TimeFormat: "02-Jan-2006 15:04:05",
+		TimeFormat: "2006-01-02 15:04:05",
 		TimeZone:   "America/Sao_paulo",
 	}))
 
