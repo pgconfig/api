@@ -51,22 +51,27 @@ func SGConfigFile(report []category.SliceOutput, pgVersion string) string {
 	return string(d)
 }
 
+// from https://github.com/ongres/stackgres/blob/main/stackgres-k8s/src/operator/src/main/resources/postgresql-blocklist.properties
 var blockedParamsForSG = []string{
 	"listen_addresses",
 	"port",
-	"cluster_name",
 	"hot_standby",
 	"fsync",
-	"full_page_writes",
-	"log_destination",
 	"logging_collector",
-	"max_replication_slots",
-	"max_wal_senders",
-	"wal_keep_segments",
+	"log_destination",
+	"log_directory",
+	"log_filename",
+	"log_rotation_age",
+	"log_rotation_size",
+	"log_truncate_on_rotation",
 	"wal_level",
+	"track_commit_timestamp",
 	"wal_log_hints",
 	"archive_mode",
 	"archive_command",
+	"lc_messages",
+	"wal_compression",
+	"dynamic_library_path",
 }
 
 // sgBlockedParam checks if the param is in the StackGres

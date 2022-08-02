@@ -21,3 +21,5 @@ tmp/
 
 profile.cov
 covprofile
+
+.vscode/
