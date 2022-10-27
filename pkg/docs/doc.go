@@ -34,7 +34,7 @@ func FormatVer(ver float32) string {
 	return fmt.Sprintf("%.0f", ver)
 }
 
-// Get does foo
+// Get queries conf website and gets the html from the webpage and parses it
 func Get(param string, ver float32) (ParamDoc, error) {
 
 	var out ParamDoc

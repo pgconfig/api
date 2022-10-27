@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 
 	"github.com/pgconfig/api/pkg/defaults"
 	"github.com/pgconfig/api/pkg/docs"
@@ -13,10 +14,19 @@ import (
 
 var (
 	targetFile string
+	limiter    chan int
+	file       docs.DocFile
+	mu         sync.Mutex
 )
 
 func init() {
-	flag.StringVar(&targetFile, "target-file", "/Users/seba/projetos/github.com/pgconfig/api/pg-docs.yml", "default target doc file")
+	currDir, _ := os.Getwd()
+	flag.StringVar(&targetFile, "target-file", fmt.Sprintf("%s/pg-docs.yml", currDir), "default target doc file")
+
+	maxJobs := 5
+	flag.IntVar(&maxJobs, "jobs", maxJobs, "max jobs")
+
+	limiter = make(chan int, maxJobs)
 	flag.Parse()
 }
 
@@ -38,9 +48,15 @@ func saveFile(file docs.DocFile) error {
 	return nil
 }
 
+func updateDoc(ver float32, param string, parsed docs.ParamDoc) {
+	mu.Lock()
+	defer mu.Unlock()
+	file.Documentation[docs.FormatVer(ver)][param] = parsed
+}
+
 func main() {
 
-	file := docs.DocFile{
+	file = docs.DocFile{
 		Documentation: make(map[string]docs.Doc),
 	}
 
@@ -68,24 +84,18 @@ func main() {
 	for _, ver := range allVersions {
 		file.Documentation[docs.FormatVer(ver)] = make(docs.Doc)
 	}
-
+	var wg sync.WaitGroup
 	for _, param := range allParams {
 		for _, ver := range allVersions {
+			wg.Add(1)
+			limiter <- 1
 
-			a, err := docs.Get(param, ver)
+			go processParam(param, ver, &wg)
 
-			fmt.Printf("Processing %s from version %s... ", param, docs.FormatVer(ver))
-			// 404 unsupported
-			if err != nil {
-				fmt.Println("SKIPPED")
-				continue
-			}
-
-			fmt.Println()
-
-			file.Documentation[docs.FormatVer(ver)][param] = a
 		}
 	}
+
+	wg.Wait()
 
 	err := saveFile(file)
 
@@ -93,4 +103,23 @@ func main() {
 		log.Printf("Could not save file: %v", err)
 	}
 
+}
+
+func processParam(param string, ver float32, wg *sync.WaitGroup) {
+	defer func() {
+		wg.Done()
+		<-limiter
+	}()
+
+	parsed, err := docs.Get(param, ver)
+
+	// 404 means unsupported
+	if err != nil {
+		fmt.Printf("Processing %s from version %s... SKIPPED\n", param, docs.FormatVer(ver))
+		return
+	}
+
+	fmt.Printf("Processing %s from version %s... \n", param, docs.FormatVer(ver))
+
+	updateDoc(ver, param, parsed)
 }
