@@ -2,6 +2,9 @@ before:
   hooks:
     - make docs
 
+env:
+  - HEROKU_APP_NAME={{ if index .Env "HEROKU_APP_NAME"  }}{{ .Env.HEROKU_APP_NAME }}{{ else }}default-app-name{{ end }}
+
 builds:
   - id: pgconfigctl
     binary: pgconfigctl
@@ -158,6 +161,7 @@ dockers:
     image_templates:
       - "docker.io/pgconfig/api:amd64-v{{ .Commit }}"
       - "ghcr.io/pgconfig/api:amd64-v{{ .Commit }}"
+      - "registry.heroku.com/{{ .Env.HEROKU_APP_NAME }}/web:latest"
     build_flag_templates:
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title=pgconfig-{{.ProjectName}}"
