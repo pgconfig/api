@@ -2,9 +2,8 @@ GOPATH := $(shell go env GOPATH)
 GOBIN := "$(GOPATH)/bin"
 
 mod:
+	go install github.com/swaggo/swag/cmd/swag@latest
 	go mod download
-	go install github.com/swaggo/swag/cmd/swag
-	go install golang.org/x/lint/golint
 	go install github.com/mattn/goveralls@latest
 
 docs: mod clean
@@ -20,7 +19,7 @@ goveralls-push: mod
 check: lint
 
 lint: mod
-	$(GOBIN)/golint -set_exit_status ./...
+	go vet ./...
 
 clean:
 	rm -rf dist/
@@ -30,3 +29,6 @@ build: clean docs lint
 	mkdir -p dist/
 	go build -o dist/pgconfigctl cmd/pgconfigctl/main.go
 	go build -o dist/api cmd/api/main.go
+
+heroku-publish:
+	goreleaser
