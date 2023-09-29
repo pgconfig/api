@@ -2,10 +2,10 @@ package defaults
 
 const (
 	// PGVersion is the current stable version of PostgreSQL
-	PGVersion = "14"
+	PGVersion = "16"
 
 	// PGVersionF is the current stable version of PostgreSQL - on the float Format
-	PGVersionF = 14.0
+	PGVersionF = 16.0
 )
 
 var (
@@ -24,5 +24,6 @@ var (
 		13.0,
 		14.0,
 		15.0,
+		16.0,
 	}
 )
