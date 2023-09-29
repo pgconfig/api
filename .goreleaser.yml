@@ -47,15 +47,17 @@ builds:
 nfpms:
   - id: default
     package_name: pgconfigctl
-    file_name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    file_name_template: >-
+      {{ .Binary }}-
+      {{ .Version }}-
+      {{- if eq .Os "darwin" }}MacOS
+      {{- else if eq .Os "linux" }}Linux
+      {{- else if eq .Os "windows" }}Windows
+      {{- else }}{{ .Os }}{{ end }}-
+      {{ .Arch }}
 
     builds:
       - pgconfigctl
-
-    replacements:
-      amd64: 64-bit
-      386: 32-bit
-      darwin: macOS
 
     homepage: https://pgconfig.org/
     maintainer: Sebastian Webber <sebastian@pgconfig.org>
@@ -71,11 +73,14 @@ archives:
   - id: pgconfigctl
     builds:
       - pgconfigctl
-    name_template: "{{ .Binary }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
-    replacements:
-      darwin: MacOS
-      linux: Linux
-      windows: Windows
+    name_template: >-
+      {{ .Binary }}-
+      {{ .Version }}-
+      {{- if eq .Os "darwin" }}MacOS
+      {{- else if eq .Os "linux" }}Linux
+      {{- else if eq .Os "windows" }}Windows
+      {{- else }}{{ .Os }}{{ end }}-
+      {{ .Arch }}
     format: binary
 checksum:
   name_template: "checksums.txt"
@@ -104,8 +109,6 @@ dockers:
       - "docker.io/pgconfig/pgconfigctl:amd64-v{{ .Commit }}"
       - "ghcr.io/pgconfig/pgconfigctl:amd64-v{{ .Commit }}"
 
-    use: buildx
-
     build_flag_templates:
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title=pgconfig-{{.ProjectName}}"
@@ -120,8 +123,6 @@ dockers:
     image_templates:
       - "docker.io/pgconfig/pgconfigctl:arm64-v{{ .Commit }}"
       - "ghcr.io/pgconfig/pgconfigctl:arm64-v{{ .Commit }}"
-
-    use: buildx
 
     build_flag_templates:
       - "--label=org.opencontainers.image.created={{.Date}}"
@@ -138,7 +139,6 @@ dockers:
     image_templates:
       - "docker.io/pgconfig/api:arm64-v{{ .Commit }}"
       - "ghcr.io/pgconfig/api:arm64-v{{ .Commit }}"
-    use: buildx
 
     build_flag_templates:
       - "--label=org.opencontainers.image.created={{.Date}}"
@@ -158,7 +158,6 @@ dockers:
     image_templates:
       - "docker.io/pgconfig/api:amd64-v{{ .Commit }}"
       - "ghcr.io/pgconfig/api:amd64-v{{ .Commit }}"
-    use: buildx
     build_flag_templates:
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.title=pgconfig-{{.ProjectName}}"
