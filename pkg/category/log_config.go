@@ -24,7 +24,7 @@ var (
 			Name:        "stder_config",
 			Description: "STDERR Configuration",
 			Parameters: []ParamSliceOutput{
-				{Format: "string", Name: "log_destination", Value: "stder"},
+				{Format: "string", Name: "log_destination", Value: "stderr"},
 				{Format: "string", Name: "log_line_prefix", Value: "%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h "},
 			},
 		},
