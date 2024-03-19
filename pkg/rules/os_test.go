@@ -4,43 +4,58 @@ import (
 	"testing"
 
 	"github.com/pgconfig/api/pkg/category"
+	"github.com/pgconfig/api/pkg/errors"
 	"github.com/pgconfig/api/pkg/input"
 	"github.com/pgconfig/api/pkg/input/bytes"
+
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func Test_computeOS(t *testing.T) {
-	_, err := computeOS(&input.Input{OS: "xpto-wrong-os"}, &category.ExportCfg{})
 
-	if err == nil {
-		t.Error("should support only windows, linux and unix")
-	}
+	Convey("Operating systems", t, func() {
+		Convey("should return error on non-supported operating systems", func() {
+			_, err := computeOS(&input.Input{OS: "xpto-wrong-os"}, &category.ExportCfg{})
+			So(err, ShouldResemble, errors.ErrorInvalidOS)
+		})
 
-	in := fakeInput()
-	in.OS = "windows"
-	in.PostgresVersion = 9.6
+		Convey("should ignore case for all operating systems supported", func() {
+			in := fakeInput()
+			in.OS = "lINUx"
+			in.TotalRAM = 120 * bytes.GB
 
-	out, _ := computeOS(in, category.NewExportCfg(*in))
+			_, err := computeOS(in, category.NewExportCfg(*in))
+			So(err, ShouldBeNil)
+		})
 
-	if out.Memory.SharedBuffers > 512*bytes.MB {
-		t.Error("should limit shared_buffers to 512MB until pg 10 on windows")
-	}
+		Convey("should limit shared_buffers to 512MB until pg 10 on windows", func() {
+			in := fakeInput()
+			in.OS = "windows"
+			in.PostgresVersion = 9.6
 
-	in = fakeInput()
-	in.OS = "windows"
-	in.PostgresVersion = 12.0
+			out, err := computeOS(in, category.NewExportCfg(*in))
+			So(err, ShouldBeNil)
+			So(out.Memory.SharedBuffers, ShouldEqual, 512*bytes.MB)
+		})
 
-	out, _ = computeOS(in, category.NewExportCfg(*in))
+		Convey("should limit effective_io_concurrency to 0 on platforms that lack posix_fadvise()", func() {
+			in := fakeInput()
+			in.OS = Windows
+			in.PostgresVersion = 12.0
 
-	if out.Storage.EffectiveIOConcurrency > 0 {
-		t.Error("should limit effective_io_concurrency to 0 on platforms that lack posix_fadvise()")
-	}
+			out, err := computeOS(in, category.NewExportCfg(*in))
+			So(err, ShouldBeNil)
+			So(out.Storage.EffectiveIOConcurrency, ShouldEqual, 0)
+		})
 
-	in = fakeInput()
-	in.TotalRAM = 120 * bytes.GB
+		Convey("should not limit shared_buffers on versions greater or equal than pg 11", func() {
+			in := fakeInput()
+			in.PostgresVersion = 14.0
+			in.TotalRAM = 120 * bytes.GB
 
-	out, _ = computeOS(in, category.NewExportCfg(*in))
-
-	if out.Memory.SharedBuffers < 25*bytes.GB {
-		t.Error("should not limit shared_buffers on versions greater or equal than pg 11")
-	}
+			out, err := computeOS(in, category.NewExportCfg(*in))
+			So(err, ShouldBeNil)
+			So(out.Memory.SharedBuffers, ShouldBeGreaterThan, 25*bytes.GB)
+		})
+	})
 }

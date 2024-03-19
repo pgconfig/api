@@ -1,21 +1,31 @@
 package rules
 
 import (
+	"strings"
+
 	"github.com/pgconfig/api/pkg/category"
 	"github.com/pgconfig/api/pkg/errors"
 	"github.com/pgconfig/api/pkg/input"
 	"github.com/pgconfig/api/pkg/input/bytes"
 )
 
+const (
+	Windows = "windows"
+	Linux   = "linux"
+	Unix    = "unix"
+	Darwin  = "darwin"
+)
+
 // ValidOS validates the Operating System
 func ValidOS(os string) error {
-	switch os {
-	case "windows":
-	case "linux":
-	case "unix", "darwin":
+	switch strings.ToLower(os) {
+	case Windows:
+	case Linux:
+	case Unix, Darwin:
 	default:
 		return errors.ErrorInvalidOS
 	}
+
 	return nil
 }
 
