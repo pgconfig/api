@@ -64,7 +64,7 @@ func formatBytes(i Byte) string {
 		return printByte("%.0fB", i, B)
 	}
 	if i < 1024*KB {
-		return printByte("%.0fKB", i, KB)
+		return printByte("%.0fkB", i, KB)
 	}
 	if i < 1024*MB {
 		return printByte("%.0fMB", i, MB)

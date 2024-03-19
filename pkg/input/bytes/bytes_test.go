@@ -25,7 +25,7 @@ func Test_Bytes(t *testing.T) {
 				{"negative values", -1, "-1"},
 				{"zero", 0, "0"},
 				{"Bytes", 5, "5B"},
-				{"KiloBytes", 455 * KB, "455KB"},
+				{"KiloBytes", 455 * KB, "455kB"},
 				{"MegaBytes", 1023 * MB, "1023MB"},
 				{"GigaBytes", 565 * GB, "565GB"},
 				{"TeraBytes", 396 * TB, "396TB"},
