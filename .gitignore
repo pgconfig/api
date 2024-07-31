@@ -24,3 +24,5 @@ covprofile
 
 .vscode/
 .idea/
+result
+!result/
