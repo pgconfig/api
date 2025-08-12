@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: make build
   test:
     needs: build
@@ -30,7 +30,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go }}
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: make test
       - name: Send coverage
         env:
