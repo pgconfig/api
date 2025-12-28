@@ -144,6 +144,9 @@ dockers_v2:
     platforms:
       - linux/amd64
       - linux/arm64
+    flags:
+      - "--provenance=false"
+    sbom: false
 
   - id: api
     ids:
@@ -170,4 +173,6 @@ dockers_v2:
     platforms:
       - linux/amd64
       - linux/arm64
-
+    flags:
+      - "--provenance=false"
+    sbom: false
