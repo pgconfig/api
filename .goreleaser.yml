@@ -96,6 +96,16 @@ archives:
 
 checksum:
   name_template: "checksums.txt"
+
+release:
+  footer: >-
+    ## Docker Images
+
+    - `docker pull docker.io/pgconfig/api:{{ .Version }}`
+    - `docker pull ghcr.io/pgconfig/api:{{ .Version }}`
+    - `docker pull docker.io/pgconfig/pgconfigctl:{{ .Version }}`
+    - `docker pull ghcr.io/pgconfig/pgconfigctl:{{ .Version }}`
+
 snapshot:
   version_template: "{{ .Tag }}-next"
 
@@ -117,9 +127,6 @@ dockers_v2:
     ids:
       - pgconfigctl
     dockerfile: cmd/pgconfigctl/Dockerfile
-    use: buildx
-    build_flag_templates:
-      - "--platform=linux/amd64,linux/arm64"
     images:
       - "docker.io/pgconfig/pgconfigctl"
       - "ghcr.io/pgconfig/pgconfigctl"
@@ -134,14 +141,14 @@ dockers_v2:
       "org.opencontainers.image.website": "pgconfig.org"
       "org.opencontainers.image.revision": "{{.FullCommit}}"
       "org.opencontainers.image.version": "{{.Version}}"
+    platforms:
+      - linux/amd64
+      - linux/arm64
 
   - id: api
     ids:
       - api
     dockerfile: cmd/api/Dockerfile
-    use: buildx
-    build_flag_templates:
-      - "--platform=linux/amd64,linux/arm64"
     extra_files:
       - rules.yml
       - pg-docs.yml
@@ -160,3 +167,7 @@ dockers_v2:
       "org.opencontainers.image.website": "pgconfig.org"
       "org.opencontainers.image.revision": "{{.FullCommit}}"
       "org.opencontainers.image.version": "{{.Version}}"
+    platforms:
+      - linux/amd64
+      - linux/arm64
+
