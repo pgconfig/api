@@ -53,4 +53,6 @@ jobs:
       - name: publish the app on Heroku
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku container:release web --app ${{ secrets.HEROKU_APP_NAME }}
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
+          /usr/local/bin/heroku container:release web --app ${{ secrets.HEROKU_APP_NAME }}
