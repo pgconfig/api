@@ -27,6 +27,7 @@ categories:
       recomendations:
         Adjusting maintenance_work_mem: https://www.cybertec-postgresql.com/en/adjusting-maintenance_work_mem/
         How Much maintenance_work_mem Do I Need?: http://rhaas.blogspot.com/2019/01/how-much-maintenanceworkmem-do-i-need.html
+        Don't give Postgres too much memory (even on busy systems): https://vondra.me/posts/dont-give-postgres-too-much-memory-even-on-busy-systems/
         Optimize PostgreSQL Server Performance Through Configuration: https://blog.crunchydata.com/blog/optimize-postgresql-server-performance
         Let's get back to basics - PostgreSQL Memory Components: https://www.postgresql.fastware.com/blog/back-to-basics-with-postgresql-memory-components
   checkpoint_related:
@@ -64,6 +65,50 @@ categories:
       abstract: Sets the number of concurrent disk I/O operations that PostgreSQL expects can be executed simultaneously.
       recomendations:
         "PostgreSQL: effective_io_concurrency benchmarked": https://portavita.github.io/2019-07-19-PostgreSQL_effective_io_concurrency_benchmarked/
+    io_method:
+      abstract: Controls the asynchronous I/O implementation used by PostgreSQL. Options are "worker" (dedicated I/O worker processes), "io_uring" (Linux io_uring interface), and "sync" (traditional synchronous I/O).
+      recomendations:
+        Tuning AIO in PostgreSQL 18 - Tomas Vondra: https://vondra.me/posts/tuning-aio-in-postgresql-18/
+        Waiting for Postgres 18: Accelerating Disk Reads with Asynchronous I/O - pganalyze: https://pganalyze.com/blog/postgres-18-async-io
+        PostgreSQL 18: Better I/O performance with AIO - Cybertec: https://www.cybertec-postgresql.com/en/postgresql-18-better-i-o-performance-with-aio/
+        PostgreSQL 18 Asynchronous I/O - Neon: https://neon.com/postgresql/postgresql-18/asynchronous-io
+        PostgreSQL 18: The AIO Revolution - dev.to: https://dev.to/mattleads/postgresql-18-the-aio-revolution-uuidv7-and-the-path-to-unprecedented-performance-415m
+    io_workers:
+      abstract: Number of background I/O worker processes used when io_method is set to "worker". Determines how many concurrent I/O operations can be performed asynchronously.
+      recomendations:
+        Tuning AIO in PostgreSQL 18 - Tomas Vondra: https://vondra.me/posts/tuning-aio-in-postgresql-18/
+        Waiting for Postgres 18: Accelerating Disk Reads with Asynchronous I/O - pganalyze: https://pganalyze.com/blog/postgres-18-async-io
+        PostgreSQL 18: Better I/O performance with AIO - Cybertec: https://www.cybertec-postgresql.com/en/postgresql-18-better-i-o-performance-with-aio/
+        PostgreSQL 18 Asynchronous I/O - Neon: https://neon.com/postgresql/postgresql-18/asynchronous-io
+    maintenance_io_concurrency:
+      abstract: Sets the number of concurrent I/O operations that PostgreSQL expects can be executed simultaneously during maintenance operations such as VACUUM and CREATE INDEX.
+    io_combine_limit:
+      abstract: Maximum size of adjacent blocks combined into one I/O request.
+      recomendations:
+        The Ultimate PostgreSQL 18 Asynchronous I/O Tuning Checklist (With Examples): https://www.cybrosys.com/research-and-development/postgres/the-ultimate-postgresql-18-asynchronous-io-tuning-checklist-with-examples
+        PostgreSQL 18 Asynchronous Disk I/O - Deep Dive Into Implementation: https://www.credativ.de/en/blog/postgresql-en/postgresql-18-asynchronous-disk-i-o-deep-dive-into-implementation/
+    io_max_combine_limit:
+      abstract: Server-wide limit that clamps io_combine_limit, controlling the largest I/O size in operations that combine I/O.
+      recomendations:
+        "Allow io_combine_limit up to 1MB": https://www.postgresql.org/message-id/CA+hUKGKd=U1zSFYNjwBBrXV3NsqR2U8dCUrCBVeB0DQ8Vb8Dwg@mail.gmail.com
+        Tuning AIO in PostgreSQL 18 - Tomas Vondra: https://vondra.me/posts/tuning-aio-in-postgresql-18/
+        Waiting for Postgres 18: Accelerating Disk Reads with Asynchronous I/O - pganalyze: https://pganalyze.com/blog/postgres-18-async-io
+        PostgreSQL 18: Better I/O performance with AIO - Cybertec: https://www.cybertec-postgresql.com/en/postgresql-18-better-i-o-performance-with-aio/
+        PostgreSQL 18 Asynchronous I/O - Neon: https://neon.com/postgresql/postgresql-18/asynchronous-io
+        The Ultimate PostgreSQL 18 Asynchronous I/O Tuning Checklist (With Examples): https://www.cybrosys.com/research-and-development/postgres/the-ultimate-postgresql-18-asynchronous-io-tuning-checklist-with-examples
+        PostgreSQL 18 Asynchronous Disk I/O - Deep Dive Into Implementation: https://www.credativ.de/en/blog/postgresql-en/postgresql-18-asynchronous-disk-i-o-deep-dive-into-implementation/
+    io_max_concurrency:
+      abstract: Maximum number of concurrent I/O requests that can be in flight at once.
+      recomendations:
+        "PostgreSQL 18 Beta 1 io_max_concurrency": https://www.postgresql.org/message-id/9673.1747250758@sss.pgh.pa.us
+        Tuning AIO in PostgreSQL 18 - Tomas Vondra: https://vondra.me/posts/tuning-aio-in-postgresql-18/
+        Waiting for Postgres 18: Accelerating Disk Reads with Asynchronous I/O - pganalyze: https://pganalyze.com/blog/postgres-18-async-io
+        PostgreSQL 18: Better I/O performance with AIO - Cybertec: https://www.cybertec-postgresql.com/en/postgresql-18-better-i-o-performance-with-aio/
+        PostgreSQL 18 Asynchronous I/O - Neon: https://neon.com/postgresql/postgresql-18/asynchronous-io
+        The Ultimate PostgreSQL 18 Asynchronous I/O Tuning Checklist (With Examples): https://www.cybrosys.com/research-and-development/postgres/the-ultimate-postgresql-18-asynchronous-io-tuning-checklist-with-examples
+        PostgreSQL 18 Asynchronous Disk I/O - Deep Dive Into Implementation: https://www.credativ.de/en/blog/postgresql-en/postgresql-18-asynchronous-disk-i-o-deep-dive-into-implementation/
+    file_copy_method:
+      abstract: Selects the method used for copying files during CREATE DATABASE and ALTER DATABASE SET TABLESPACE operations.
   worker_related:
     max_worker_processes:
       abstract: Sets the maximum number of background processes that the system can support.
@@ -77,3 +122,4 @@ categories:
       abstract: Sets the maximum number of parallel workers that can be active at one time
       recomendations:
         "Comprehensive guide on how to tune database parameters and configuration in PostgreSQL": https://www.enterprisedb.com/postgres-tutorials/comprehensive-guide-how-tune-database-parameters-and-configuration-postgresql
+

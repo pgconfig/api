@@ -55,7 +55,6 @@ func updateDoc(ver float32, param string, parsed docs.ParamDoc) {
 }
 
 func main() {
-
 	file = docs.DocFile{
 		Documentation: make(map[string]docs.Doc),
 	}
@@ -76,6 +75,12 @@ func main() {
 		"max_connections",
 		"random_page_cost",
 		"effective_io_concurrency",
+		"maintenance_io_concurrency",
+		"io_method",
+		"io_workers",
+		"io_max_combine_limit",
+		"io_max_concurrency",
+		"file_copy_method",
 		"max_worker_processes",
 		"max_parallel_workers_per_gather",
 		"max_parallel_workers",

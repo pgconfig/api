@@ -50,3 +50,22 @@ PGConfig.org API v2.
 
 ## License
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpgconfig%2Fapi.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fpgconfig%2Fapi?ref=badge_large)
+
+## Rules Engine
+
+The configuration is adjusted by a rules engine based on the environment.
+
+| Category       | Condition                                   | Action/Adjustment                                                                                             |
+| :------------- | :------------------------------------------ | :------------------------------------------------------------------------------------------------------------ |
+| **Architecture**   | 32-bit (`386`, `i686`)                      | Cap `shared_buffers`, `work_mem`, `maintenance_work_mem` at 4GB.                                                |
+| **OS**         | Windows                                     | Set `effective_io_concurrency` to `0`.                                                                        |
+|                | Windows & PG Version <= 9.6                 | Limit `shared_buffers` to 512MB.                                                                              |
+| **Profile**    | `Desktop`                                   | Set `shared_buffers` to Total RAM / 16.                                                                       |
+| **Storage**    | Disk Type is `SSD`                          | Set `effective_io_concurrency` to `200` and `random_page_cost` to `1.1`.                                       |
+|                | Disk Type is `SAN`                          | Set `effective_io_concurrency` to `300` and `random_page_cost` to `1.1`.                                       |
+|                | Disk Type is `HDD`                          | Set `effective_io_concurrency` to `2`.                                                                        |
+| **PG Version** | < 9.5                                       | Remove `min_wal_size` and `max_wal_size`.                                                                     |
+|                | < 9.6                                       | Remove `max_parallel_worker_per_gather`. Cap `shared_buffers` at 8GB.                                         |
+|                | < 10.0                                      | Remove `max_parallel_workers`.                                                                                |
+|                | >= 9.5                                      | Remove `checkpoint_segments`.                                                                                 |
+|                | <= 9.3                                      | Remove the entire `worker` category.                                                                          |

@@ -19,11 +19,11 @@ func ValidArch(arch string) error {
 	default:
 		return errors.ErrorInvalidArch
 	}
+
 	return nil
 }
 
 func computeArch(in *input.Input, cfg *category.ExportCfg) (*category.ExportCfg, error) {
-
 	if err := ValidArch(in.Arch); err != nil {
 		return nil, err
 	}

@@ -1,4 +1,7 @@
-on: ["push", "pull_request"]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
 
 name: Test Coveralls Parallel
 
@@ -7,30 +10,22 @@ jobs:
     env:
       CGO_ENABLED: 1
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go:
-          - "1.22"
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go }}
-      - uses: actions/checkout@v4
+          go-version-file: go.mod
       - run: make build
   test:
     needs: build
     env:
       CGO_ENABLED: 1
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go:
-          - "1.22"
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go }}
-      - uses: actions/checkout@v4
+          go-version-file: go.mod
       - run: make test
       - name: Send coverage
         env:
