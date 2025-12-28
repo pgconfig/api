@@ -2,7 +2,7 @@ package docs
 
 import (
 	"fmt"
-	"log"
+	"github.com/charmbracelet/log"
 	"net/http"
 	"strings"
 

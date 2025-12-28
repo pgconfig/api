@@ -2,6 +2,7 @@ package v1
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -14,7 +15,47 @@ import (
 	"github.com/pgconfig/api/pkg/input/bytes"
 	"github.com/pgconfig/api/pkg/input/profile"
 	"github.com/pgconfig/api/pkg/rules"
+	"gopkg.in/yaml.v2"
 )
+
+type rulesFileContent struct {
+	Categories map[string]map[string]parameter `json:"categories"`
+}
+
+type parameter struct {
+	Abstract       string            `json:"abstract"`
+	Recomendations map[string]string `json:"recomendations,omitempty"`
+	Formula        string            `json:"formula,omitempty"`
+}
+
+var (
+	allRules rulesFileContent
+	pgDocs   docs.DocFile
+)
+
+// LoadConfig loads the necessary files to the api server
+func LoadConfig(rulesFile, docsFile string) error {
+	fileData, err := os.ReadFile(rulesFile)
+	if err != nil {
+		return err
+	}
+
+	err = yaml.Unmarshal(fileData, &allRules)
+	if err != nil {
+		return err
+	}
+	docFile, err := os.ReadFile(docsFile)
+	if err != nil {
+		return err
+	}
+
+	err = yaml.Unmarshal(docFile, &pgDocs)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 // GetConfig is a function to that computes the input and suggests a tuning configuration
 // @Summary Get Configuration
