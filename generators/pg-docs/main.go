@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
+	"github.com/charmbracelet/log"
 	"os"
 	"sync"
 
@@ -105,7 +105,7 @@ func main() {
 	err := saveFile(file)
 
 	if err != nil {
-		log.Printf("Could not save file: %v", err)
+		log.Errorf("Could not save file: %v", err)
 	}
 
 }
