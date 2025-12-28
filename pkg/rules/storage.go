@@ -16,6 +16,9 @@ func computeStorage(in *input.Input, cfg *category.ExportCfg) (*category.ExportC
 		cfg.Storage.EffectiveIOConcurrency = 2
 	}
 
+	// maintenance_io_concurrency should match effective_io_concurrency
+	cfg.Storage.MaintenanceIOConcurrency = cfg.Storage.EffectiveIOConcurrency
+
 	if in.DiskType != "HDD" {
 		cfg.Storage.RandomPageCost = 1.1
 	}

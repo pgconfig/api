@@ -62,4 +62,36 @@ func Test_computeVersion(t *testing.T) {
 	if out.Memory.SharedBuffers > 8*bytes.GB {
 		t.Error("should limit shared_buffers up to 8gb on versions <= 9.5")
 	}
+
+	in = fakeInput()
+	in.PostgresVersion = 12.0
+	out, _ = computeVersion(in, category.NewExportCfg(*in))
+
+	if out.Storage.MaintenanceIOConcurrency != 0 {
+		t.Error("should zero maintenance_io_concurrency for versions < 13")
+	}
+
+	in = fakeInput()
+	in.PostgresVersion = 13.0
+	out, _ = computeVersion(in, category.NewExportCfg(*in))
+
+	if out.Storage.MaintenanceIOConcurrency == 0 {
+		t.Error("should keep maintenance_io_concurrency for versions >= 13")
+	}
+
+	in = fakeInput()
+	in.PostgresVersion = 17.0
+	out, _ = computeVersion(in, category.NewExportCfg(*in))
+
+	if out.Storage.IOMethod != "" || out.Storage.IOWorkers != 0 || out.Storage.IOMaxCombineLimit != 0 || out.Storage.IOMaxConcurrency != 0 || out.Storage.FileCopyMethod != "" {
+		t.Error("should zero all AIO-related parameters for versions < 18")
+	}
+
+	in = fakeInput()
+	in.PostgresVersion = 18.0
+	out, _ = computeVersion(in, category.NewExportCfg(*in))
+
+	if out.Storage.IOMethod == "" || out.Storage.IOWorkers == 0 || out.Storage.IOMaxCombineLimit == 0 || out.Storage.IOMaxConcurrency == 0 || out.Storage.FileCopyMethod == "" {
+		t.Error("should keep AIO-related parameters for versions >= 18")
+	}
 }

@@ -11,10 +11,10 @@ docs: mod clean
 	$(GOBIN)/swag init --dir ./cmd/api --output ./cmd/api/docs
 
 test: docs
-	go test -race -v -covermode atomic -coverprofile=covprofile ./...
+	go test -race -v -covermode atomic -coverpkg=./... -coverprofile=covprofile ./...
 
 goveralls-push: mod
-	$(GOBIN)/goveralls -coverprofile=covprofile -service=github
+	$(GOBIN)/goveralls -coverprofile=covprofile -service=github -v
 
 check: lint
 

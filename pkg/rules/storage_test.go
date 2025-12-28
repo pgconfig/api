@@ -26,4 +26,15 @@ func Test_computeStorage(t *testing.T) {
 	if outHDD.Storage.EffectiveIOConcurrency > 2 {
 		t.Error("should use lower values for effective_io_concurrency on HDD drives")
 	}
+
+	// maintenance_io_concurrency should match effective_io_concurrency
+	if outSSD.Storage.MaintenanceIOConcurrency != outSSD.Storage.EffectiveIOConcurrency {
+		t.Error("maintenance_io_concurrency should match effective_io_concurrency for SSD")
+	}
+	if outSAN.Storage.MaintenanceIOConcurrency != outSAN.Storage.EffectiveIOConcurrency {
+		t.Error("maintenance_io_concurrency should match effective_io_concurrency for SAN")
+	}
+	if outHDD.Storage.MaintenanceIOConcurrency != outHDD.Storage.EffectiveIOConcurrency {
+		t.Error("maintenance_io_concurrency should match effective_io_concurrency for HDD")
+	}
 }
