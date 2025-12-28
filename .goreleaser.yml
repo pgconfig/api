@@ -158,7 +158,6 @@ dockers_v2:
     images:
       - "docker.io/pgconfig/api"
       - "ghcr.io/pgconfig/api"
-      - "registry.heroku.com/{{ .Env.HEROKU_APP_NAME }}/web"
     tags:
       - "v{{ .Version }}"
       - "v{{ .Major }}.{{ .Minor }}"
@@ -173,6 +172,32 @@ dockers_v2:
     platforms:
       - linux/amd64
       - linux/arm64
+    flags:
+      - "--provenance=false"
+    sbom: false
+
+  - id: heroku-web
+    ids:
+      - api
+    dockerfile: cmd/api/Dockerfile
+    extra_files:
+      - rules.yml
+      - pg-docs.yml
+    images:
+      - "registry.heroku.com/{{ .Env.HEROKU_APP_NAME }}/web"
+    tags:
+      - "v{{ .Version }}"
+      - "v{{ .Major }}.{{ .Minor }}"
+      - "v{{ .Major }}"
+      - "latest"
+    labels:
+      "org.opencontainers.image.created": "{{.Date}}"
+      "org.opencontainers.image.title": "pgconfig-{{.ProjectName}}"
+      "org.opencontainers.image.website": "pgconfig.org"
+      "org.opencontainers.image.revision": "{{.FullCommit}}"
+      "org.opencontainers.image.version": "{{.Version}}"
+    platforms:
+      - linux/amd64
     flags:
       - "--provenance=false"
     sbom: false
