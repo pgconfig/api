@@ -32,7 +32,7 @@ func getDefaultPort(envName string) int {
 	return out
 }
 
-func init() {
+func initAPI() {
 	flag.IntVar(&port, "port", getDefaultPort("PORT"), "Listen port")
 	flag.StringVar(&rulesFile, "rules-file", "./rules.yml", "Rules file")
 	flag.StringVar(&docsFile, "docs-file", "./pg-docs.yml", "Rules file")
@@ -42,6 +42,8 @@ func init() {
 }
 
 func main() {
+	initAPI()
+
 	log.Printf("PGConfig API - %s\n", version.Pretty())
 
 	app := routes.New()
