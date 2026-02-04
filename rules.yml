@@ -9,11 +9,18 @@ categories:
         Tuning Your PostgreSQL Server: https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server#shared_buffers
         Determining optimal shared_buffers using pg_buffercache: https://aws.amazon.com/blogs/database/determining-the-optimal-value-for-shared_buffers-using-the-pg_buffercache-extension-in-postgresql/
         Tuning shared_buffers for OLTP and data warehouse workloads: https://pganalyze.com/blog/5mins-postgres-tuning-shared-buffers-pgbench-TPROC-C-TPROC-H
+        "Introduction to Buffers in PostgreSQL": https://boringsql.com/posts/introduction-to-buffers/
+        "PostgreSQL double buffering: understand the cache size": https://dev.to/franckpachot/postgresql-double-buffering-understand-the-cache-size-in-a-managed-service-oci-2oci
         PostgreSQL Performance Tuning Best Practices 2025: https://www.mydbops.com/blog/postgresql-parameter-tuning-best-practices
         Optimize PostgreSQL Server Performance Through Configuration: https://blog.crunchydata.com/blog/optimize-postgresql-server-performance
         Let's get back to basics - PostgreSQL Memory Components: https://www.postgresql.fastware.com/blog/back-to-basics-with-postgresql-memory-components
     effective_cache_size:
-      abstract: This parameter does not allocate any resource, just tells to the query planner how much of the operating system cache are avaliable to use. Remember that shared_buffers needs to smaller than 8GB, then the query planner will prefer read the disk because it will be on memory.
+      abstract: |
+        Estimates total memory available for disk caching (PostgreSQL + OS cache). Used by query planner for cost estimates.
+
+        Does **NOT allocate memory** - only informs the planner about available cache.
+
+        A good starting point: `effective_cache_size = RAM - shared_buffers`
       recomendations:
         "effective_cache_size: A practical example": https://www.cybertec-postgresql.com/en/effective_cache_size-a-practical-example/
         "effective_cache_size: What it means in PostgreSQL": https://www.cybertec-postgresql.com/en/effective_cache_size-what-it-means-in-postgresql/
