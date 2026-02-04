@@ -103,9 +103,21 @@ categories:
         "Understanding PostgreSQL Checkpoints": https://prateekcodes.com/understanding-postgres-checkpoints/
         "PostgreSQL WAL Configuration": https://www.postgresql.org/docs/current/wal-configuration.html
     wal_buffers:
-      abstract: This parameter defines a buffer to store WAL changes before write it in the WAL file.
+      abstract: |
+        Buffer for WAL data before flushing to disk. Default **-1** auto-tunes to 3% of `shared_buffers` (min 64kB, max 16MB).
+
+        For **write-heavy workloads**, manual tuning can significantly improve performance:
+        - **DW profile**: 64MB (always, regardless of RAM)
+        - **OLTP profile**: 32MB (when shared_buffers > 8GB)
+        - **Others**: Auto-tune (default)
+
+        WAL flushes at every commit, so extremely large values provide diminishing returns.
       recomendations:
-        Chapter 9 - Write Ahead Logging — WAL: http://www.interdb.jp/pg/pgsql09.html
+        "Tuning shared_buffers and wal_buffers": https://www.enterprisedb.com/blog/tuning-sharedbuffers-and-walbuffers
+        "Understanding shared_buffers, work_mem, and wal_buffers": https://www.postgresql.fastware.com/pzone/2024-06-understanding-shared-buffers-work-mem-and-wal-buffers-in-postgresql
+        "PostgreSQL WAL Configuration": https://www.postgresql.org/docs/current/runtime-config-wal.html
+        "PostgreSQL Performance Tuning Best Practices 2025": https://www.mydbops.com/blog/postgresql-parameter-tuning-best-practices
+        "Tuning PostgreSQL for Write Heavy Workloads": https://www.cloudraft.io/blog/tuning-postgresql-for-write-heavy-workloads
   network_related:
     listen_addresses:
       abstract: This parameter defines a network address to bind to.

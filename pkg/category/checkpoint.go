@@ -3,6 +3,7 @@ package category
 import (
 	"github.com/pgconfig/api/pkg/input"
 	"github.com/pgconfig/api/pkg/input/bytes"
+	"github.com/pgconfig/api/pkg/input/profile"
 )
 
 // CheckpointCfg is the checkpoint related category
@@ -19,11 +20,34 @@ type CheckpointCfg struct {
 // For wal_buffers setting automatic by default. check this commit and the comments in the
 // function check_wal_buffers on https://github.com/postgres/postgres/commit/2594cf0e8c04406ffff19b1651c5a406d376657c#diff-0cf91b3df8a1bbd72140d10a0b4541b5R4915
 func NewCheckpointCfg(in input.Input) *CheckpointCfg {
+	// Calculate shared_buffers to determine wal_buffers tuning
+	// Same calculation as in memory.go: totalRAM * MaxMemoryProfilePercent * SharedBufferPerc (25%)
+	maxMemoryProfilePercent := map[profile.Profile]float32{
+		profile.Web:     1,
+		profile.OLTP:    1,
+		profile.DW:      1,
+		profile.Mixed:   0.5,
+		profile.Desktop: 0.2,
+	}
+	totalRAM := float32(in.TotalRAM) * maxMemoryProfilePercent[in.Profile]
+	sharedBuffers := bytes.Byte(totalRAM * 0.25) // SharedBufferPerc = 0.25
+
+	// DW (Data Warehouse) workloads benefit from larger wal_buffers
+	// for write-heavy operations
+	// OLTP with large shared_buffers (>8GB) indicates high concurrent writes
+	walBuffers := bytes.Byte(-1) // -1 means automatic tuning
+
+	if in.Profile == profile.DW {
+		walBuffers = 64 * bytes.MB
+	} else if in.Profile == profile.OLTP && sharedBuffers > 8*bytes.GB {
+		walBuffers = 32 * bytes.MB
+	}
+
 	return &CheckpointCfg{
 		MinWALSize:                 bytes.Byte(2 * bytes.GB),
 		MaxWALSize:                 bytes.Byte(3 * bytes.GB),
 		CheckpointCompletionTarget: 0.9,
-		WALBuffers:                 -1, // -1 means automatic tuning
+		WALBuffers:                 walBuffers,
 		CheckpointSegments:         16,
 	}
 }
