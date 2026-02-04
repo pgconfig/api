@@ -1,10 +1,15 @@
 categories:
   memory_related:
     shared_buffers:
-      abstract: This parameter allocate memory slots used by all process when the database starts. Mainly works as the disk cache and its similar to oracle's SGA buffer.
+      abstract: |
+        Allocates shared memory for caching data pages. Acts as PostgreSQL's main disk cache, similar to Oracle's SGA buffer.
+
+        Start with **25% of RAM** as a baseline. For optimal tuning, use the **pg_buffercache extension** to analyze cache hit ratios for your specific workload.
       recomendations:
         Tuning Your PostgreSQL Server: https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server#shared_buffers
-        Tuning shared_buffers and wal_buffers: http://rhaas.blogspot.com.br/2012/03/tuning-sharedbuffers-and-walbuffers.html
+        Determining optimal shared_buffers using pg_buffercache: https://aws.amazon.com/blogs/database/determining-the-optimal-value-for-shared_buffers-using-the-pg_buffercache-extension-in-postgresql/
+        Tuning shared_buffers for OLTP and data warehouse workloads: https://pganalyze.com/blog/5mins-postgres-tuning-shared-buffers-pgbench-TPROC-C-TPROC-H
+        PostgreSQL Performance Tuning Best Practices 2025: https://www.mydbops.com/blog/postgresql-parameter-tuning-best-practices
         Optimize PostgreSQL Server Performance Through Configuration: https://blog.crunchydata.com/blog/optimize-postgresql-server-performance
         Let's get back to basics - PostgreSQL Memory Components: https://www.postgresql.fastware.com/blog/back-to-basics-with-postgresql-memory-components
     effective_cache_size:
