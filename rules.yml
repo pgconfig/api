@@ -162,9 +162,16 @@ categories:
         "Postgres Scan Types in EXPLAIN Plans": https://www.crunchydata.com/blog/postgres-scan-types-in-explain-plans
         "Tuning Your PostgreSQL Server": https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
     effective_io_concurrency:
-      abstract: Sets the number of concurrent disk I/O operations that PostgreSQL expects can be executed simultaneously.
+      abstract: |
+        Controls concurrent disk I/O operations for **bitmap heap scans** only.
+
+        Bitmap scans are used when queries need to fetch moderate result sets (too many rows for index scans, too few for sequential scans) or when combining multiple indexes. They're more common in analytical workloads.
+
+        PostgreSQL 18 changes the default from 1 to 16. Values above 200 show diminishing returns in benchmarks.
       recomendations:
         "PostgreSQL: effective_io_concurrency benchmarked": https://portavita.github.io/2019-07-19-PostgreSQL_effective_io_concurrency_benchmarked/
+        "Bitmap Heap Scan - pganalyze": https://pganalyze.com/docs/explain/scan-nodes/bitmap-heap-scan
+        "PostgreSQL indexing: Index scan vs. Bitmap scan vs. Sequential scan (basics)": https://www.cybertec-postgresql.com/en/postgresql-indexing-index-scan-vs-bitmap-scan-vs-sequential-scan-basics/
     io_method:
       abstract: Controls the asynchronous I/O implementation used by PostgreSQL. Options are "worker" (dedicated I/O worker processes), "io_uring" (Linux io_uring interface), and "sync" (traditional synchronous I/O).
       recomendations:
