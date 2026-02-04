@@ -12,6 +12,88 @@ func TestCompute(t *testing.T) {
 	t.SkipNow()
 }
 
+func TestComputeWalSizes(t *testing.T) {
+	tests := []struct {
+		name          string
+		profile       profile.Profile
+		totalRAM      bytes.Byte
+		expectedMinWAL bytes.Byte
+		expectedMaxWAL bytes.Byte
+		description   string
+	}{
+		{
+			name:          "DW profile gets large WAL sizes",
+			profile:       profile.DW,
+			totalRAM:      100 * bytes.GB,
+			expectedMinWAL: 4 * bytes.GB,
+			expectedMaxWAL: 16 * bytes.GB,
+			description:   "Data Warehouse is write-heavy with batch jobs",
+		},
+		{
+			name:          "OLTP profile gets medium-large WAL sizes",
+			profile:       profile.OLTP,
+			totalRAM:      100 * bytes.GB,
+			expectedMinWAL: 2 * bytes.GB,
+			expectedMaxWAL: 8 * bytes.GB,
+			description:   "OLTP has frequent transactions",
+		},
+		{
+			name:          "Web profile gets moderate WAL sizes",
+			profile:       profile.Web,
+			totalRAM:      100 * bytes.GB,
+			expectedMinWAL: 1 * bytes.GB,
+			expectedMaxWAL: 4 * bytes.GB,
+			description:   "Web has moderate writes",
+		},
+		{
+			name:          "Mixed profile gets balanced WAL sizes",
+			profile:       profile.Mixed,
+			totalRAM:      100 * bytes.GB,
+			expectedMinWAL: 2 * bytes.GB,
+			expectedMaxWAL: 6 * bytes.GB,
+			description:   "Mixed workload is balanced",
+		},
+		{
+			name:          "Desktop profile gets small WAL sizes",
+			profile:       profile.Desktop,
+			totalRAM:      16 * bytes.GB,
+			expectedMinWAL: 512 * bytes.MB,
+			expectedMaxWAL: 2 * bytes.GB,
+			description:   "Desktop has low activity",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			in := input.Input{
+				OS:              "linux",
+				Arch:            "amd64",
+				Profile:         tt.profile,
+				TotalRAM:        tt.totalRAM,
+				MaxConnections:  100,
+				DiskType:        "ssd",
+				TotalCPU:        8,
+				PostgresVersion: 16.0,
+			}
+
+			out, err := Compute(in)
+			if err != nil {
+				t.Fatalf("Compute failed: %v", err)
+			}
+
+			if out.Checkpoint.MinWALSize != tt.expectedMinWAL {
+				t.Errorf("%s: expected min_wal_size = %v, got %v",
+					tt.description, tt.expectedMinWAL, out.Checkpoint.MinWALSize)
+			}
+
+			if out.Checkpoint.MaxWALSize != tt.expectedMaxWAL {
+				t.Errorf("%s: expected max_wal_size = %v, got %v",
+					tt.description, tt.expectedMaxWAL, out.Checkpoint.MaxWALSize)
+			}
+		})
+	}
+}
+
 func TestComputeWalBuffers(t *testing.T) {
 	tests := []struct {
 		name             string
