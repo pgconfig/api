@@ -147,9 +147,20 @@ categories:
         "How To Optimize PostgreSQL For High Traffic": https://www.nilebits.com/blog/2025/06/postgresql-high-connections/
   storage_type:
     random_page_cost:
-      abstract: Sets the planner's estimate of the cost of a non-sequentially-fetched disk page.
+      abstract: |
+        Query planner's cost estimate for random disk access relative to sequential reads (`seq_page_cost = 1.0`).
+
+        Lower values favor index scans, higher values favor sequential scans. Sequential scans become more efficient when queries return ~5-10% or more of table rows, common in analytical/DW workloads.
+
+        **Debate (2025)**: Some experts advocate keeping higher values (4.0) for **plan stability** across cache states, while others recommend lower values (1.1-2.0) for SSD to favor index scans.
+
+        Test with `EXPLAIN ANALYZE` to verify query plan choices for your workload.
       recomendations:
-        How a single PostgreSQL config change improved slow query performance by 50x: https://amplitude.engineering/how-a-single-postgresql-config-change-improved-slow-query-performance-by-50x-85593b8991b0
+        "How a single PostgreSQL config change improved slow query performance by 50x": https://amplitude.engineering/how-a-single-postgresql-config-change-improved-slow-query-performance-by-50x-85593b8991b0
+        "Better PostgreSQL performance on SSDs": https://www.cybertec-postgresql.com/en/better-postgresql-performance-on-ssds/
+        "PostgreSQL with modern storage: what about a lower random_page_cost?": https://dev.to/aws-heroes/postgresql-with-modern-storage-what-about-a-lower-randompagecost-5b7f
+        "Postgres Scan Types in EXPLAIN Plans": https://www.crunchydata.com/blog/postgres-scan-types-in-explain-plans
+        "Tuning Your PostgreSQL Server": https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
     effective_io_concurrency:
       abstract: Sets the number of concurrent disk I/O operations that PostgreSQL expects can be executed simultaneously.
       recomendations:
