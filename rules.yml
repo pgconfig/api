@@ -46,11 +46,20 @@ categories:
         Optimize PostgreSQL Server Performance Through Configuration: https://blog.crunchydata.com/blog/optimize-postgresql-server-performance
         Let's get back to basics - PostgreSQL Memory Components: https://www.postgresql.fastware.com/blog/back-to-basics-with-postgresql-memory-components
     maintenance_work_mem:
-      abstract: This parameter defines how much a maintenance operation (ALTER TABLE, VACUUM, REINDEX, AutoVACUUM worker, etc) buffer can use.
+      abstract: |
+        Memory for maintenance operations: **VACUUM**, **CREATE INDEX**, **ALTER TABLE**, and autovacuum workers.
+
+        Can be set higher than work_mem since fewer concurrent maintenance operations run.
+
+        **Important**: Total usage = `maintenance_work_mem × autovacuum_max_workers`. Consider using `autovacuum_work_mem` separately.
+
+        **PostgreSQL ≤16**: 1GB limit (~179M dead tuples per pass). **PostgreSQL 17+**: No limit (uses radix trees).
       recomendations:
         Adjusting maintenance_work_mem: https://www.cybertec-postgresql.com/en/adjusting-maintenance_work_mem/
         How Much maintenance_work_mem Do I Need?: http://rhaas.blogspot.com/2019/01/how-much-maintenanceworkmem-do-i-need.html
         Don't give Postgres too much memory (even on busy systems): https://vondra.me/posts/dont-give-postgres-too-much-memory-even-on-busy-systems/
+        Understanding autovacuum in Amazon RDS for PostgreSQL: https://aws.amazon.com/blogs/database/understanding-autovacuum-in-amazon-rds-for-postgresql-environments/
+        PostgreSQL Performance Tuning Best Practices 2025: https://www.mydbops.com/blog/postgresql-parameter-tuning-best-practices
         Optimize PostgreSQL Server Performance Through Configuration: https://blog.crunchydata.com/blog/optimize-postgresql-server-performance
         Let's get back to basics - PostgreSQL Memory Components: https://www.postgresql.fastware.com/blog/back-to-basics-with-postgresql-memory-components
   checkpoint_related:
