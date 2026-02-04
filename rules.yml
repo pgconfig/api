@@ -65,14 +65,28 @@ categories:
   checkpoint_related:
     min_wal_size:
       abstract: |
-        This parameter defines the minimum size of the pg_wal directory. pg_wal directory contains the WAL files. 
-        Older versions refer to it as the pg_xlog directory.
+        Minimum size of pg_wal directory (pg_xlog in versions <10). WAL files are **recycled** rather than removed when below this threshold.
+
+        Useful to handle **WAL spikes** during batch jobs or high write periods.
       recomendations:
-        "Configuration changes in 9.5: transaction log size": http://www.databasesoup.com/2016/01/configuration-changes-in-95-transaction.html
+        "PostgreSQL WAL Configuration": https://www.postgresql.org/docs/current/wal-configuration.html
+        "Checkpoint distance and amount of WAL": https://www.cybertec-postgresql.com/en/checkpoint-distance-and-amount-of-wal/
+        "PostgreSQL Performance Tuning Best Practices 2025": https://www.mydbops.com/blog/postgresql-parameter-tuning-best-practices
+        "Tuning Your Postgres Database for High Write Loads": https://www.crunchydata.com/blog/tuning-your-postgres-database-for-high-write-loads
     max_wal_size:
       abstract: |
-        This parameter defines the maximun size of the pg_wal directory. pg_wal directory contains the WAL files.
-        Older versions refer to it as the pg_xlog directory.
+        Triggers checkpoint when pg_wal exceeds this size. Larger values reduce checkpoint frequency but increase crash recovery time.
+
+        **Recommendation**: Set to hold **1 hour of WAL**. Write-heavy systems may need significantly more.
+
+        Monitor `pg_stat_bgwriter` to ensure most checkpoints are **timed** (not requested).
+      recomendations:
+        "Basics of Tuning Checkpoints": https://www.enterprisedb.com/blog/basics-tuning-checkpoints
+        "Tuning max_wal_size in PostgreSQL": https://www.enterprisedb.com/blog/tuning-maxwalsize-postgresql
+        "Checkpoint distance and amount of WAL": https://www.cybertec-postgresql.com/en/checkpoint-distance-and-amount-of-wal/
+        "Tuning Your Postgres Database for High Write Loads": https://www.crunchydata.com/blog/tuning-your-postgres-database-for-high-write-loads
+        "PostgreSQL WAL Configuration": https://www.postgresql.org/docs/current/wal-configuration.html
+        "PostgreSQL Performance Tuning Best Practices 2025": https://www.mydbops.com/blog/postgresql-parameter-tuning-best-practices
     checkpoint_completion_target:
       abstract: This parameter defines a percentual of checkpoint_timeout as a target to write the CHECKPOINT data on the disk.
       recomendations:
