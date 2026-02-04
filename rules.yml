@@ -190,7 +190,17 @@ categories:
         "PostgreSQL 18 Asynchronous I/O - Neon": https://neon.com/postgresql/postgresql-18/asynchronous-io
         "PostgreSQL 18: The AIO Revolution - dev.to": https://dev.to/mattleads/postgresql-18-the-aio-revolution-uuidv7-and-the-path-to-unprecedented-performance-415m
     io_workers:
-      abstract: Number of background I/O worker processes used when io_method is set to "worker". Determines how many concurrent I/O operations can be performed asynchronously.
+      abstract: |
+        Background worker processes for async I/O when `io_method = worker`.
+
+        Default of 3 is too low for modern multi-core systems. Recommendation: **10-40% of CPU cores** depending on workload.
+
+        Higher values benefit workloads with:
+        - Sequential scans (DW/analytical queries)
+        - High I/O latency (HDD vs SSD)
+        - High concurrent read operations
+
+        Monitor `pg_stat_activity` for I/O wait events. If workers are saturated, increase this value.
       recomendations:
         "Tuning AIO in PostgreSQL 18 - Tomas Vondra": https://vondra.me/posts/tuning-aio-in-postgresql-18/
         "Waiting for Postgres 18: Accelerating Disk Reads with Asynchronous I/O - pganalyze": https://pganalyze.com/blog/postgres-18-async-io
