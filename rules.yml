@@ -88,9 +88,20 @@ categories:
         "PostgreSQL WAL Configuration": https://www.postgresql.org/docs/current/wal-configuration.html
         "PostgreSQL Performance Tuning Best Practices 2025": https://www.mydbops.com/blog/postgresql-parameter-tuning-best-practices
     checkpoint_completion_target:
-      abstract: This parameter defines a percentual of checkpoint_timeout as a target to write the CHECKPOINT data on the disk.
+      abstract: |
+        Spreads checkpoint writes over this fraction of `checkpoint_timeout` to reduce I/O spikes.
+
+        **Example**: `checkpoint_timeout = 5min` and `checkpoint_completion_target = 0.9`
+        → Checkpoint spreads writes over **270 seconds (4min 30s)**, leaving 30s buffer for sync overhead.
+
+        Values higher than 0.9 risk checkpoint delays. Monitor via `pg_stat_bgwriter`.
       recomendations:
-        "Understaning postgresql.conf: CHECKPOINT_COMPLETION_TARGET": https://www.depesz.com/2010/11/03/checkpoint_completion_target/
+        "Basics of Tuning Checkpoints": https://www.enterprisedb.com/blog/basics-tuning-checkpoints
+        "Measuring PostgreSQL Checkpoint Statistics": https://www.enterprisedb.com/blog/measuring-postgresql-checkpoint-statistics
+        "Checkpoints, Background Writer and monitoring": https://stormatics.tech/blogs/checkpoints-and-background-writer-and-how-to-monitor-it
+        "Deep dive into postgres stats: pg_stat_bgwriter": https://dataegret.com/2017/03/deep-dive-into-postgres-stats-pg_stat_bgwriter/
+        "Understanding PostgreSQL Checkpoints": https://prateekcodes.com/understanding-postgres-checkpoints/
+        "PostgreSQL WAL Configuration": https://www.postgresql.org/docs/current/wal-configuration.html
     wal_buffers:
       abstract: This parameter defines a buffer to store WAL changes before write it in the WAL file.
       recomendations:
