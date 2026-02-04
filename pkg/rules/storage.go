@@ -3,6 +3,7 @@ package rules
 import (
 	"github.com/pgconfig/api/pkg/category"
 	"github.com/pgconfig/api/pkg/input"
+	"github.com/pgconfig/api/pkg/input/profile"
 )
 
 func computeStorage(in *input.Input, cfg *category.ExportCfg) (*category.ExportCfg, error) {
@@ -21,6 +22,12 @@ func computeStorage(in *input.Input, cfg *category.ExportCfg) (*category.ExportC
 
 	if in.DiskType != "HDD" {
 		cfg.Storage.RandomPageCost = 1.1
+
+		// DW workloads: analytical queries often touch >10% of rows,
+		// where sequential scans are more efficient than index scans
+		if in.Profile == profile.DW {
+			cfg.Storage.RandomPageCost = 1.8
+		}
 	}
 
 	return cfg, nil
