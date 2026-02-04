@@ -173,7 +173,16 @@ categories:
         "Bitmap Heap Scan - pganalyze": https://pganalyze.com/docs/explain/scan-nodes/bitmap-heap-scan
         "PostgreSQL indexing: Index scan vs. Bitmap scan vs. Sequential scan (basics)": https://www.cybertec-postgresql.com/en/postgresql-indexing-index-scan-vs-bitmap-scan-vs-sequential-scan-basics/
     io_method:
-      abstract: Controls the asynchronous I/O implementation used by PostgreSQL. Options are "worker" (dedicated I/O worker processes), "io_uring" (Linux io_uring interface), and "sync" (traditional synchronous I/O).
+      abstract: |
+        Selects the async I/O implementation for read operations (PostgreSQL 18+).
+
+        **worker** (default): Uses dedicated background processes. Best for most workloads, especially high-bandwidth sequential scans. Recommended as default.
+
+        **io_uring** (Linux only): Kernel-level async I/O. Only switch after extensive testing proves benefit for your specific low-latency random-read patterns. Can hit file descriptor limits with high max_connections.
+
+        **sync**: Traditional synchronous I/O. Slower than async methods - avoid unless debugging or testing.
+
+        Note: Only affects reads. Writes, checkpoints, and WAL still use sync I/O.
       recomendations:
         "Tuning AIO in PostgreSQL 18 - Tomas Vondra": https://vondra.me/posts/tuning-aio-in-postgresql-18/
         "Waiting for Postgres 18: Accelerating Disk Reads with Asynchronous I/O - pganalyze": https://pganalyze.com/blog/postgres-18-async-io
