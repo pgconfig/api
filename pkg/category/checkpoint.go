@@ -43,9 +43,37 @@ func NewCheckpointCfg(in input.Input) *CheckpointCfg {
 		walBuffers = 32 * bytes.MB
 	}
 
+	// WAL size tuning per profile
+	// Recommended to hold ~1 hour of WAL for most systems
+	minWALSize := bytes.Byte(2 * bytes.GB)
+	maxWALSize := bytes.Byte(3 * bytes.GB)
+
+	switch in.Profile {
+	case profile.DW:
+		// Data Warehouse: write-heavy with batch jobs
+		minWALSize = 4 * bytes.GB
+		maxWALSize = 16 * bytes.GB
+	case profile.OLTP:
+		// OLTP: frequent transactions
+		minWALSize = 2 * bytes.GB
+		maxWALSize = 8 * bytes.GB
+	case profile.Web:
+		// Web: moderate writes
+		minWALSize = 1 * bytes.GB
+		maxWALSize = 4 * bytes.GB
+	case profile.Mixed:
+		// Mixed: balanced workload
+		minWALSize = 2 * bytes.GB
+		maxWALSize = 6 * bytes.GB
+	case profile.Desktop:
+		// Desktop: low activity
+		minWALSize = 512 * bytes.MB
+		maxWALSize = 2 * bytes.GB
+	}
+
 	return &CheckpointCfg{
-		MinWALSize:                 bytes.Byte(2 * bytes.GB),
-		MaxWALSize:                 bytes.Byte(3 * bytes.GB),
+		MinWALSize:                 minWALSize,
+		MaxWALSize:                 maxWALSize,
 		CheckpointCompletionTarget: 0.9,
 		WALBuffers:                 walBuffers,
 		CheckpointSegments:         16,
