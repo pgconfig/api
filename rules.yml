@@ -120,11 +120,31 @@ categories:
         "Tuning PostgreSQL for Write Heavy Workloads": https://www.cloudraft.io/blog/tuning-postgresql-for-write-heavy-workloads
   network_related:
     listen_addresses:
-      abstract: This parameter defines a network address to bind to.
-    max_connections:
-      abstract: This parameter defines a max connections allowed.
+      abstract: |
+        Network interfaces PostgreSQL listens on for connections.
+
+        **Security**: Default is `localhost` (local-only). Never use `*` or `0.0.0.0` exposed to internet.
+
+        Use specific IPs with `pg_hba.conf` rules, or SSH tunnels/VPN for remote access.
       recomendations:
-        Tuning max_connections in PostgreSQL: https://www.cybertec-postgresql.com/en/tuning-max_connections-in-postgresql/
+        "PostgreSQL Connections and Authentication": https://www.postgresql.org/docs/current/runtime-config-connection.html
+        "PostgreSQL Security: 12 rules for database hardening": https://www.cybertec-postgresql.com/en/postgresql-security-things-to-avoid-in-real-life/
+        "Postgres security best practices": https://www.bytebase.com/reference/postgres/how-to/postgres-security-best-practices/
+    max_connections:
+      abstract: |
+        Maximum concurrent database connections. Each connection consumes memory (~10MB + work_mem per operation).
+
+        **Best practice**: Use **connection pooling** (PgBouncer, pgpool) instead of high max_connections.
+
+        With pooling: 20-50 connections. Without pooling: 100-200 (but review memory impact).
+
+        Formula: `(RAM - shared_buffers) / (work_mem × avg_operations_per_query)` for rough estimate.
+      recomendations:
+        "Tuning max_connections in PostgreSQL": https://www.cybertec-postgresql.com/en/tuning-max_connections-in-postgresql/
+        "Why you should use Connection Pooling": https://www.enterprisedb.com/postgres-tutorials/why-you-should-use-connection-pooling-when-setting-maxconnections-postgres
+        "PgBouncer for PostgreSQL: How Connection Pooling Solves Enterprise Slowdowns": https://www.percona.com/blog/pgbouncer-for-postgresql-how-connection-pooling-solves-enterprise-slowdowns/
+        "Complete Guide to Fixing PostgreSQL Performance with PgBouncer": https://opstree.com/blog/2025/10/07/postgresql-performance-with-pgbouncer/
+        "How To Optimize PostgreSQL For High Traffic": https://www.nilebits.com/blog/2025/06/postgresql-high-connections/
   storage_type:
     random_page_cost:
       abstract: Sets the planner's estimate of the cost of a non-sequentially-fetched disk page.
