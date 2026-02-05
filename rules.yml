@@ -263,9 +263,19 @@ categories:
         "Git for Data: Instant PostgreSQL Database Cloning": https://vonng.com/en/pg/pg-clone/
   worker_related:
     max_worker_processes:
-      abstract: Sets the maximum number of background processes that the system can support.
+      abstract: |
+        Maximum background worker processes (autovacuum, parallel query, replication, extensions).
+
+        Pool from which all background workers are drawn. Must accommodate:
+        - Parallel query workers (`max_parallel_workers`)
+        - Logical replication workers
+        - Extensions (pg_stat_statements, etc.)
+
+        Recommendation: Set to **CPU core count** or at least **25% of vCPUs**. Requires restart.
       recomendations:
-        "Comprehensive guide on how to tune database parameters and configuration in PostgreSQL": https://www.enterprisedb.com/postgres-tutorials/comprehensive-guide-how-tune-database-parameters-and-configuration-postgresql
+        "PostgreSQL Performance Tuning Best Practices 2025": https://www.mydbops.com/blog/postgresql-parameter-tuning-best-practices
+        "PostgreSQL Performance Tuning: Key Parameters": https://www.tigerdata.com/learn/postgresql-performance-tuning-key-parameters
+        "Parallel Queries in Postgres - Crunchy Data": https://www.crunchydata.com/blog/parallel-queries-in-postgres
     max_parallel_workers_per_gather:
       abstract: Sets the maximum number of parallel processes per executor node.
       recomendations:
