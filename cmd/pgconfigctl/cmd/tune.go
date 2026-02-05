@@ -97,7 +97,7 @@ func init() {
 	tuneCmd.PersistentFlags().StringVarP(&arch, "arch", "", runtime.GOARCH, "PostgreSQL Version")
 	tuneCmd.PersistentFlags().StringVarP(&diskType, "disk-type", "D", "SSD", "Disk type (possible values are SSD, HDD and SAN)")
 	tuneCmd.PersistentFlags().Float32VarP(&pgVersion, "version", "", defaults.PGVersionF, "PostgreSQL Version")
-	tuneCmd.PersistentFlags().IntVarP(&totalCPU, "cpus", "c", runtime.NumCPU(), "Total CPU cores")
+	tuneCmd.PersistentFlags().IntVarP(&totalCPU, "cpus", "c", runtime.NumCPU(), "Total logical CPU cores (includes hyperthreading)")
 	tuneCmd.PersistentFlags().MarkDeprecated("env-name", "please use --profile instead")
 	tuneCmd.PersistentFlags().IntVarP(&maxConnections, "max-connections", "M", 100, "Max expected connections")
 	tuneCmd.PersistentFlags().BoolVarP(&includePgbadger, "include-pgbadger", "B", false, "Include pgbadger params?")
