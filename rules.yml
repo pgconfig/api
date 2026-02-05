@@ -207,7 +207,17 @@ categories:
         "PostgreSQL 18: Better I/O performance with AIO - Cybertec": https://www.cybertec-postgresql.com/en/postgresql-18-better-i-o-performance-with-aio/
         "PostgreSQL 18 Asynchronous I/O - Neon": https://neon.com/postgresql/postgresql-18/asynchronous-io
     maintenance_io_concurrency:
-      abstract: Sets the number of concurrent I/O operations that PostgreSQL expects can be executed simultaneously during maintenance operations such as VACUUM and CREATE INDEX.
+      abstract: |
+        Concurrent I/O operations for maintenance: **VACUUM**, **CREATE INDEX**, **ANALYZE**.
+
+        Similar to `effective_io_concurrency` but for maintenance operations. PostgreSQL 18 changed default from 10 to 16.
+
+        Typically set to match `effective_io_concurrency` based on storage capabilities.
+      recomendations:
+        "Quick Benchmark: ANALYZE vs. maintenance_io_concurrency": https://www.credativ.de/en/blog/postgresql-en/quick-benchmark-analyze-vs-maintenance_io_concurrency/
+        "PostgreSQL 18 Asynchronous I/O: A Complete Guide": https://betterstack.com/community/guides/databases/postgresql-asynchronous-io/
+        "PostgreSQL Performance Tuning Best Practices 2025": https://www.mydbops.com/blog/postgresql-parameter-tuning-best-practices
+        "PostgreSQL Database Tuning for OLAP vs. OLTP Workloads": https://reintech.io/blog/postgresql-database-tuning-olap-vs-oltp
     io_combine_limit:
       abstract: Maximum size of adjacent blocks combined into one I/O request.
       recomendations:
