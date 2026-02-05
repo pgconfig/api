@@ -253,7 +253,14 @@ categories:
         "PostgreSQL 18: Better I/O performance with AIO - Cybertec": https://www.cybertec-postgresql.com/en/postgresql-18-better-i-o-performance-with-aio/
         "PostgreSQL 18 Asynchronous I/O - Neon": https://neon.com/postgresql/postgresql-18/asynchronous-io
     file_copy_method:
-      abstract: Selects the method used for copying files during CREATE DATABASE and ALTER DATABASE SET TABLESPACE operations.
+      abstract: |
+        Method for copying files during **CREATE DATABASE** and **ALTER DATABASE SET TABLESPACE** (PostgreSQL 18+).
+
+        Recommendation: Use **clone** if your filesystem supports it - dramatically faster (200-600ms for 100s of GB) and initially consumes zero extra disk space.
+      recomendations:
+        "Instant database clones with PostgreSQL 18": https://boringsql.com/posts/instant-database-clones/
+        "Instant Per-Branch Databases with PostgreSQL 18's clone": https://medium.com/axial-engineering/instant-per-branch-databases-with-postgresql-18s-clone-file-copy-and-copy-on-write-filesystems-1b1930bddbaa
+        "Git for Data: Instant PostgreSQL Database Cloning": https://vonng.com/en/pg/pg-clone/
   worker_related:
     max_worker_processes:
       abstract: Sets the maximum number of background processes that the system can support.
