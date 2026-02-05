@@ -287,7 +287,13 @@ categories:
         "Parallel Queries in Postgres": https://www.crunchydata.com/blog/parallel-queries-in-postgres
         "PostgreSQL Performance Tuning Best Practices 2025": https://www.mydbops.com/blog/postgresql-parameter-tuning-best-practices
     max_parallel_workers:
-      abstract: Sets the maximum number of parallel workers that can be active at one time
+      abstract: |
+        Maximum parallel workers active system-wide across all queries.
+
+        Limits total parallel workers from the `max_worker_processes` pool. Cannot exceed `max_worker_processes`.
+
+        Recommendation: Set equal to **CPU core count** or `max_worker_processes`.
       recomendations:
-        "Comprehensive guide on how to tune database parameters and configuration in PostgreSQL": https://www.enterprisedb.com/postgres-tutorials/comprehensive-guide-how-tune-database-parameters-and-configuration-postgresql
+        "Parallel Queries in Postgres": https://www.crunchydata.com/blog/parallel-queries-in-postgres
+        "PostgreSQL Performance Tuning Best Practices 2025": https://www.mydbops.com/blog/postgresql-parameter-tuning-best-practices
 
