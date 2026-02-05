@@ -51,6 +51,17 @@ PGConfig.org API v2.
 ## License
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpgconfig%2Fapi.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fpgconfig%2Fapi?ref=badge_large)
 
+## CPU Core Counting
+
+The API expects the `total_cpu` parameter to represent the total number of **logical CPU cores**, which includes hyperthreading. This is the standard output from:
+- Linux/Unix: `nproc` command
+- Go: `runtime.NumCPU()`
+- Windows: Total processor count in Task Manager
+
+**Example**: A system with 8 physical cores and hyperthreading enabled has 16 logical cores. Use `total_cpu=16`.
+
+**Why logical cores?** Modern PostgreSQL (2017-2025) benefits from hyperthreading with [up to 15% performance improvement](https://www.cybertec-postgresql.com/en/experimenting-scaling-full-parallelism-postgresql/). The tuning formulas for `max_worker_processes`, `max_parallel_workers`, and `io_workers` are designed to work with logical core counts.
+
 ## Rules Engine
 
 The configuration is adjusted by a rules engine based on the environment.
