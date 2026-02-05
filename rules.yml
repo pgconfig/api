@@ -219,12 +219,18 @@ categories:
         "PostgreSQL Performance Tuning Best Practices 2025": https://www.mydbops.com/blog/postgresql-parameter-tuning-best-practices
         "PostgreSQL Database Tuning for OLAP vs. OLTP Workloads": https://reintech.io/blog/postgresql-database-tuning-olap-vs-oltp
     io_combine_limit:
-      abstract: Maximum size of adjacent blocks combined into one I/O request.
+      abstract: |
+        Maximum adjacent blocks combined into a single I/O request (PostgreSQL 18+).
+
+        Larger values benefit sequential scans and bitmap heap scans by reducing I/O operations. Limited by `io_max_combine_limit` server setting.
       recomendations:
-        The Ultimate PostgreSQL 18 Asynchronous I/O Tuning Checklist (With Examples): https://www.cybrosys.com/research-and-development/postgres/the-ultimate-postgresql-18-asynchronous-io-tuning-checklist-with-examples
-        PostgreSQL 18 Asynchronous Disk I/O - Deep Dive Into Implementation: https://www.credativ.de/en/blog/postgresql-en/postgresql-18-asynchronous-disk-i-o-deep-dive-into-implementation/
+        "The Ultimate PostgreSQL 18 Asynchronous I/O Tuning Checklist": https://www.cybrosys.com/research-and-development/postgres/the-ultimate-postgresql-18-asynchronous-io-tuning-checklist-with-examples
+        "PostgreSQL 18 Asynchronous Disk I/O - Deep Dive": https://www.credativ.de/en/blog/postgresql-en/postgresql-18-asynchronous-disk-i-o-deep-dive-into-implementation/
     io_max_combine_limit:
-      abstract: Server-wide limit that clamps io_combine_limit, controlling the largest I/O size in operations that combine I/O.
+      abstract: |
+        Server-wide limit that clamps `io_combine_limit` (PostgreSQL 18+).
+
+        Set at server startup. Controls the maximum I/O size for operations that combine I/O. Increase for data warehouses with large sequential scans.
       recomendations:
         "Allow io_combine_limit up to 1MB": https://www.postgresql.org/message-id/CA+hUKGKd=U1zSFYNjwBBrXV3NsqR2U8dCUrCBVeB0DQ8Vb8Dwg@mail.gmail.com
         "Tuning AIO in PostgreSQL 18 - Tomas Vondra": https://vondra.me/posts/tuning-aio-in-postgresql-18/
