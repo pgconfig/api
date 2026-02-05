@@ -20,11 +20,11 @@ const (
 	DW Profile = "DW"
 
 	// Mixed profile
-	Mixed Profile = "Mixed"
+	Mixed Profile = "MIXED"
 
 	// Desktop is the development machine on any non-production server
 	// that needs to consume less resources than a regular server.
-	Desktop Profile = "Desktop"
+	Desktop Profile = "DESKTOP"
 )
 
 // AllProfiles Lists all profiles currently available
