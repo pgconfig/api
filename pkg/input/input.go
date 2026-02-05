@@ -13,6 +13,9 @@ type Input struct {
 	Profile         profile.Profile `json:"profile"`
 	DiskType        string          `json:"disk_type"`
 	MaxConnections  int             `json:"max_connections"`
+	// TotalCPU represents the total number of logical CPU cores (including hyperthreading).
+	// Use runtime.NumCPU() or the output of `nproc` command to get this value.
+	// For CPUs with hyperthreading: 8 physical cores × 2 threads = 16 logical cores.
 	TotalCPU        int             `json:"total_cpu"`
 	PostgresVersion float32         `json:"postgres_version"`
 }
