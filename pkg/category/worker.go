@@ -1,6 +1,9 @@
 package category
 
-import "github.com/pgconfig/api/pkg/input"
+import (
+	"github.com/pgconfig/api/pkg/input"
+	"github.com/pgconfig/api/pkg/input/profile"
+)
 
 // WorkerCfg is the main workers category
 type WorkerCfg struct {
@@ -11,9 +14,42 @@ type WorkerCfg struct {
 
 // NewWorkerCfg creates a new Worker Configuration
 func NewWorkerCfg(in input.Input) *WorkerCfg {
-	return &WorkerCfg{
-		MaxWorkerProcesses:         8, /* pg >= 9.4 */
-		MaxParallelWorkerPerGather: 2, /* pg >= 9.6 */
-		MaxParallelWorkers:         2, /* pg >= 10 */
+	// max_worker_processes: at least 8 (default), or CPU count
+	maxWorkerProcesses := max(8, in.TotalCPU)
+
+	// max_parallel_workers: at least 8, or CPU count (limited by max_worker_processes)
+	maxParallelWorkers := max(8, in.TotalCPU)
+
+	// max_parallel_workers_per_gather: varies by profile
+	// OLTP/transactional workloads keep default (2)
+	// DW/analytical workloads benefit from higher parallelism
+	maxParallelWorkerPerGather := 2
+	if in.Profile == profile.DW {
+		// DW: use half of CPU cores, limited by max_parallel_workers
+		maxParallelWorkerPerGather = min(in.TotalCPU/2, maxParallelWorkers)
+		// Ensure at least 2
+		if maxParallelWorkerPerGather < 2 {
+			maxParallelWorkerPerGather = 2
+		}
 	}
+
+	return &WorkerCfg{
+		MaxWorkerProcesses:         maxWorkerProcesses,
+		MaxParallelWorkerPerGather: maxParallelWorkerPerGather,
+		MaxParallelWorkers:         maxParallelWorkers,
+	}
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
