@@ -57,5 +57,82 @@ func Test_computeOS(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(out.Memory.SharedBuffers, ShouldBeGreaterThan, 25*bytes.GB)
 		})
+
+		Convey("should limit work_mem to ~2GB on Windows (issue #5)", func() {
+			in := fakeInput()
+			in.OS = Windows
+			in.TotalRAM = 256 * bytes.GB
+			in.MaxConnections = 10
+			in.PostgresVersion = 16.0
+
+			cfg := category.NewExportCfg(*in)
+			// Force work_mem to be higher than the limit
+			cfg.Memory.WorkMem = 5 * bytes.GB
+
+			out, err := computeOS(in, cfg)
+			So(err, ShouldBeNil)
+			So(out.Memory.WorkMem, ShouldEqual, WindowsMaxWorkMem)
+			So(out.Memory.WorkMem, ShouldBeLessThan, 2*bytes.GB)
+		})
+
+		Convey("should limit maintenance_work_mem to ~2GB on Windows (issue #5)", func() {
+			in := fakeInput()
+			in.OS = Windows
+			in.TotalRAM = 256 * bytes.GB
+			in.PostgresVersion = 16.0
+
+			cfg := category.NewExportCfg(*in)
+			// Force maintenance_work_mem to be higher than the limit
+			cfg.Memory.MaintenanceWorkMem = 10 * bytes.GB
+
+			out, err := computeOS(in, cfg)
+			So(err, ShouldBeNil)
+			So(out.Memory.MaintenanceWorkMem, ShouldEqual, WindowsMaxWorkMem)
+			So(out.Memory.MaintenanceWorkMem, ShouldBeLessThan, 2*bytes.GB)
+		})
+
+		Convey("should not limit work_mem on non-Windows platforms", func() {
+			in := fakeInput()
+			in.OS = Linux
+			in.TotalRAM = 256 * bytes.GB
+			in.MaxConnections = 10
+			in.PostgresVersion = 16.0
+
+			cfg := category.NewExportCfg(*in)
+			cfg.Memory.WorkMem = 5 * bytes.GB
+
+			out, err := computeOS(in, cfg)
+			So(err, ShouldBeNil)
+			So(out.Memory.WorkMem, ShouldEqual, 5*bytes.GB)
+		})
+
+		Convey("should not limit work_mem on Windows with PostgreSQL 18+", func() {
+			in := fakeInput()
+			in.OS = Windows
+			in.TotalRAM = 256 * bytes.GB
+			in.MaxConnections = 10
+			in.PostgresVersion = 18.0
+
+			cfg := category.NewExportCfg(*in)
+			cfg.Memory.WorkMem = 5 * bytes.GB
+
+			out, err := computeOS(in, cfg)
+			So(err, ShouldBeNil)
+			So(out.Memory.WorkMem, ShouldEqual, 5*bytes.GB)
+		})
+
+		Convey("should not limit maintenance_work_mem on Windows with PostgreSQL 18+", func() {
+			in := fakeInput()
+			in.OS = Windows
+			in.TotalRAM = 256 * bytes.GB
+			in.PostgresVersion = 18.0
+
+			cfg := category.NewExportCfg(*in)
+			cfg.Memory.MaintenanceWorkMem = 10 * bytes.GB
+
+			out, err := computeOS(in, cfg)
+			So(err, ShouldBeNil)
+			So(out.Memory.MaintenanceWorkMem, ShouldEqual, 10*bytes.GB)
+		})
 	})
 }

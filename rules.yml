@@ -35,6 +35,8 @@ categories:
 
         Example worst-case: 128MB × 3 operations × 2 workers × 100 connections = **102GB**
 
+        **Windows ≤ PostgreSQL 17**: Maximum value is ~2GB (2097151 kB) due to Windows LLP64 model where `sizeof(long)==4` even on 64-bit systems. Fixed in [PostgreSQL 18](https://www.postgresql.org/message-id/flat/1a01f0-66ec2d80-3b-68487680@27595217) which increased the limit to 2TB. See also [pgvector issue #667](https://github.com/pgvector/pgvector/issues/667).
+
         Monitor temp file usage with `log_temp_files`. Consider **per-session** tuning (`SET work_mem`) for heavy queries instead of global settings.
       details:
         - Specifies the amount of memory to be used by internal sort operations and hash tables before writing to temporary disk files. The value defaults to four megabytes (4MB). Note that for a complex query, several sort or hash operations might be running in parallel; each operation will be allowed to use as much memory as this value specifies before it starts to write data into temporary files. Also, several running sessions could be doing such operations concurrently. Therefore, the total memory used could be many times the value of work_mem; it is necessary to keep this fact in mind when choosing the value. Sort operations are used for ORDER BY, DISTINCT, and merge joins. Hash tables are used in hash joins, hash-based aggregation, and hash-based processing of IN subqueries.
@@ -54,6 +56,8 @@ categories:
         **Important**: Total usage = `maintenance_work_mem × autovacuum_max_workers`. Consider using `autovacuum_work_mem` separately.
 
         **PostgreSQL ≤16**: 1GB limit (~179M dead tuples per pass). **PostgreSQL 17+**: No limit (uses radix trees).
+
+        **Windows ≤ PostgreSQL 17**: Maximum value is ~2GB (2097151 kB) due to Windows LLP64 model where `sizeof(long)==4` even on 64-bit systems. Fixed in [PostgreSQL 18](https://www.postgresql.org/message-id/flat/1a01f0-66ec2d80-3b-68487680@27595217) which increased the limit to 2TB. See also [pgvector issue #667](https://github.com/pgvector/pgvector/issues/667).
       recomendations:
         Adjusting maintenance_work_mem: https://www.cybertec-postgresql.com/en/adjusting-maintenance_work_mem/
         How Much maintenance_work_mem Do I Need?: http://rhaas.blogspot.com/2019/01/how-much-maintenanceworkmem-do-i-need.html
