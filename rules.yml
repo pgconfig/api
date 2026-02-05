@@ -4,7 +4,7 @@ categories:
       abstract: |
         Allocates shared memory for caching data pages. Acts as PostgreSQL's main disk cache, similar to Oracle's SGA buffer.
 
-        Start with **25% of RAM** as a baseline. For optimal tuning, use the **pg_buffercache extension** to analyze cache hit ratios for your specific workload.
+        Start with **25% of RAM** as a baseline. For optimal tuning, use the `pg_buffercache` extension to analyze cache hit ratios for your specific workload.
       recomendations:
         Tuning Your PostgreSQL Server: https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server#shared_buffers
         Determining optimal shared_buffers using pg_buffercache: https://aws.amazon.com/blogs/database/determining-the-optimal-value-for-shared_buffers-using-the-pg_buffercache-extension-in-postgresql/
@@ -27,17 +27,28 @@ categories:
         Optimize PostgreSQL Server Performance Through Configuration: https://blog.crunchydata.com/blog/optimize-postgresql-server-performance
     work_mem:
       abstract: |
-        Memory per operation for sorts, hash joins, and aggregates. Each query can use **multiple work_mem buffers** simultaneously.
+        Memory per operation for sorts, hash joins, and aggregates. Each query can use multiple `work_mem` buffers simultaneously.
 
-        **⚠️ Warning**: With high concurrency and large datasets, you can easily trigger **OOM kills** in Kubernetes pods or cloud instances.
+        > [!WARNING]
+        > With high concurrency and large datasets, you can easily trigger **OOM kills** in Kubernetes pods or cloud instances.
+        >
+        > Maximum potential memory:
+        > ```
+        > max = work_mem × operations × parallel_workers × connections
+        > ```
+        >
+        > Example worst-case:
+        > ```
+        > 128MB × 3 operations × 2 workers × 100 connections = 102GB
+        > ```
 
-        Maximum potential memory = `work_mem × operations × parallel_workers × connections`
+        > [!NOTE]
+        > **Windows ≤ PostgreSQL 17**: Maximum value is ~2GB (2097151 kB) due to Windows LLP64 model where `sizeof(long)==4` even on 64-bit systems.
+        >
+        > Fixed in [PostgreSQL 18](https://www.postgresql.org/message-id/flat/1a01f0-66ec2d80-3b-68487680@27595217) which increased the limit to 2TB. See also [pgvector issue #667](https://github.com/pgvector/pgvector/issues/667).
 
-        Example worst-case: 128MB × 3 operations × 2 workers × 100 connections = **102GB**
-
-        **Windows ≤ PostgreSQL 17**: Maximum value is ~2GB (2097151 kB) due to Windows LLP64 model where `sizeof(long)==4` even on 64-bit systems. Fixed in [PostgreSQL 18](https://www.postgresql.org/message-id/flat/1a01f0-66ec2d80-3b-68487680@27595217) which increased the limit to 2TB. See also [pgvector issue #667](https://github.com/pgvector/pgvector/issues/667).
-
-        Monitor temp file usage with `log_temp_files`. Consider **per-session** tuning (`SET work_mem`) for heavy queries instead of global settings.
+        > [!TIP]
+        > Monitor temp file usage with `log_temp_files`. Consider **per-session** tuning (`SET work_mem`) for heavy queries instead of global settings.
       details:
         - Specifies the amount of memory to be used by internal sort operations and hash tables before writing to temporary disk files. The value defaults to four megabytes (4MB). Note that for a complex query, several sort or hash operations might be running in parallel; each operation will be allowed to use as much memory as this value specifies before it starts to write data into temporary files. Also, several running sessions could be doing such operations concurrently. Therefore, the total memory used could be many times the value of work_mem; it is necessary to keep this fact in mind when choosing the value. Sort operations are used for ORDER BY, DISTINCT, and merge joins. Hash tables are used in hash joins, hash-based aggregation, and hash-based processing of IN subqueries.
       recomendations:
@@ -49,15 +60,22 @@ categories:
         Let's get back to basics - PostgreSQL Memory Components: https://www.postgresql.fastware.com/blog/back-to-basics-with-postgresql-memory-components
     maintenance_work_mem:
       abstract: |
-        Memory for maintenance operations: **VACUUM**, **CREATE INDEX**, **ALTER TABLE**, and autovacuum workers.
+        Memory for maintenance operations: `VACUUM`, `CREATE INDEX`, `ALTER TABLE`, and autovacuum workers.
 
-        Can be set higher than work_mem since fewer concurrent maintenance operations run.
+        Can be set higher than `work_mem` since fewer concurrent maintenance operations run.
 
-        **Important**: Total usage = `maintenance_work_mem × autovacuum_max_workers`. Consider using `autovacuum_work_mem` separately.
+        > [!IMPORTANT]
+        > Total usage:
+        > ```
+        > total = maintenance_work_mem × autovacuum_max_workers
+        > ```
+        >
+        > Consider using `autovacuum_work_mem` separately.
 
-        **PostgreSQL ≤16**: 1GB limit (~179M dead tuples per pass). **PostgreSQL 17+**: No limit (uses radix trees).
-
-        **Windows ≤ PostgreSQL 17**: Maximum value is ~2GB (2097151 kB) due to Windows LLP64 model where `sizeof(long)==4` even on 64-bit systems. Fixed in [PostgreSQL 18](https://www.postgresql.org/message-id/flat/1a01f0-66ec2d80-3b-68487680@27595217) which increased the limit to 2TB. See also [pgvector issue #667](https://github.com/pgvector/pgvector/issues/667).
+        > [!NOTE]
+        > **PostgreSQL ≤16**: 1GB limit (~179M dead tuples per pass). **PostgreSQL 17+**: No limit (uses radix trees).
+        >
+        > **Windows ≤ PostgreSQL 17**: Maximum value is ~2GB (2097151 kB) due to Windows LLP64 model where `sizeof(long)==4` even on 64-bit systems. Fixed in [PostgreSQL 18](https://www.postgresql.org/message-id/flat/1a01f0-66ec2d80-3b-68487680@27595217) which increased the limit to 2TB. See also [pgvector issue #667](https://github.com/pgvector/pgvector/issues/667).
       recomendations:
         Adjusting maintenance_work_mem: https://www.cybertec-postgresql.com/en/adjusting-maintenance_work_mem/
         How Much maintenance_work_mem Do I Need?: http://rhaas.blogspot.com/2019/01/how-much-maintenanceworkmem-do-i-need.html
@@ -69,7 +87,7 @@ categories:
   checkpoint_related:
     min_wal_size:
       abstract: |
-        Minimum size of pg_wal directory (pg_xlog in versions <10). WAL files are **recycled** rather than removed when below this threshold.
+        Minimum size of `pg_wal` directory (`pg_xlog` in versions <10). WAL files are **recycled** rather than removed when below this threshold.
 
         Useful to handle **WAL spikes** during batch jobs or high write periods.
       recomendations:
@@ -79,11 +97,12 @@ categories:
         "Tuning Your Postgres Database for High Write Loads": https://www.crunchydata.com/blog/tuning-your-postgres-database-for-high-write-loads
     max_wal_size:
       abstract: |
-        Triggers checkpoint when pg_wal exceeds this size. Larger values reduce checkpoint frequency but increase crash recovery time.
+        Triggers checkpoint when `pg_wal` exceeds this size. Larger values reduce checkpoint frequency but increase crash recovery time.
 
-        **Recommendation**: Set to hold **1 hour of WAL**. Write-heavy systems may need significantly more.
-
-        Monitor `pg_stat_bgwriter` to ensure most checkpoints are **timed** (not requested).
+        > [!TIP]
+        > Set to hold **1 hour of WAL**. Write-heavy systems may need significantly more.
+        >
+        > Monitor `pg_stat_bgwriter` to ensure most checkpoints are **timed** (not requested).
       recomendations:
         "Basics of Tuning Checkpoints": https://www.enterprisedb.com/blog/basics-tuning-checkpoints
         "Tuning max_wal_size in PostgreSQL": https://www.enterprisedb.com/blog/tuning-maxwalsize-postgresql
@@ -95,8 +114,14 @@ categories:
       abstract: |
         Spreads checkpoint writes over this fraction of `checkpoint_timeout` to reduce I/O spikes.
 
-        **Example**: `checkpoint_timeout = 5min` and `checkpoint_completion_target = 0.9`
-        → Checkpoint spreads writes over **270 seconds (4min 30s)**, leaving 30s buffer for sync overhead.
+        > [!TIP]
+        > Example:
+        > ```
+        > checkpoint_timeout = 5min
+        > checkpoint_completion_target = 0.9
+        > ```
+        >
+        > Checkpoint spreads writes over **270 seconds (4min 30s)**, leaving 30s buffer for sync overhead.
 
         Values higher than 0.9 risk checkpoint delays. Monitor via `pg_stat_bgwriter`.
       recomendations:
@@ -127,22 +152,35 @@ categories:
       abstract: |
         Network interfaces PostgreSQL listens on for connections.
 
-        **Security**: Default is `localhost` (local-only). Never use `*` or `0.0.0.0` exposed to internet.
-
-        Use specific IPs with `pg_hba.conf` rules, or SSH tunnels/VPN for remote access.
+        > [!WARNING]
+        > **Security**: Default is `localhost` (local-only). Avoid `*` or `0.0.0.0` exposed to internet.
+        >
+        > Use specific IPs with `pg_hba.conf` rules, or SSH tunnels/VPN for remote access.
+        >
+        > If exposing PostgreSQL over network, **always enable SSL/TLS** (`ssl = on` + certificates) and enforce `hostssl` in `pg_hba.conf`.
       recomendations:
         "PostgreSQL Connections and Authentication": https://www.postgresql.org/docs/current/runtime-config-connection.html
         "PostgreSQL Security: 12 rules for database hardening": https://www.cybertec-postgresql.com/en/postgresql-security-things-to-avoid-in-real-life/
         "Postgres security best practices": https://www.bytebase.com/reference/postgres/how-to/postgres-security-best-practices/
     max_connections:
       abstract: |
-        Maximum concurrent database connections. Each connection consumes memory (~10MB + work_mem per operation).
+        Maximum concurrent database connections. Each connection consumes memory (~10MB + `work_mem` per operation).
 
-        **Best practice**: Use **connection pooling** (PgBouncer, pgpool) instead of high max_connections.
-
-        With pooling: 20-50 connections. Without pooling: 100-200 (but review memory impact).
-
-        Formula: `(RAM - shared_buffers) / (work_mem × avg_operations_per_query)` for rough estimate.
+        > [!TIP]
+        > Use **connection pooling** instead of high `max_connections`:
+        > - [PgBouncer](https://www.pgbouncer.org/) - Lightweight, battle-tested
+        > - [PgCat](https://github.com/postgresml/pgcat) - Modern, written in Rust
+        > - [Pgpool-II](https://www.pgpool.net/) - Feature-rich with query caching
+        >
+        > | Scenario | Recommended Connections |
+        > |----------|------------------------|
+        > | With pooling | 20-50 |
+        > | Without pooling | 100-200 (review memory impact) |
+        >
+        > Memory estimation formula:
+        > ```
+        > max_connections_limit = (RAM - shared_buffers) / (work_mem × avg_operations_per_query)
+        > ```
       recomendations:
         "Tuning max_connections in PostgreSQL": https://www.cybertec-postgresql.com/en/tuning-max_connections-in-postgresql/
         "Why you should use Connection Pooling": https://www.enterprisedb.com/postgres-tutorials/why-you-should-use-connection-pooling-when-setting-maxconnections-postgres
@@ -156,13 +194,16 @@ categories:
 
         Lower values favor index scans, higher values favor sequential scans. Sequential scans become more efficient when queries return ~5-10% or more of table rows, common in analytical/DW workloads.
 
-        **Debate (2025)**: Some experts advocate keeping higher values (4.0) for **plan stability** across cache states, while others recommend lower values (1.1-2.0) for SSD to favor index scans.
+        > [!NOTE]
+        > **Ongoing debate (2025)**: Some experts advocate keeping higher values (4.0) for **plan stability** across cache states, while others recommend lower values (1.1-2.0) for SSD to favor index scans.
+        >
+        > Check suggested readings #1 and #2 for detailed analysis.
 
         Test with `EXPLAIN ANALYZE` to verify query plan choices for your workload.
       recomendations:
-        "How a single PostgreSQL config change improved slow query performance by 50x": https://amplitude.engineering/how-a-single-postgresql-config-change-improved-slow-query-performance-by-50x-85593b8991b0
-        "Better PostgreSQL performance on SSDs": https://www.cybertec-postgresql.com/en/better-postgresql-performance-on-ssds/
         "PostgreSQL with modern storage: what about a lower random_page_cost?": https://dev.to/aws-heroes/postgresql-with-modern-storage-what-about-a-lower-randompagecost-5b7f
+        "Better PostgreSQL performance on SSDs": https://www.cybertec-postgresql.com/en/better-postgresql-performance-on-ssds/
+        "How a single PostgreSQL config change improved slow query performance by 50x": https://amplitude.engineering/how-a-single-postgresql-config-change-improved-slow-query-performance-by-50x-85593b8991b0
         "Postgres Scan Types in EXPLAIN Plans": https://www.crunchydata.com/blog/postgres-scan-types-in-explain-plans
         "Tuning Your PostgreSQL Server": https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
     effective_io_concurrency:
@@ -171,22 +212,22 @@ categories:
 
         Bitmap scans are used when queries need to fetch moderate result sets (too many rows for index scans, too few for sequential scans) or when combining multiple indexes. They're more common in analytical workloads.
 
-        PostgreSQL 18 changes the default from 1 to 16. Values above 200 show diminishing returns in benchmarks.
+        > [!NOTE]
+        > **PostgreSQL 18** changes the default from `1` to `16`. Values above `200` show diminishing returns in benchmarks.
       recomendations:
         "PostgreSQL: effective_io_concurrency benchmarked": https://portavita.github.io/2019-07-19-PostgreSQL_effective_io_concurrency_benchmarked/
         "Bitmap Heap Scan - pganalyze": https://pganalyze.com/docs/explain/scan-nodes/bitmap-heap-scan
         "PostgreSQL indexing: Index scan vs. Bitmap scan vs. Sequential scan (basics)": https://www.cybertec-postgresql.com/en/postgresql-indexing-index-scan-vs-bitmap-scan-vs-sequential-scan-basics/
     io_method:
       abstract: |
-        Selects the async I/O implementation for read operations (PostgreSQL 18+).
+        Selects the async I/O implementation for read operations (PostgreSQL 18+):
 
-        **worker** (default): Uses dedicated background processes. Best for most workloads, especially high-bandwidth sequential scans. Recommended as default.
+        - **`worker`** (default): Uses dedicated background processes. Best for most workloads, especially high-bandwidth sequential scans. Recommended as default.
+        - **`io_uring`** (Linux only): Kernel-level async I/O. Only switch after extensive testing proves benefit for your specific low-latency random-read patterns. Can hit file descriptor limits with high `max_connections`.
+        - **`sync`**: Traditional synchronous I/O. Slower than async methods - avoid unless debugging or testing.
 
-        **io_uring** (Linux only): Kernel-level async I/O. Only switch after extensive testing proves benefit for your specific low-latency random-read patterns. Can hit file descriptor limits with high max_connections.
-
-        **sync**: Traditional synchronous I/O. Slower than async methods - avoid unless debugging or testing.
-
-        Note: Only affects reads. Writes, checkpoints, and WAL still use sync I/O.
+        > [!NOTE]
+        > Only affects reads. Writes, checkpoints, and WAL still use sync I/O.
       recomendations:
         "Tuning AIO in PostgreSQL 18 - Tomas Vondra": https://vondra.me/posts/tuning-aio-in-postgresql-18/
         "Waiting for Postgres 18: Accelerating Disk Reads with Asynchronous I/O - pganalyze": https://pganalyze.com/blog/postgres-18-async-io
@@ -197,7 +238,10 @@ categories:
       abstract: |
         Background worker processes for async I/O when `io_method = worker`.
 
-        Default of 3 is too low for modern multi-core systems. Recommendation: **10-40% of CPU cores** depending on workload.
+        > [!TIP]
+        > Default of `3` is too low for modern multi-core systems.
+        >
+        > **Recommendation**: 10-40% of CPU cores depending on workload.
 
         Higher values benefit workloads with:
         - Sequential scans (DW/analytical queries)
@@ -247,7 +291,10 @@ categories:
       abstract: |
         Hard limit on concurrent I/O operations per backend process (PostgreSQL 18+).
 
-        Controls read-ahead with async I/O. Formula: `max read-ahead = effective_io_concurrency × io_combine_limit`
+        Controls read-ahead with async I/O:
+        ```
+        max_read_ahead = effective_io_concurrency × io_combine_limit
+        ```
 
         Higher values benefit high-latency storage (cloud/EBS) with high IOPS. Watch memory usage - high concurrency increases memory pressure.
       recomendations:
@@ -258,9 +305,10 @@ categories:
         "PostgreSQL 18 Asynchronous I/O - Neon": https://neon.com/postgresql/postgresql-18/asynchronous-io
     file_copy_method:
       abstract: |
-        Method for copying files during **CREATE DATABASE** and **ALTER DATABASE SET TABLESPACE** (PostgreSQL 18+).
+        Method for copying files during `CREATE DATABASE` and `ALTER DATABASE SET TABLESPACE` (PostgreSQL 18+).
 
-        Recommendation: Use **clone** if your filesystem supports it - dramatically faster (200-600ms for 100s of GB) and initially consumes zero extra disk space.
+        > [!TIP]
+        > Use `clone` if your filesystem supports it - dramatically faster (200-600ms for 100s of GB) and initially consumes zero extra disk space.
       recomendations:
         "Instant database clones with PostgreSQL 18": https://boringsql.com/posts/instant-database-clones/
         "Instant Per-Branch Databases with PostgreSQL 18's clone": https://medium.com/axial-engineering/instant-per-branch-databases-with-postgresql-18s-clone-file-copy-and-copy-on-write-filesystems-1b1930bddbaa
@@ -273,9 +321,10 @@ categories:
         Pool from which all background workers are drawn. Must accommodate:
         - Parallel query workers (`max_parallel_workers`)
         - Logical replication workers
-        - Extensions (pg_stat_statements, etc.)
+        - Extensions (`pg_stat_statements`, etc.)
 
-        Recommendation: Set to **CPU core count** or at least **25% of vCPUs**. Requires restart.
+        > [!TIP]
+        > Set to **CPU core count** or at least **25% of vCPUs**. Requires restart.
       recomendations:
         "PostgreSQL Performance Tuning Best Practices 2025": https://www.mydbops.com/blog/postgresql-parameter-tuning-best-practices
         "PostgreSQL Performance Tuning: Key Parameters": https://www.tigerdata.com/learn/postgresql-performance-tuning-key-parameters
@@ -284,7 +333,8 @@ categories:
       abstract: |
         Maximum parallel workers per query executor node.
 
-        Each worker consumes resources individually (work_mem, CPU, I/O). A query with 4 workers uses 5x resources (1 leader + 4 workers).
+        > [!IMPORTANT]
+        > Each worker consumes resources individually (`work_mem`, CPU, I/O). A query with 4 workers uses 5x resources (1 leader + 4 workers).
       recomendations:
         "Increasing max parallel workers per gather in Postgres": https://www.pgmustard.com/blog/max-parallel-workers-per-gather
         "Postgres Tuning & Performance for Analytics Data": https://www.crunchydata.com/blog/postgres-tuning-and-performance-for-analytics-data
@@ -296,7 +346,8 @@ categories:
 
         Limits total parallel workers from the `max_worker_processes` pool. Cannot exceed `max_worker_processes`.
 
-        Recommendation: Set equal to **CPU core count** or `max_worker_processes`.
+        > [!TIP]
+        > Set equal to **CPU core count** or `max_worker_processes`.
       recomendations:
         "Parallel Queries in Postgres": https://www.crunchydata.com/blog/parallel-queries-in-postgres
         "PostgreSQL Performance Tuning Best Practices 2025": https://www.mydbops.com/blog/postgresql-parameter-tuning-best-practices
