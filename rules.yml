@@ -277,9 +277,15 @@ categories:
         "PostgreSQL Performance Tuning: Key Parameters": https://www.tigerdata.com/learn/postgresql-performance-tuning-key-parameters
         "Parallel Queries in Postgres - Crunchy Data": https://www.crunchydata.com/blog/parallel-queries-in-postgres
     max_parallel_workers_per_gather:
-      abstract: Sets the maximum number of parallel processes per executor node.
+      abstract: |
+        Maximum parallel workers per query executor node.
+
+        Each worker consumes resources individually (work_mem, CPU, I/O). A query with 4 workers uses 5x resources (1 leader + 4 workers).
       recomendations:
-        "Comprehensive guide on how to tune database parameters and configuration in PostgreSQL": https://www.enterprisedb.com/postgres-tutorials/comprehensive-guide-how-tune-database-parameters-and-configuration-postgresql
+        "Increasing max parallel workers per gather in Postgres": https://www.pgmustard.com/blog/max-parallel-workers-per-gather
+        "Postgres Tuning & Performance for Analytics Data": https://www.crunchydata.com/blog/postgres-tuning-and-performance-for-analytics-data
+        "Parallel Queries in Postgres": https://www.crunchydata.com/blog/parallel-queries-in-postgres
+        "PostgreSQL Performance Tuning Best Practices 2025": https://www.mydbops.com/blog/postgresql-parameter-tuning-best-practices
     max_parallel_workers:
       abstract: Sets the maximum number of parallel workers that can be active at one time
       recomendations:
