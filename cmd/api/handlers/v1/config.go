@@ -172,6 +172,11 @@ func parseConfigArgs(c *fiber.Ctx) (*configArgs, error) {
 		return nil, fmt.Errorf("could not parse total ram: %w", err)
 	}
 
+	envName, err := profile.Parse(c.Query("environment_name", "WEB"))
+	if err != nil {
+		return nil, fmt.Errorf("could not parse environment name: %w", err)
+	}
+
 	// Set default log format based on PostgreSQL version
 	defaultLogFormat := "stderr"
 	if float32(pgVersion) >= 15.0 {
@@ -182,7 +187,7 @@ func parseConfigArgs(c *fiber.Ctx) (*configArgs, error) {
 		pgVersion:       float32(pgVersion),
 		totalRAM:        parsedRAM,
 		maxConn:         maxConn,
-		envName:         profile.Profile(c.Query("environment_name", "WEB")),
+		envName:         envName,
 		osType:          c.Query("os_type", "linux"),
 		arch:            c.Query("arch", "amd64"),
 		driveType:       c.Query("drive_type", "HDD"),
