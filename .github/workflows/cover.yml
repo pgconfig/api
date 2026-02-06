@@ -26,6 +26,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: Set Go toolchain (workaround for Go 1.25 covdata bug)
+        run: go env -w GOTOOLCHAIN=go1.25.1+auto
       - run: make test
       - name: Send coverage
         env:
