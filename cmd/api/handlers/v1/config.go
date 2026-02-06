@@ -73,7 +73,7 @@ func LoadConfig(rulesFile, docsFile string) error {
 // @Param format query string false "Output format" Enums(json,alter_system,conf) default(json)
 // @Param show_doc query string false "Show Documentation args" Enums(true,false) default(false)
 // @Param include_pgbadger query string false "Add pgbadger configuration" Enums(true,false) default(false)
-// @Param log_format query string false "Defines the log_format to be used" Enums(stderr,csvlog,syslog) default(stderr)
+// @Param log_format query string false "Defines the log_format to be used (default: jsonlog for PG>=15, stderr otherwise)" Enums(stderr,csvlog,syslog,jsonlog)
 // @Success 200 {object} ResponseHTTP{}
 // @Router /v1/tuning/get-config [get]
 func GetConfig(c *fiber.Ctx) error {
@@ -172,6 +172,12 @@ func parseConfigArgs(c *fiber.Ctx) (*configArgs, error) {
 		return nil, fmt.Errorf("could not parse total ram: %w", err)
 	}
 
+	// Set default log format based on PostgreSQL version
+	defaultLogFormat := "stderr"
+	if float32(pgVersion) >= 15.0 {
+		defaultLogFormat = "jsonlog"
+	}
+
 	return &configArgs{
 		pgVersion:       float32(pgVersion),
 		totalRAM:        parsedRAM,
@@ -184,7 +190,7 @@ func parseConfigArgs(c *fiber.Ctx) (*configArgs, error) {
 		outFormat:       format.ExportFormat(c.Query("format", "json")),
 		showDoc:         c.Query("show_doc", "false") == "true",
 		includePgbadger: c.Query("include_pgbadger", "false") == "true",
-		logFormat:       c.Query("log_format", "stderr"),
+		logFormat:       c.Query("log_format", defaultLogFormat),
 	}, nil
 }
 

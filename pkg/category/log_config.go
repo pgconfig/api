@@ -45,5 +45,12 @@ var (
 				{Format: "string", Name: "log_destination", Value: "csvlog"},
 			},
 		},
+		"jsonlog": {
+			Name:        "jsonlog_config",
+			Description: "JSON Log Configuration",
+			Parameters: []ParamSliceOutput{
+				{Format: "string", Name: "log_destination", Value: "jsonlog"},
+			},
+		},
 	}
 )
