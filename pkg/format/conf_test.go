@@ -6,6 +6,7 @@ import (
 
 	"github.com/andreyvit/diff"
 	"github.com/pgconfig/api/pkg/category"
+	. "github.com/pgconfig/api/pkg/tests"
 )
 
 var sliceConfSample = []category.SliceOutput{
@@ -47,7 +48,9 @@ var sliceConfSample = []category.SliceOutput{
 			{Name: "max_parallel_workers", Value: "2", Format: "int"}}}}
 
 func TestConfigFile(t *testing.T) {
-	sample := `
+	Describe("Config file formatting", t, func() {
+		It("should format configuration as postgresql.conf format", func() {
+			expected := `
 # Memory Configuration
 shared_buffers = 23GB
 effective_cache_size = 70GB
@@ -76,10 +79,14 @@ max_parallel_workers_per_gather = 2
 max_parallel_workers = 2
 `
 
-	out := ConfigFile(sliceConfSample)
+			out := ConfigFile(sliceConfSample)
 
-	if a, e := strings.TrimSpace(sample), strings.TrimSpace(out); a != e {
-		t.Errorf("Result not as expected:\n%v", diff.LineDiff(e, a))
-	}
+			actual := strings.TrimSpace(out)
+			expectedTrimmed := strings.TrimSpace(expected)
 
+			if actual != expectedTrimmed {
+				t.Errorf("Result not as expected:\n%v", diff.LineDiff(expectedTrimmed, actual))
+			}
+		})
+	})
 }
