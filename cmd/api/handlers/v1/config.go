@@ -2,6 +2,7 @@ package v1
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -14,7 +15,47 @@ import (
 	"github.com/pgconfig/api/pkg/input/bytes"
 	"github.com/pgconfig/api/pkg/input/profile"
 	"github.com/pgconfig/api/pkg/rules"
+	"gopkg.in/yaml.v2"
 )
+
+type rulesFileContent struct {
+	Categories map[string]map[string]parameter `json:"categories"`
+}
+
+type parameter struct {
+	Abstract       string            `json:"abstract"`
+	Recomendations map[string]string `json:"recomendations,omitempty"`
+	Formula        string            `json:"formula,omitempty"`
+}
+
+var (
+	allRules rulesFileContent
+	pgDocs   docs.DocFile
+)
+
+// LoadConfig loads the necessary files to the api server
+func LoadConfig(rulesFile, docsFile string) error {
+	fileData, err := os.ReadFile(rulesFile)
+	if err != nil {
+		return err
+	}
+
+	err = yaml.Unmarshal(fileData, &allRules)
+	if err != nil {
+		return err
+	}
+	docFile, err := os.ReadFile(docsFile)
+	if err != nil {
+		return err
+	}
+
+	err = yaml.Unmarshal(docFile, &pgDocs)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 // GetConfig is a function to that computes the input and suggests a tuning configuration
 // @Summary Get Configuration
@@ -32,7 +73,7 @@ import (
 // @Param format query string false "Output format" Enums(json,alter_system,conf) default(json)
 // @Param show_doc query string false "Show Documentation args" Enums(true,false) default(false)
 // @Param include_pgbadger query string false "Add pgbadger configuration" Enums(true,false) default(false)
-// @Param log_format query string false "Defines the log_format to be used" Enums(stderr,csvlog,syslog) default(stderr)
+// @Param log_format query string false "Defines the log_format to be used (default: jsonlog for PG>=15, stderr otherwise)" Enums(stderr,csvlog,syslog,jsonlog)
 // @Success 200 {object} ResponseHTTP{}
 // @Router /v1/tuning/get-config [get]
 func GetConfig(c *fiber.Ctx) error {
@@ -131,11 +172,22 @@ func parseConfigArgs(c *fiber.Ctx) (*configArgs, error) {
 		return nil, fmt.Errorf("could not parse total ram: %w", err)
 	}
 
+	envName, err := profile.Parse(c.Query("environment_name", "WEB"))
+	if err != nil {
+		return nil, fmt.Errorf("could not parse environment name: %w", err)
+	}
+
+	// Set default log format based on PostgreSQL version
+	defaultLogFormat := "stderr"
+	if float32(pgVersion) >= 15.0 {
+		defaultLogFormat = "jsonlog"
+	}
+
 	return &configArgs{
 		pgVersion:       float32(pgVersion),
 		totalRAM:        parsedRAM,
 		maxConn:         maxConn,
-		envName:         profile.Profile(c.Query("environment_name", "WEB")),
+		envName:         envName,
 		osType:          c.Query("os_type", "linux"),
 		arch:            c.Query("arch", "amd64"),
 		driveType:       c.Query("drive_type", "HDD"),
@@ -143,7 +195,7 @@ func parseConfigArgs(c *fiber.Ctx) (*configArgs, error) {
 		outFormat:       format.ExportFormat(c.Query("format", "json")),
 		showDoc:         c.Query("show_doc", "false") == "true",
 		includePgbadger: c.Query("include_pgbadger", "false") == "true",
-		logFormat:       c.Query("log_format", "stderr"),
+		logFormat:       c.Query("log_format", defaultLogFormat),
 	}, nil
 }
 

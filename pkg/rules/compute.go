@@ -14,6 +14,7 @@ var allRules = []rule{
 	computeOS,
 	computeProfile,
 	computeStorage,
+	computeAIO,
 
 	// computeVersion can remove values deppending on the version
 	// to be sure that it will not break other rules, leave it at

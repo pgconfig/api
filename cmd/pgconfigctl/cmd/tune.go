@@ -59,6 +59,11 @@ var tuneCmd = &cobra.Command{
 	Long:  `Uses your server info to compute the PostgreSQL tuning aiming to give you a get-start to tune your server.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
+		// Auto-select jsonlog for PostgreSQL 15+ if user didn't explicitly set log format
+		if !cmd.Flags().Changed("log-format") && pgVersion >= 15.0 {
+			logFormat = "jsonlog"
+		}
+
 		out, err := rules.Compute(
 			*input.NewInput(
 				osName,
@@ -97,11 +102,11 @@ func init() {
 	tuneCmd.PersistentFlags().StringVarP(&arch, "arch", "", runtime.GOARCH, "PostgreSQL Version")
 	tuneCmd.PersistentFlags().StringVarP(&diskType, "disk-type", "D", "SSD", "Disk type (possible values are SSD, HDD and SAN)")
 	tuneCmd.PersistentFlags().Float32VarP(&pgVersion, "version", "", defaults.PGVersionF, "PostgreSQL Version")
-	tuneCmd.PersistentFlags().IntVarP(&totalCPU, "cpus", "c", runtime.NumCPU(), "Total CPU cores")
+	tuneCmd.PersistentFlags().IntVarP(&totalCPU, "cpus", "c", runtime.NumCPU(), "Total logical CPU cores (includes hyperthreading)")
 	tuneCmd.PersistentFlags().MarkDeprecated("env-name", "please use --profile instead")
 	tuneCmd.PersistentFlags().IntVarP(&maxConnections, "max-connections", "M", 100, "Max expected connections")
 	tuneCmd.PersistentFlags().BoolVarP(&includePgbadger, "include-pgbadger", "B", false, "Include pgbadger params?")
-	tuneCmd.PersistentFlags().StringVarP(&logFormat, "log-format", "L", "csvlog", "Default log format")
+	tuneCmd.PersistentFlags().StringVarP(&logFormat, "log-format", "L", "csvlog", "Default log format (stderr, csvlog, syslog, jsonlog)")
 
 	tuneCmd.PersistentFlags().VarP(&totalRAM, "ram", "", "Total Memory in bytes")
 	tuneCmd.PersistentFlags().Lookup("ram").DefValue = totalRAM.String()

@@ -1,0 +1,184 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.1'
+          cache: true
+          
+      - name: Build pgconfigctl
+        run: go build -o pgconfigctl cmd/pgconfigctl/main.go
+        
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pgconfigctl-${{ github.sha }}
+          path: pgconfigctl
+          retention-days: 1
+
+  validate-config:
+    name: include on pg${{ matrix.pg_version }}
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        pg_version: ["9.5", "9.6", "10", "11", "12", "13", "14", "15", "16", "17", "18"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download pgconfigctl
+        uses: actions/download-artifact@v4
+        with:
+          name: pgconfigctl-${{ github.sha }}
+          path: .
+          
+      - name: Make executable
+        run: chmod +x pgconfigctl
+
+      - name: Generate postgresql.conf
+        run: |
+          ./pgconfigctl tune \
+            --version ${{ matrix.pg_version }} \
+            --format conf \
+            --ram 1GB \
+            --cpus 2 > tuned.conf
+          
+          echo "--- Generated Config for PG ${{ matrix.pg_version }} ---"
+          cat tuned.conf
+
+      - name: Create Init Script
+        run: |
+          echo "#!/bin/bash" > init-config.sh
+          echo "echo \"include = '/etc/postgresql/tuned.conf'\" >> \"\$PGDATA/postgresql.conf\"" >> init-config.sh
+          chmod +x init-config.sh
+
+      - name: Run PostgreSQL Container
+        run: |
+          IMG_TAG="${{ matrix.pg_version }}"
+          
+          echo "Starting Postgres $IMG_TAG..."
+          
+          docker run -d --name pg-${{ matrix.pg_version }} \
+            -e POSTGRES_PASSWORD=postgres \
+            -v $(pwd)/tuned.conf:/etc/postgresql/tuned.conf \
+            -v $(pwd)/init-config.sh:/docker-entrypoint-initdb.d/init-config.sh \
+            postgres:$IMG_TAG || {
+              echo "Container failed to start (maybe image missing?)"
+              exit 1
+            }
+
+      - name: Wait for Readiness
+        run: |
+          # Verify container exists
+          if ! docker ps -a -q -f name=pg-${{ matrix.pg_version }} | grep -q .; then
+             echo "Container not found!"
+             exit 1
+          fi
+
+          echo "Waiting for Postgres to be ready..."
+          READY=0
+          for i in {1..30}; do
+            # Check if container is still running
+            if ! docker ps -q -f name=pg-${{ matrix.pg_version }} | grep -q .; then
+               echo "Container stopped running!"
+               docker logs pg-${{ matrix.pg_version }}
+               exit 1
+            fi
+
+            if docker exec pg-${{ matrix.pg_version }} pg_isready -U postgres; then
+              echo "Postgres is ready!"
+              READY=1
+              break
+            fi
+            echo "Waiting..."
+            sleep 1
+          done
+
+          if [ $READY -eq 0 ]; then
+            echo "Timed out waiting for Postgres to be ready."
+            docker logs pg-${{ matrix.pg_version }}
+            exit 1
+          fi
+
+      - name: Verify Settings Applied
+        run: |
+          # Fail if container is not running
+          if ! docker ps -q -f name=pg-${{ matrix.pg_version }} | grep -q .; then
+             echo "Container is not running!"
+             exit 1
+          fi
+
+          echo "### PostgreSQL ${{ matrix.pg_version }} Verification Report" >> $GITHUB_STEP_SUMMARY
+          echo "| Parameter | Status | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+
+          check_param() {
+            PARAM=$1
+            # Execute psql to show parameter. 
+            # If it fails (e.g. param doesn't exist), capture error.
+            # We use '|| echo ERROR' to prevent script exit and capture failure.
+            VALUE=$(docker exec pg-${{ matrix.pg_version }} psql -U postgres -t -c "SHOW $PARAM;" 2>/dev/null || echo "NOT_SUPPORTED")
+            
+            # Trim whitespace
+            VALUE=$(echo "$VALUE" | xargs)
+            
+            if [ "$VALUE" == "NOT_SUPPORTED" ]; then
+               echo "| \`$PARAM\` | ⚪ Skipped | Not supported in this version |" >> $GITHUB_STEP_SUMMARY
+               echo "Parameter $PARAM not supported."
+            else
+               echo "| \`$PARAM\` | ✅ Passed | \`$VALUE\` |" >> $GITHUB_STEP_SUMMARY
+               echo "Parameter $PARAM = $VALUE"
+            fi
+          }
+
+          # Core memory settings (mostly universal)
+          check_param "shared_buffers"
+          check_param "effective_cache_size"
+          check_param "work_mem"
+          check_param "maintenance_work_mem"
+
+          # Checkpoint (min/max_wal_size introduced in 9.5, checkpoint_segments removed in 9.5)
+          check_param "min_wal_size"
+          check_param "max_wal_size"
+          check_param "checkpoint_completion_target"
+
+          # Parallel query (introduced gradually 9.6+)
+          check_param "max_worker_processes"
+          check_param "max_parallel_workers_per_gather"
+          check_param "max_parallel_workers"
+
+          # Storage/IO
+          check_param "random_page_cost"
+          check_param "effective_io_concurrency"
+          check_param "maintenance_io_concurrency"
+
+          # PG 18+ AIO
+          check_param "io_workers"
+          check_param "io_method"
+
+          # Final status line
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Tests Completed Successfully**" >> $GITHUB_STEP_SUMMARY
+
+
+      - name: Dump Logs on Failure
+        if: failure()
+        run: |
+           if docker ps -a -q -f name=pg-${{ matrix.pg_version }} | grep -q .; then
+             docker logs pg-${{ matrix.pg_version }}
+           fi

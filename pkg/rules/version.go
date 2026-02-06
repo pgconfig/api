@@ -30,6 +30,18 @@ func computeVersion(in *input.Input, cfg *category.ExportCfg) (*category.ExportC
 		cfg.Worker.MaxParallelWorkers = 0
 	}
 
+	if in.PostgresVersion < 13.0 {
+		cfg.Storage.MaintenanceIOConcurrency = 0
+	}
+
+	if in.PostgresVersion < 18.0 {
+		cfg.Storage.IOMethod = ""
+		cfg.Storage.IOWorkers = 0
+		cfg.Storage.IOMaxCombineLimit = 0
+		cfg.Storage.IOMaxConcurrency = 0
+		cfg.Storage.FileCopyMethod = ""
+	}
+
 	if in.PostgresVersion >= 9.5 {
 		cfg.Checkpoint.CheckpointSegments = 0
 	}

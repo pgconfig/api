@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"testing"
 
-	. "github.com/smartystreets/goconvey/convey"
+	. "github.com/pgconfig/api/pkg/tests"
 )
 
 func TestPretty(t *testing.T) {
-	Convey("Version", t, func() {
-		Convey("should print the version as expected", func() {
+	Describe("Version", t, func() {
+		It("should print the version as expected", func() {
 			got := Pretty()
-			So(got, ShouldResemble, fmt.Sprintf("%s (%s)", Tag, Commit))
+			Expect(got, ShouldResemble, fmt.Sprintf("%s (%s)", Tag, Commit))
 		})
 	})
 }

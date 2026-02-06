@@ -1,3 +1,4 @@
 FROM scratch
-COPY pgconfigctl /
+ARG TARGETPLATFORM
+COPY ${TARGETPLATFORM}/pgconfigctl /
 CMD ["/pgconfigctl"]

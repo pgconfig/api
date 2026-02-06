@@ -5,10 +5,13 @@ import (
 	"testing"
 
 	"github.com/andreyvit/diff"
+	. "github.com/pgconfig/api/pkg/tests"
 )
 
 func TestAlterSystem(t *testing.T) {
-	sample := `
+	Describe("ALTER SYSTEM formatting", t, func() {
+		It("should format configuration as ALTER SYSTEM statements", func() {
+			expected := `
 -- Memory Configuration
 ALTER SYSTEM SET shared_buffers TO '23GB';
 ALTER SYSTEM SET effective_cache_size TO '70GB';
@@ -37,9 +40,14 @@ ALTER SYSTEM SET max_parallel_workers_per_gather TO '2';
 ALTER SYSTEM SET max_parallel_workers TO '2';
 `
 
-	out := AlterSystem(sliceConfSample)
+			out := AlterSystem(sliceConfSample)
 
-	if a, e := strings.TrimSpace(sample), strings.TrimSpace(out); a != e {
-		t.Errorf("Result not as expected:\n%v", diff.LineDiff(e, a))
-	}
+			actual := strings.TrimSpace(out)
+			expectedTrimmed := strings.TrimSpace(expected)
+
+			if actual != expectedTrimmed {
+				t.Errorf("Result not as expected:\n%v", diff.LineDiff(expectedTrimmed, actual))
+			}
+		})
+	})
 }

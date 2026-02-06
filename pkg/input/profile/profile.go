@@ -20,11 +20,11 @@ const (
 	DW Profile = "DW"
 
 	// Mixed profile
-	Mixed Profile = "Mixed"
+	Mixed Profile = "MIXED"
 
 	// Desktop is the development machine on any non-production server
 	// that needs to consume less resources than a regular server.
-	Desktop Profile = "Desktop"
+	Desktop Profile = "DESKTOP"
 )
 
 // AllProfiles Lists all profiles currently available
@@ -52,4 +52,15 @@ func (e *Profile) Set(v string) error {
 // Type is only used in help text
 func (e *Profile) Type() string {
 	return "Profile"
+}
+
+// Parse parses a profile string and returns the normalized Profile.
+// It normalizes the input to uppercase to ensure case-insensitive matching.
+// Returns an error if the profile string is not valid.
+func Parse(s string) (Profile, error) {
+	var p Profile
+	if err := p.Set(s); err != nil {
+		return "", err
+	}
+	return p, nil
 }
