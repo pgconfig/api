@@ -2,108 +2,104 @@ package profile
 
 import (
 	"testing"
+
+	. "github.com/pgconfig/api/pkg/tests"
 )
 
 func TestProfile_Set(t *testing.T) {
-	tests := []struct {
-		name    string
-		input   string
-		want    Profile
-		wantErr bool
-	}{
-		{
-			name:    "Web uppercase",
-			input:   "WEB",
-			want:    Web,
-			wantErr: false,
-		},
-		{
-			name:    "Web lowercase",
-			input:   "web",
-			want:    Web,
-			wantErr: false,
-		},
-		{
-			name:    "OLTP uppercase",
-			input:   "OLTP",
-			want:    OLTP,
-			wantErr: false,
-		},
-		{
-			name:    "OLTP lowercase",
-			input:   "oltp",
-			want:    OLTP,
-			wantErr: false,
-		},
-		{
-			name:    "DW uppercase",
-			input:   "DW",
-			want:    DW,
-			wantErr: false,
-		},
-		{
-			name:    "DW lowercase",
-			input:   "dw",
-			want:    DW,
-			wantErr: false,
-		},
-		{
-			name:    "Mixed uppercase",
-			input:   "MIXED",
-			want:    Mixed,
-			wantErr: false,
-		},
-		{
-			name:    "Mixed mixed case",
-			input:   "Mixed",
-			want:    Mixed,
-			wantErr: false,
-		},
-		{
-			name:    "Mixed lowercase",
-			input:   "mixed",
-			want:    Mixed,
-			wantErr: false,
-		},
-		{
-			name:    "Desktop uppercase",
-			input:   "DESKTOP",
-			want:    Desktop,
-			wantErr: false,
-		},
-		{
-			name:    "Desktop mixed case",
-			input:   "Desktop",
-			want:    Desktop,
-			wantErr: false,
-		},
-		{
-			name:    "Desktop lowercase",
-			input:   "desktop",
-			want:    Desktop,
-			wantErr: false,
-		},
-		{
-			name:    "Invalid profile",
-			input:   "invalid",
-			want:    "",
-			wantErr: true,
-		},
-	}
+	Describe("Profile.Set()", t, func() {
+		Context("when input is valid", func() {
+			It("should accept WEB in uppercase", func() {
+				var p Profile
+				err := p.Set("WEB")
+				Expect(err, ShouldBeNil)
+				Expect(p, ShouldEqual, Web)
+			})
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			var p Profile
-			err := p.Set(tt.input)
+			It("should accept web in lowercase", func() {
+				var p Profile
+				err := p.Set("web")
+				Expect(err, ShouldBeNil)
+				Expect(p, ShouldEqual, Web)
+			})
 
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Profile.Set() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+			It("should accept OLTP in uppercase", func() {
+				var p Profile
+				err := p.Set("OLTP")
+				Expect(err, ShouldBeNil)
+				Expect(p, ShouldEqual, OLTP)
+			})
 
-			if !tt.wantErr && p != tt.want {
-				t.Errorf("Profile.Set() = %v, want %v", p, tt.want)
-			}
+			It("should accept oltp in lowercase", func() {
+				var p Profile
+				err := p.Set("oltp")
+				Expect(err, ShouldBeNil)
+				Expect(p, ShouldEqual, OLTP)
+			})
+
+			It("should accept DW in uppercase", func() {
+				var p Profile
+				err := p.Set("DW")
+				Expect(err, ShouldBeNil)
+				Expect(p, ShouldEqual, DW)
+			})
+
+			It("should accept dw in lowercase", func() {
+				var p Profile
+				err := p.Set("dw")
+				Expect(err, ShouldBeNil)
+				Expect(p, ShouldEqual, DW)
+			})
+
+			It("should accept MIXED in uppercase", func() {
+				var p Profile
+				err := p.Set("MIXED")
+				Expect(err, ShouldBeNil)
+				Expect(p, ShouldEqual, Mixed)
+			})
+
+			It("should accept Mixed in mixed case", func() {
+				var p Profile
+				err := p.Set("Mixed")
+				Expect(err, ShouldBeNil)
+				Expect(p, ShouldEqual, Mixed)
+			})
+
+			It("should accept mixed in lowercase", func() {
+				var p Profile
+				err := p.Set("mixed")
+				Expect(err, ShouldBeNil)
+				Expect(p, ShouldEqual, Mixed)
+			})
+
+			It("should accept DESKTOP in uppercase", func() {
+				var p Profile
+				err := p.Set("DESKTOP")
+				Expect(err, ShouldBeNil)
+				Expect(p, ShouldEqual, Desktop)
+			})
+
+			It("should accept Desktop in mixed case", func() {
+				var p Profile
+				err := p.Set("Desktop")
+				Expect(err, ShouldBeNil)
+				Expect(p, ShouldEqual, Desktop)
+			})
+
+			It("should accept desktop in lowercase", func() {
+				var p Profile
+				err := p.Set("desktop")
+				Expect(err, ShouldBeNil)
+				Expect(p, ShouldEqual, Desktop)
+			})
 		})
-	}
+
+		Context("when input is invalid", func() {
+			It("should return an error", func() {
+				var p Profile
+				err := p.Set("invalid")
+				Expect(err, ShouldNotBeNil)
+			})
+		})
+	})
 }
