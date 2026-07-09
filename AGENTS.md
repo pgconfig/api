@@ -49,7 +49,15 @@ make clean        # Remove dist/ and generated docs
 ## CI/CD
 
 - **cover.yml**: runs `make build` and `make test`, pushes coverage to Coveralls
-- **release.yml**: triggered on tags, runs goreleaser for multi‑arch binaries and Docker images
+- **release.yml**: triggered on tags, runs goreleaser for multi‑arch binaries and Docker images, then releases to Heroku and Dokploy
+
+Release workflow secrets:
+
+| Secret | Used for |
+| --- | --- |
+| `HEROKU_EMAIL`, `HEROKU_API_KEY`, `HEROKU_APP_NAME` | Heroku Container Registry push and `container:release` |
+| `DOCKER_USERNAME`, `DOCKER_TOKEN` | Docker Hub image publish |
+| `DOKPLOY_API_URL`, `DOKPLOY_API_KEY`, `DOKPLOY_APP_ID` | Dokploy deploy after image publish (`pgconfig/api:latest`) |
 
 ## Commit Conventions
 
