@@ -59,3 +59,19 @@ jobs:
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
           /usr/local/bin/heroku container:release web --app ${{ secrets.HEROKU_APP_NAME }}
+
+      - name: Deploy on Dokploy
+        env:
+          DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+          DOKPLOY_API_URL: ${{ secrets.DOKPLOY_API_URL }}
+          DOKPLOY_APP_ID: ${{ secrets.DOKPLOY_APP_ID }}
+        run: |
+          curl -f -X POST "${DOKPLOY_API_URL}/api/application.deploy" \
+            -H 'accept: application/json' \
+            -H "x-api-key: ${DOKPLOY_API_KEY}" \
+            -H 'Content-Type: application/json' \
+            -d "{
+              \"applicationId\": \"${DOKPLOY_APP_ID}\",
+              \"title\": \"Release ${GITHUB_REF_NAME}\",
+              \"description\": \"GoReleaser tag ${GITHUB_REF_NAME}\"
+            }"
