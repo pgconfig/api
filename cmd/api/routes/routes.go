@@ -62,6 +62,8 @@ func New() *fiber.App {
 		return c.Redirect("/docs/index.html")
 	})
 
+	app.Get("/v1/version", handV1.Version)
+
 	v1 := app.Group("/v1/tuning/")
 
 	v1.Get("/list-environments", handV1.ListEnvs)
