@@ -1,0 +1,40 @@
+name: Pull Request Title
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Conventional Commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        shell: bash
+        run: |
+          pattern='^(feat|fix|refactor|docs|chore|test|style|ci|build|perf|revert)(\([a-zA-Z0-9._/-]+\))?!?: .+$'
+
+          if [[ ! "$PR_TITLE" =~ $pattern ]]; then
+            echo "Pull request title must follow Conventional Commits."
+            echo "Example: feat(api): add a new endpoint"
+            exit 1
+          fi
+
+          if (( ${#PR_TITLE} > 50 )); then
+            echo "Pull request title must not exceed 50 characters."
+            exit 1
+          fi
+
+          if [[ "$PR_TITLE" =~ ^[a-z]+(\([^)]*\))?!: ]]; then
+            echo "::warning::This pull request will trigger a major release after merge."
+            {
+              echo "## Major release"
+              echo
+              echo "This pull request will trigger a major release after merge."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi

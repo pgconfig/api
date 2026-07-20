@@ -48,8 +48,11 @@ make clean        # Remove dist/ and generated docs
 
 ## CI/CD
 
-- **cover.yml**: runs `make build` and `make test`, pushes coverage to Coveralls
-- **release.yml**: triggered on tags, runs goreleaser for multi‑arch binaries and Docker images
+- **cover.yml**: runs `make build` and `make test` in parallel; successful pushes
+  to `main` run semantic-release and GoReleaser in a FIFO release queue
+- **release.yml**: publishes manual tags and retries existing tags with GoReleaser
+  for multi-arch binaries and Docker images
+- **pr-title.yml**: validates pull request titles as Conventional Commits
 
 ## Commit Conventions
 
@@ -61,15 +64,23 @@ Follow commit conventions from `~/.claude/pgconfig.md`:
 <body wrapped at 80 cols, focus on WHY not WHAT>
 ```
 
-Types: `feat`, `fix`, `refactor`, `docs`, `chore`, `test`, `style`
+Types: `feat`, `fix`, `refactor`, `docs`, `chore`, `test`, `style`, `ci`,
+`build`, `perf`, `revert`
 
 Rules:
 - Title ≤50 chars, imperative mood ("fix" not "fixed").
 - Body wrapped at 80 cols, focus on WHY.
+- Use `feat` only for user-facing product capabilities. Release automation,
+  workflows, and other CI/CD infrastructure must use `ci` and must not trigger a
+  product release.
 - Sign‑off required (`-s`).
 - **STRICTLY FORBIDDEN**: AI attribution footers (e.g., "Generated with Crush", "Assisted by...").
 - **STRICTLY FORBIDDEN**: Adding "Co-authored-by" unless explicitly requested by the user.
 - **English Only**: Commit messages must be in English.
+- **Breaking changes require explicit approval**: Agents must never add `!` to a
+  commit/PR type or add a `BREAKING CHANGE:` footer unless the user explicitly
+  requests a breaking change or major release. A large change is not necessarily
+  a breaking change; when in doubt, use a non-breaking type and ask the user.
 
 ## Gotchas
 

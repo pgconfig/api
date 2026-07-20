@@ -29,6 +29,3 @@ build: clean docs lint
 	mkdir -p dist/
 	go build -o dist/pgconfigctl cmd/pgconfigctl/main.go
 	go build -o dist/api cmd/api/main.go
-
-heroku-publish:
-	goreleaser

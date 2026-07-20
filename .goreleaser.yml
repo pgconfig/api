@@ -3,9 +3,6 @@ before:
   hooks:
     - make docs
 
-env:
-  - HEROKU_APP_NAME={{ if index .Env "HEROKU_APP_NAME"  }}{{ .Env.HEROKU_APP_NAME }}{{ else }}default-app-name{{ end }}
-
 builds:
   - id: pgconfigctl
     binary: pgconfigctl
@@ -101,10 +98,10 @@ release:
   footer: >-
     ## Docker Images
 
-    - `docker pull docker.io/pgconfig/api:{{ .Version }}`
-    - `docker pull ghcr.io/pgconfig/api:{{ .Version }}`
-    - `docker pull docker.io/pgconfig/pgconfigctl:{{ .Version }}`
-    - `docker pull ghcr.io/pgconfig/pgconfigctl:{{ .Version }}`
+    - `docker pull docker.io/pgconfig/api:v{{ .Version }}`
+    - `docker pull ghcr.io/pgconfig/api:v{{ .Version }}`
+    - `docker pull docker.io/pgconfig/pgconfigctl:v{{ .Version }}`
+    - `docker pull ghcr.io/pgconfig/pgconfigctl:v{{ .Version }}`
 
 snapshot:
   version_template: "{{ .Tag }}-next"
@@ -172,32 +169,6 @@ dockers_v2:
     platforms:
       - linux/amd64
       - linux/arm64
-    flags:
-      - "--provenance=false"
-    sbom: false
-
-  - id: heroku-web
-    ids:
-      - api
-    dockerfile: cmd/api/Dockerfile
-    extra_files:
-      - rules.yml
-      - pg-docs.yml
-    images:
-      - "registry.heroku.com/{{ .Env.HEROKU_APP_NAME }}/web"
-    tags:
-      - "v{{ .Version }}"
-      - "v{{ .Major }}.{{ .Minor }}"
-      - "v{{ .Major }}"
-      - "latest"
-    labels:
-      "org.opencontainers.image.created": "{{.Date}}"
-      "org.opencontainers.image.title": "pgconfig-{{.ProjectName}}"
-      "org.opencontainers.image.website": "pgconfig.org"
-      "org.opencontainers.image.revision": "{{.FullCommit}}"
-      "org.opencontainers.image.version": "{{.Version}}"
-    platforms:
-      - linux/amd64
     flags:
       - "--provenance=false"
     sbom: false
