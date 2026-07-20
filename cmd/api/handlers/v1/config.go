@@ -108,13 +108,13 @@ func processConfig(c *fiber.Ctx, args *configArgs) ([]category.SliceOutput, erro
 		args.maxConn,
 		args.pgVersion)
 
-	tune, err := rules.Compute(input)
+	tuningResult, err := rules.TuneCompatibility(input)
 
 	if err != nil {
 		return nil, err
 	}
 
-	output := tune.ToSlice(args.pgVersion, args.includePgbadger, args.logFormat)
+	output := tuningResult.CompatibilityProjection().ToSlice(args.pgVersion, args.includePgbadger, args.logFormat)
 
 	if args.showDoc {
 		doc := pgDocs.Documentation[docs.FormatVer(args.pgVersion)]

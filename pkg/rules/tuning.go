@@ -73,7 +73,8 @@ func Tune(request TuningRequest) (*TuningResult, error) {
 	if err != nil {
 		return nil, err
 	}
-	legacy, adjustments, err := computeWithAdjustments(normalized.legacyInput(rulesVersion))
+	calculationRequest := normalized.legacyInput(rulesVersion)
+	legacy, adjustments, err := computeWithAdjustments(calculationRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -97,6 +98,27 @@ func Tune(request TuningRequest) (*TuningResult, error) {
 		ApplicationVersion: version.Pretty(),
 		legacy:             legacy,
 	}, nil
+}
+
+// TuneCompatibility uses the shared tuning operation while retaining the
+// historical projection and errors expected by legacy consumers.
+func TuneCompatibility(legacyRequest input.Input) (*TuningResult, error) {
+	canonicalRequest := NewTuningRequest(legacyRequest)
+	result, tuningErr := Tune(canonicalRequest)
+	compatibility, _, compatibilityErr := computeWithAdjustments(legacyRequest)
+	if compatibilityErr != nil {
+		return nil, compatibilityErr
+	}
+	if tuningErr != nil {
+		return &TuningResult{
+			Request:            normalizeRequest(canonicalRequest),
+			Recommendations:    map[string]TuningRecommendation{},
+			ApplicationVersion: version.Pretty(),
+			legacy:             compatibility,
+		}, nil
+	}
+	result.legacy = compatibility
+	return result, nil
 }
 
 // CompatibilityProjection returns the legacy category model used by REST v1

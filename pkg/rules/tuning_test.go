@@ -333,6 +333,15 @@ func TestTuneNormalizesPostgreSQLVersionWhitespace(t *testing.T) {
 	}
 }
 
+func TestTuneKeepsCanonicalVersionValidationStrict(t *testing.T) {
+	request := validTuningRequest()
+	request.PostgreSQLVersion = "0"
+
+	if _, err := Tune(request); err == nil {
+		t.Fatal("canonical tuning accepted an invalid PostgreSQL Version")
+	}
+}
+
 func TestTuneIsDeterministic(t *testing.T) {
 	request := NewTuningRequest(validLegacyInput())
 
@@ -361,7 +370,7 @@ func TestCompatibilityProjectionMatchesCompute(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	result, err := Tune(NewTuningRequest(in))
+	result, err := TuneCompatibility(in)
 	if err != nil {
 		t.Fatal(err)
 	}
