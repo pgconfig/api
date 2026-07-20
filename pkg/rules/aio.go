@@ -12,43 +12,8 @@ func computeAIO(in *input.Input, cfg *category.ExportCfg) (*category.ExportCfg, 
 	// Set default values already from NewStorageCfg
 	// Adjust io_workers based on profile and CPU cores
 
-	// Factor per profile
-	var factor float64
-	switch in.Profile {
-	case profile.Desktop:
-		factor = 0.1
-	case profile.Web:
-		factor = 0.2
-	case profile.Mixed:
-		factor = 0.25
-	case profile.OLTP:
-		factor = 0.3
-	case profile.DW:
-		factor = 0.4
-	default:
-		factor = 0.25
-	}
-
-	// Adjust factor based on disk type (optional)
-	// HDD may benefit from more workers, SSD from fewer
-	switch in.DiskType {
-	case "HDD":
-		factor += 0.1
-	case "SSD", "SAN":
-		// keep factor as is
-	}
-
-	// Calculate io_workers
-	workers := int(math.Ceil(float64(in.TotalCPU) * factor))
-	// Ensure at least 2 workers, but keep default 3 as minimum
-	if workers < 2 {
-		workers = 2
-	}
-	// Max workers? Not needed, but can limit to total CPU
-	if workers > in.TotalCPU {
-		workers = in.TotalCPU
-	}
-	cfg.Storage.IOWorkers = workers
+	workerCalculation := calculateIOWorkers(in.TotalCPU, in.Profile, in.DiskType)
+	cfg.Storage.IOWorkers = workerCalculation.Value
 
 	// Tune io_max_combine_limit and io_max_concurrency based on profile
 	// Values assume 8KB pages for limits (16 = 128KB, 128 = 1MB)
@@ -69,4 +34,58 @@ func computeAIO(in *input.Input, cfg *category.ExportCfg) (*category.ExportCfg, 
 	// cfg.Storage.IOMethod = "worker"
 
 	return cfg, nil
+}
+
+type ioWorkerCalculation struct {
+	Value                int
+	InitialValue         int
+	HDDAdjusted          bool
+	MinimumApplied       bool
+	LogicalCPUCapApplied bool
+}
+
+func calculateIOWorkers(totalCPU int, workload profile.Profile, diskType string) ioWorkerCalculation {
+	calculation := ioWorkerCalculation{
+		InitialValue: int(math.Ceil(float64(totalCPU) * ioWorkerFactor(workload, diskType))),
+		HDDAdjusted:  diskType == "HDD",
+	}
+	calculation.Value = calculation.InitialValue
+	if calculation.Value < 2 {
+		calculation.Value = 2
+		calculation.MinimumApplied = true
+	}
+	if calculation.Value > totalCPU {
+		calculation.Value = totalCPU
+		calculation.LogicalCPUCapApplied = true
+	}
+	return calculation
+}
+
+func ioWorkerFactor(workload profile.Profile, diskType string) float64 {
+	var factor float64
+	switch workload {
+	case profile.Desktop:
+		factor = 0.1
+	case profile.Web:
+		factor = 0.2
+	case profile.Mixed:
+		factor = 0.25
+	case profile.OLTP:
+		factor = 0.3
+	case profile.DW:
+		factor = 0.4
+	default:
+		factor = 0.25
+	}
+
+	// Adjust factor based on disk type (optional)
+	// HDD may benefit from more workers, SSD from fewer
+	switch diskType {
+	case "HDD":
+		factor += 0.1
+	case "SSD", "SAN":
+		// keep factor as is
+	}
+
+	return factor
 }
