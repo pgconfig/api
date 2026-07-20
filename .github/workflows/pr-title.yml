@@ -30,7 +30,9 @@ jobs:
             exit 1
           fi
 
-          if [[ "$PR_TITLE" =~ ^[a-z]+(\([^)]*\))?!: ]]; then
+          breaking_pattern='^[a-z]+(\([^)]*\))?!:'
+
+          if [[ "$PR_TITLE" =~ $breaking_pattern ]]; then
             echo "::warning::This pull request will trigger a major release after merge."
             {
               echo "## Major release"
