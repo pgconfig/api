@@ -64,24 +64,33 @@ var tuneCmd = &cobra.Command{
 			logFormat = "jsonlog"
 		}
 
-		out, err := rules.Compute(
-			*input.NewInput(
-				osName,
-				arch,
-				totalRAM,
-				totalCPU,
-				profileName,
-				diskType,
-				maxConnections,
-				pgVersion))
+		in := *input.NewInput(
+			osName,
+			arch,
+			totalRAM,
+			totalCPU,
+			profileName,
+			diskType,
+			maxConnections,
+			pgVersion)
+		output, err := tune(in, outputFormat, includePgbadger, logFormat)
 
 		if err != nil {
 			panic(err)
 		}
 
-		data := out.ToSlice(pgVersion, includePgbadger, logFormat)
-		fmt.Println(format.ExportConf(outputFormat, data, pgVersion, nil))
+		fmt.Println(output)
 	},
+}
+
+func tune(in input.Input, outputFormat format.ExportFormat, includePgbadger bool, logFormat string) (string, error) {
+	result, err := rules.Tune(rules.NewTuningRequest(in))
+	if err != nil {
+		return "", err
+	}
+
+	data := result.CompatibilityProjection().ToSlice(in.PostgresVersion, includePgbadger, logFormat)
+	return format.ExportConf(outputFormat, data, in.PostgresVersion, nil), nil
 }
 
 func init() {
