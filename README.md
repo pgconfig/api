@@ -7,6 +7,12 @@
 
 PGConfig.org API v2.
 
+## Model Context Protocol
+
+The public MCP server exposes PostgreSQL tuning recommendations to compatible
+clients at `https://api.pgconfig.org/mcp`. See the [MCP contract](docs/mcp.md)
+for connection instructions, inputs, results, errors, and operational limits.
+
 ## Objectives of this repo
 
 1. host the v2 api of pgconfig.org:

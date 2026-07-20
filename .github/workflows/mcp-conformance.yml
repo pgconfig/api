@@ -1,0 +1,67 @@
+name: MCP Conformance
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  server-conformance:
+    # Stacked documentation branches may predate the endpoint. Retargeting the
+    # PR to main after its implementation dependencies land activates the job.
+    if: github.event_name != 'pull_request' || github.event.pull_request.base.ref == 'main'
+    name: Server (${{ matrix.scenario }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario:
+          - server-initialize
+          - tools-list
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Generate API documentation
+        run: make docs
+
+      - name: Build API
+        run: go build -o dist/api ./cmd/api
+
+      - name: Start API
+        run: |
+          ./dist/api --port 3000 >api.log 2>&1 &
+          echo $! >api.pid
+
+      - name: Wait for API
+        shell: bash
+        run: |
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:3000/v1/version >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat api.log
+          exit 1
+
+      - name: Run official MCP conformance
+        uses: modelcontextprotocol/conformance@v0.1.16
+        with:
+          mode: server
+          url: http://127.0.0.1:3000/mcp
+          scenario: ${{ matrix.scenario }}
+          verbose: true
+
+      - name: Show API log on failure
+        if: failure()
+        run: cat api.log
