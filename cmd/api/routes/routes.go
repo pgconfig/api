@@ -4,12 +4,14 @@ import (
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/swagger"
 
 	handV1 "github.com/pgconfig/api/cmd/api/handlers/v1"
+	mcpHandler "github.com/pgconfig/api/cmd/api/mcp"
 )
 
 // New create an instance of Book app routes
@@ -63,6 +65,7 @@ func New() *fiber.App {
 	})
 
 	app.Get("/v1/version", handV1.Version)
+	app.All("/mcp", adaptor.HTTPHandler(mcpHandler.NewHandler()))
 
 	v1 := app.Group("/v1/tuning/")
 

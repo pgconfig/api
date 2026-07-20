@@ -34,6 +34,8 @@ type TuningRecommendation struct {
 // TuningResult is the provenance-aware result returned by Tune.
 type TuningResult struct {
 	Request            TuningRequest                   `json:"request"`
+	Assumptions        []string                        `json:"assumptions"`
+	Warnings           []string                        `json:"warnings"`
 	Recommendations    map[string]TuningRecommendation `json:"recommendations"`
 	ApplicationVersion string                          `json:"application_version"`
 	legacy             *category.ExportCfg
@@ -93,6 +95,8 @@ func Tune(request TuningRequest) (*TuningResult, error) {
 
 	return &TuningResult{
 		Request:            normalized,
+		Assumptions:        []string{},
+		Warnings:           []string{},
 		Recommendations:    recommendations,
 		ApplicationVersion: version.Pretty(),
 		legacy:             legacy,
@@ -108,6 +112,7 @@ func (r *TuningResult) CompatibilityProjection() *category.ExportCfg {
 func normalizeRequest(request TuningRequest) TuningRequest {
 	request.OS = strings.ToLower(strings.TrimSpace(request.OS))
 	request.Arch = strings.ToLower(strings.TrimSpace(request.Arch))
+	request.Profile = profile.Profile(strings.ToUpper(strings.TrimSpace(string(request.Profile))))
 	switch request.Arch {
 	case "i686":
 		request.Arch = "386"
