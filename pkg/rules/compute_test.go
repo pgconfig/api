@@ -3,6 +3,7 @@ package rules
 import (
 	"testing"
 
+	"github.com/pgconfig/api/pkg/format"
 	"github.com/pgconfig/api/pkg/input"
 	"github.com/pgconfig/api/pkg/input/bytes"
 	"github.com/pgconfig/api/pkg/input/profile"
@@ -85,6 +86,38 @@ func TestComputeWalBuffers(t *testing.T) {
 				Expect(err, ShouldBeNil)
 				Expect(out.Checkpoint.WALBuffers, ShouldEqual, tt.expectedWalBuffers)
 			}
+		})
+	})
+}
+
+func TestComputeIOWorkersClampAcrossFormats(t *testing.T) {
+	Describe("io_workers clamp in output formats", t, func() {
+		It("should emit the clamped value in json, alter_system, and conf", func() {
+			in := input.Input{
+				OS:              "linux",
+				Arch:            "amd64",
+				Profile:         profile.DW,
+				TotalRAM:        540 * bytes.GB,
+				MaxConnections:  25,
+				DiskType:        "SSD",
+				TotalCPU:        96,
+				PostgresVersion: 18.0,
+			}
+
+			out, err := Compute(in)
+			Expect(err, ShouldBeNil)
+			Expect(out.Storage.IOWorkers, ShouldEqual, 32)
+
+			report := out.ToSlice(18.0, false, "")
+
+			Expect(format.ExportConf(format.JSON, report, 18.0, nil),
+				ShouldContainSubstring, `"name": "io_workers"`)
+			Expect(format.ExportConf(format.JSON, report, 18.0, nil),
+				ShouldContainSubstring, `"config_value": "32"`)
+			Expect(format.ExportConf(format.AlterSystemFormat, report, 18.0, nil),
+				ShouldContainSubstring, "ALTER SYSTEM SET io_workers TO '32';")
+			Expect(format.ExportConf(format.Config, report, 18.0, nil),
+				ShouldContainSubstring, "io_workers = 32")
 		})
 	})
 }
