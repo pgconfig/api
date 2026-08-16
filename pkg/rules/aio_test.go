@@ -34,6 +34,10 @@ func Test_computeAIO(t *testing.T) {
 				{"SAN disk type behaves like SSD", profile.OLTP, 8, "SAN", 18.0, 3, "worker", 16, 128},
 				{"Should limit workers to TotalCPU", profile.DW, 2, "HDD", 18.0, 2, "worker", 128, 256},
 				{"Should cap workers at TotalCPU when min exceeds it", profile.Web, 1, "SSD", 18.0, 1, "worker", 16, 64},
+				{"DW profile with 96 cores SSD caps at 32", profile.DW, 96, "SSD", 18.0, 32, "worker", 128, 256},
+				{"DW profile with 96 cores HDD caps at 32", profile.DW, 96, "HDD", 18.0, 32, "worker", 128, 256},
+				{"DW profile with 80 cores SSD stays at 32", profile.DW, 80, "SSD", 18.0, 32, "worker", 128, 256},
+				{"DW profile with 60 cores HDD stays at 30", profile.DW, 60, "HDD", 18.0, 30, "worker", 128, 256},
 			}
 
 			for _, tt := range tests {

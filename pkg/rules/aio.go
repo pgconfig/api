@@ -8,6 +8,10 @@ import (
 	"github.com/pgconfig/api/pkg/input/profile"
 )
 
+// maxIOWorkers is the upper bound for io_workers. PostgreSQL rejects values
+// above 32; see the io_workers entry in pg-docs.yml (max_value: "32").
+const maxIOWorkers = 32
+
 func computeAIO(in *input.Input, cfg *category.ExportCfg) (*category.ExportCfg, error) {
 	// Set default values already from NewStorageCfg
 	// Adjust io_workers based on profile and CPU cores
@@ -44,9 +48,12 @@ func computeAIO(in *input.Input, cfg *category.ExportCfg) (*category.ExportCfg, 
 	if workers < 2 {
 		workers = 2
 	}
-	// Max workers? Not needed, but can limit to total CPU
+	// Limit workers to the total CPU count, then to PostgreSQL's maximum.
 	if workers > in.TotalCPU {
 		workers = in.TotalCPU
+	}
+	if workers > maxIOWorkers {
+		workers = maxIOWorkers
 	}
 	cfg.Storage.IOWorkers = workers
 
