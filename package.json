@@ -1,0 +1,14 @@
+{
+  "name": "pgconfig-api",
+  "version": "3.6.1",
+  "private": true,
+  "scripts": {
+    "changeset": "changeset",
+    "version:packages": "changeset version && npm install --package-lock-only --ignore-scripts",
+    "release:tag": "node scripts/release-version.mjs check && changeset git-tag",
+    "test:release": "node --test scripts/release-*.test.mjs"
+  },
+  "devDependencies": {
+    "@changesets/cli": "3.0.3"
+  }
+}

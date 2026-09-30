@@ -27,3 +27,7 @@ covprofile
 .crush/
 result
 !result/
+
+# Release tooling
+/node_modules
+/release-notes.md

@@ -3,11 +3,21 @@ name: release
 on:
   push:
     tags:
-      - "*"
+      - "v*"
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_TOKEN:
+        required: true
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing tag to publish or retry
+        description: Existing version tag to publish or retry
         required: true
         type: string
 
@@ -19,6 +29,9 @@ concurrency:
   group: release
   cancel-in-progress: false
   queue: max
+
+env:
+  VERSION: ${{ inputs.tag || github.ref_name }}
 
 jobs:
   goreleaser:
@@ -36,9 +49,9 @@ jobs:
           RELEASE_TAG: ${{ inputs.tag }}
         shell: bash
         run: |
-          pattern='^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$'
+          pattern='^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$'
           if [[ ! "$RELEASE_TAG" =~ $pattern ]]; then
-            echo "Tag must be a semantic version without a v prefix."
+            echo "Tag must be a semantic version with a v prefix."
             exit 1
           fi
 
@@ -46,6 +59,17 @@ jobs:
             echo "Tag $RELEASE_TAG does not point to the checked-out commit."
             exit 1
           fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Check release version
+        run: node scripts/release-version.mjs check "${VERSION#v}"
+
+      - name: Prepare release notes
+        run: node scripts/release-version.mjs notes > release-notes.md
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -73,6 +97,6 @@ jobs:
         with:
           distribution: goreleaser
           version: v2.17.0
-          args: release --clean
+          args: release --clean --release-notes=release-notes.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
