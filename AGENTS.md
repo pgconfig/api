@@ -48,10 +48,12 @@ make clean        # Remove dist/ and generated docs
 
 ## CI/CD
 
-- **cover.yml**: runs `make build` and `make test` in parallel; successful pushes
-  to `main` run semantic-release and GoReleaser in a FIFO release queue
-- **release.yml**: publishes manual tags and retries existing tags with GoReleaser
-  for multi-arch binaries and Docker images
+- **cover.yml**: runs `make build`, `make test`, and the release config checks
+  in parallel
+- **changesets.yml**: on `main`, opens or updates the Changesets version PR;
+  merging it tags `v<version>` and calls `release.yml`
+- **release.yml**: publishes a tag with GoReleaser for multi-arch binaries and
+  Docker images, using the tag's `CHANGELOG.md` entry as release notes
 - **pr-title.yml**: validates pull request titles as Conventional Commits
 
 ## Commit Conventions
@@ -71,16 +73,19 @@ Rules:
 - Title ≤50 chars, imperative mood ("fix" not "fixed").
 - Body wrapped at 80 cols, focus on WHY.
 - Use `feat` only for user-facing product capabilities. Release automation,
-  workflows, and other CI/CD infrastructure must use `ci` and must not trigger a
-  product release.
+  workflows, and other CI/CD infrastructure must use `ci`.
+- Add a changeset (`npm run changeset`) for each user-visible change and commit
+  it with the change. CI and docs-only changes need none. See
+  `docs/releases.md`.
 - Sign‑off required (`-s`).
 - **STRICTLY FORBIDDEN**: AI attribution footers (e.g., "Generated with Crush", "Assisted by...").
 - **STRICTLY FORBIDDEN**: Adding "Co-authored-by" unless explicitly requested by the user.
 - **English Only**: Commit messages must be in English.
-- **Breaking changes require explicit approval**: Agents must never add `!` to a
-  commit/PR type or add a `BREAKING CHANGE:` footer unless the user explicitly
-  requests a breaking change or major release. A large change is not necessarily
-  a breaking change; when in doubt, use a non-breaking type and ask the user.
+- **Breaking changes require explicit approval**: Agents must never choose a
+  `major` changeset, add `!` to a commit/PR type, or add a `BREAKING CHANGE:`
+  footer unless the user explicitly requests a breaking change or major release.
+  A large change is not necessarily a breaking change; when in doubt, use a
+  non-breaking type and ask the user.
 
 ## Gotchas
 
