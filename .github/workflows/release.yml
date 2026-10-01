@@ -9,11 +9,6 @@ on:
       tag:
         required: true
         type: string
-    secrets:
-      DOCKER_USERNAME:
-        required: true
-      DOCKER_TOKEN:
-        required: true
   workflow_dispatch:
     inputs:
       tag:
@@ -34,7 +29,91 @@ env:
   VERSION: ${{ inputs.tag || github.ref_name }}
 
 jobs:
+  # Each target compiles on a runner of its own platform. The publishing job
+  # then packages the binaries without compiling anything.
+  build:
+    name: build (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            command: zigbuild
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-musl
+            command: zigbuild
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            command: build
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            command: build
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            command: build
+            exe: .exe
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Check release version
+        run: node scripts/release-version.mjs check "${VERSION#v}"
+
+      # The web app ships inside the server, so it is built before cargo is.
+      - run: npm ci && npm run build
+        working-directory: web
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.target }}
+          cache-key: release-${{ matrix.target }}
+
+      - uses: mlugg/setup-zig@v1
+        if: runner.os == 'Linux'
+        with:
+          version: 0.13.0
+
+      - run: cargo install --locked cargo-zigbuild
+        if: runner.os == 'Linux'
+
+      # The binaries report the commit they were built from.
+      - run: echo "PGCONFIG_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - run: >-
+          cargo ${{ matrix.command }} --release --locked
+          --target ${{ matrix.target }}
+          --package pgconfigctl --package pgconfig-server
+
+      # Tar preserves the executable mode when transferring between runners.
+      - run: >-
+          tar czf ${{ matrix.target }}.tar.gz
+          -C target/${{ matrix.target }}/release
+          pgconfigctl${{ matrix.exe }} pgconfig-server${{ matrix.exe }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.target }}
+          path: ${{ matrix.target }}.tar.gz
+          compression-level: 0
+          retention-days: 1
+
   goreleaser:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -60,6 +139,20 @@ jobs:
             exit 1
           fi
 
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: binary-*
+          path: prebuilt
+          merge-multiple: true
+
+      - name: Unpack release binaries
+        run: |
+          for archive in prebuilt/*.tar.gz; do
+            target=$(basename "$archive" .tar.gz)
+            mkdir -p "prebuilt/$target"
+            tar xzf "$archive" -C "prebuilt/$target"
+          done
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -71,10 +164,12 @@ jobs:
       - name: Prepare release notes
         run: node scripts/release-version.mjs notes > release-notes.md
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      # GoReleaser's Rust builder still prepares target metadata. The tool hook
+      # imports the matrix artifacts, so this job needs no Zig or compilation.
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          go-version-file: go.mod
+          toolchain: stable
+          cache: false
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -86,12 +181,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v7
         with:
@@ -100,3 +189,4 @@ jobs:
           args: release --clean --release-notes=release-notes.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PGCONFIG_PREBUILT_DIR: ${{ github.workspace }}/prebuilt

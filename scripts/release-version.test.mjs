@@ -6,10 +6,21 @@ import { join, resolve } from "node:path";
 import { test } from "node:test";
 
 const script = resolve("scripts/release-version.mjs");
+const crates = ["pgconfig", "pgconfig-golden", "pgconfig-server", "pgconfigctl"];
+function cargoFiles(cwd, version) {
+  writeFileSync(
+    join(cwd, "Cargo.toml"),
+    `[workspace]\nmembers = ["crates/*"]\n\n[workspace.package]\nversion = "${version}"\nedition = "2024"\n\n[workspace.dependencies]\nserde = { version = "1" }\n`,
+  );
+  const packages = ["serde", ...crates].map((name) =>
+    `[[package]]\nname = "${name}"\nversion = "${name === "serde" ? "1.0.229" : version}"\n`);
+  writeFileSync(join(cwd, "Cargo.lock"), `version = 4\n\n${packages.join("\n")}`);
+}
 function fixture(t) {
   const cwd = mkdtempSync(join(tmpdir(), "pgconfig-api-version-"));
   t.after(() => rmSync(cwd, { recursive: true, force: true }));
   writeFileSync(join(cwd, "package.json"), JSON.stringify({ version: "3.7.0" }));
+  cargoFiles(cwd, "3.7.0");
   return cwd;
 }
 function run(cwd, ...args) {
@@ -23,6 +34,39 @@ test("check rejects a tag that differs from the package version", (t) => {
   assert.notEqual(run(cwd, "check", "3.8.0").status, 0);
 });
 
+test("check rejects cargo files that differ from the package version", (t) => {
+  const cwd = fixture(t);
+  cargoFiles(cwd, "3.6.1");
+  const result = run(cwd, "check");
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /Cargo.toml version differs/);
+});
+
+test("sync writes the package version to the workspace and every crate in the lock", (t) => {
+  const cwd = fixture(t);
+  cargoFiles(cwd, "3.6.1");
+  assert.equal(run(cwd, "sync").status, 0);
+  assert.match(readFileSync(join(cwd, "Cargo.toml"), "utf8"), /\[workspace.package\]\nversion = "3.7.0"/);
+  const lock = readFileSync(join(cwd, "Cargo.lock"), "utf8");
+  for (const name of crates) {
+    assert.ok(lock.includes(`name = "${name}"\nversion = "3.7.0"`), `${name} was not synced`);
+  }
+  // A dependency keeps its own version.
+  assert.ok(lock.includes('name = "serde"\nversion = "1.0.229"'));
+  assert.equal(run(cwd, "check").status, 0);
+});
+
+test("sync changes nothing when a crate is missing from the lock", (t) => {
+  const cwd = fixture(t);
+  cargoFiles(cwd, "3.6.1");
+  const lock = readFileSync(join(cwd, "Cargo.lock"), "utf8").replace('name = "pgconfigctl"', 'name = "renamed"');
+  writeFileSync(join(cwd, "Cargo.lock"), lock);
+  const manifest = readFileSync(join(cwd, "Cargo.toml"), "utf8");
+  assert.notEqual(run(cwd, "sync").status, 0);
+  assert.equal(readFileSync(join(cwd, "Cargo.toml"), "utf8"), manifest);
+  assert.equal(readFileSync(join(cwd, "Cargo.lock"), "utf8"), lock);
+});
+
 test("notes contains only the current release and requires an entry", (t) => {
   const cwd = fixture(t);
   writeFileSync(join(cwd, "CHANGELOG.md"), "# pgconfig-api\n\n## 3.7.0\n\n### Minor Changes\n\n- Changesets.\n\n## 3.6.1\n\n- Previous release.\n");
@@ -33,7 +77,7 @@ test("notes contains only the current release and requires an entry", (t) => {
 
 test("the version workflow pushes the tag and hands it to the release only once", (t) => {
   const cwd = fixture(t);
-  for (const path of ["package.json", "package-lock.json", ".changeset/config.json", "scripts/release-version.mjs"]) {
+  for (const path of ["package.json", "package-lock.json", "Cargo.toml", "Cargo.lock", ".changeset/config.json", "scripts/release-version.mjs"]) {
     cpSync(resolve(path), join(cwd, path), { recursive: true });
   }
   const pkg = JSON.parse(readFileSync(join(cwd, "package.json")));
