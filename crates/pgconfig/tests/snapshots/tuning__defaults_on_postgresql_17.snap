@@ -1,0 +1,106 @@
+---
+source: crates/pgconfig/tests/tuning.rs
+expression: tuned(required_only())
+---
+{
+  "request": {
+    "os": "linux",
+    "arch": "amd64",
+    "total_ram": "8GB",
+    "profile": "WEB",
+    "disk_type": "SSD",
+    "max_connections": 100,
+    "total_cpu": 4,
+    "postgres_version": "17.10"
+  },
+  "assumptions": [
+    {
+      "field": "profile",
+      "value": "WEB",
+      "message": "profile was not supplied. Assumed WEB."
+    },
+    {
+      "field": "disk_type",
+      "value": "SSD",
+      "message": "disk_type was not supplied. Assumed SSD."
+    },
+    {
+      "field": "os",
+      "value": "linux",
+      "message": "os was not supplied. Assumed linux."
+    },
+    {
+      "field": "arch",
+      "value": "amd64",
+      "message": "arch was not supplied. Assumed amd64."
+    },
+    {
+      "field": "max_connections",
+      "value": "100",
+      "message": "max_connections was not supplied. Assumed 100."
+    }
+  ],
+  "warnings": [],
+  "recommendations": {
+    "checkpoint_completion_target": {
+      "value": "0.9",
+      "reason": "Set to 0.9 to spread checkpoint I/O across most of the checkpoint interval."
+    },
+    "effective_cache_size": {
+      "value": "6GB",
+      "reason": "Set to 6GB from memory available to the PostgreSQL and operating-system caches."
+    },
+    "effective_io_concurrency": {
+      "value": "200",
+      "reason": "Set to 200 for the requested SSD storage."
+    },
+    "maintenance_io_concurrency": {
+      "value": "200",
+      "reason": "Set to 200 for the requested SSD storage."
+    },
+    "maintenance_work_mem": {
+      "value": "410MB",
+      "reason": "Set to 410MB as 5% of memory available to the WEB profile."
+    },
+    "max_connections": {
+      "value": "100",
+      "reason": "Set to 100 to match the requested connection limit."
+    },
+    "max_parallel_workers": {
+      "value": "8",
+      "reason": "Set to 8 by applying the minimum of 8 to 4 logical CPUs."
+    },
+    "max_parallel_workers_per_gather": {
+      "value": "2",
+      "reason": "Set to 2 as the parallel-query default for the WEB workload profile."
+    },
+    "max_wal_size": {
+      "value": "4GB",
+      "reason": "Set to 4GB for the WEB workload profile."
+    },
+    "max_worker_processes": {
+      "value": "8",
+      "reason": "Set to 8 by applying the minimum of 8 to 4 logical CPUs."
+    },
+    "min_wal_size": {
+      "value": "1GB",
+      "reason": "Set to 1GB for the WEB workload profile."
+    },
+    "random_page_cost": {
+      "value": "1.1",
+      "reason": "Set to 1.1 for SSD storage and the WEB workload profile."
+    },
+    "shared_buffers": {
+      "value": "2GB",
+      "reason": "Set to 2GB from the memory share for the WEB profile."
+    },
+    "wal_buffers": {
+      "value": "-1",
+      "reason": "Set to -1 to use automatic PostgreSQL tuning for the WEB workload profile."
+    },
+    "work_mem": {
+      "value": "20MB",
+      "reason": "Set to 20MB from available memory for the WEB profile and 100 connections."
+    }
+  }
+}
