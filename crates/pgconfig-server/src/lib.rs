@@ -1,9 +1,10 @@
 //! The pgconfig HTTP server. One binary serves REST v1, its OpenAPI document,
-//! and the MCP endpoint.
+//! the MCP endpoint, and the web app.
 
 mod cors;
 mod mcp;
 mod v1;
+mod web;
 
 use axum::Router;
 use axum::middleware;
@@ -43,7 +44,7 @@ pub fn app_with(config: Config) -> Router {
 
     let routes = v1::router()
         .merge(SwaggerUi::new("/docs").url("/docs/openapi.json", openapi))
-        .fallback(v1::not_found);
+        .fallback(web::serve);
 
     // The routes sit behind a fallback so the layers below run before any
     // routing: `normalize` rewrites the path the routes match on, and a CORS

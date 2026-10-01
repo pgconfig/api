@@ -56,8 +56,13 @@ cargo test
   The `v1` module reproduces the output of REST v1 and `pgconfigctl`.
 - `crates/pgconfigctl`: the CLI (clap). Same flags and output as the Go CLI.
 - `crates/pgconfig-server`: the HTTP server (axum). REST v1, the OpenAPI
-  document under `/docs`, and the MCP endpoint at `/mcp`. `docs/mcp.md` is the
-  MCP contract: change it with the code.
+  document under `/docs`, the MCP endpoint at `/mcp`, and the web app on every
+  other path. `docs/mcp.md` is the MCP contract: change it with the code.
+- `web/`: the web app (React 19, Vite, `@momoi-labs/kiso-react`): the profile
+  comparison, the export page, and the guide under `/guide`. The server embeds
+  `web/dist`, which is not committed, so build the web app before cargo:
+  `cd web && npm ci && npm test && npm run build`. `cargo test` fails with
+  `the web bundle is missing` when you have not.
 - `crates/golden`: records and replays `tests/golden`. `cargo test` replays
   every golden against the Rust binaries.
 - `scripts/check-conf-loads.sh <pgconfigctl> <version>` loads a generated
