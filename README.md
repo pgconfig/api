@@ -48,6 +48,11 @@ PGConfig.org API v2.
 
 
 
+## MCP
+
+AI agents can ask for tuning recommendations over the Model Context Protocol at
+`https://api.pgconfig.org/mcp`. The contract is in [docs/mcp.md](docs/mcp.md).
+
 ## License
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpgconfig%2Fapi.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fpgconfig%2Fapi?ref=badge_large)
 

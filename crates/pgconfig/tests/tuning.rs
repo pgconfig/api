@@ -457,7 +457,7 @@ fn every_missing_and_invalid_fact_is_reported_at_once() {
     assert_eq!(error.missing_fields(), ["total_cpu", "postgres_version"]);
     assert_eq!(
         error.to_string(),
-        "Invalid tuning request. total_cpu is required: the number of logical CPUs, such as 8. postgres_version is required: the PostgreSQL version, such as 18.4. total_ram: \"16\" has no unit. Use a positive integer followed by B, KB, MB, GB, or TB, such as 16GB or 1536MB."
+        "Invalid tuning request. total_ram: \"16\" has no unit. Use a positive integer followed by B, KB, MB, GB, or TB, such as 16GB or 1536MB. total_cpu is required: the number of logical CPUs, such as 8. postgres_version is required: the PostgreSQL version, such as 18.4."
     );
 }
 

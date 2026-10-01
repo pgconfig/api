@@ -1,6 +1,6 @@
 [package]
 name = "pgconfig-server"
-description = "The pgconfig HTTP server: REST v1"
+description = "The pgconfig HTTP server: REST v1 and MCP"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -11,6 +11,7 @@ publish = false
 axum = "0.8"
 clap = { version = "4", features = ["derive", "env"] }
 pgconfig = { path = "../pgconfig" }
+rmcp = { version = "3", default-features = false, features = ["server", "transport-streamable-http-server"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { version = "1", features = ["macros", "net", "rt-multi-thread", "signal"] }
@@ -24,4 +25,6 @@ utoipa-swagger-ui = { version = "10", features = ["axum", "vendored"] }
 [dev-dependencies]
 http-body-util = "0.1"
 pgconfig-golden = { path = "../golden" }
+reqwest = { version = "0.13", default-features = false, features = ["json"] }
+rmcp = { version = "3", default-features = false, features = ["client", "transport-streamable-http-client-reqwest"] }
 tower = { version = "0.5", features = ["util"] }

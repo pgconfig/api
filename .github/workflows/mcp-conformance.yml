@@ -1,0 +1,65 @@
+name: MCP Conformance
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # The official suite, pinned so a new release of it cannot break CI
+  # unreviewed. docs/mcp.md explains why the other scenarios do not apply.
+  server-conformance:
+    name: Server
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Build the server
+        run: cargo build --locked -p pgconfig-server
+
+      - name: Start the server
+        run: |
+          ./target/debug/pgconfig-server --port 3000 >server.log 2>&1 &
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:3000/v1/version >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat server.log
+          exit 1
+
+      - name: server-initialize
+        uses: modelcontextprotocol/conformance@v0.1.16
+        with:
+          mode: server
+          url: http://127.0.0.1:3000/mcp
+          scenario: server-initialize
+          verbose: true
+
+      - name: ping
+        uses: modelcontextprotocol/conformance@v0.1.16
+        with:
+          mode: server
+          url: http://127.0.0.1:3000/mcp
+          scenario: ping
+          verbose: true
+
+      - name: tools-list
+        uses: modelcontextprotocol/conformance@v0.1.16
+        with:
+          mode: server
+          url: http://127.0.0.1:3000/mcp
+          scenario: tools-list
+          verbose: true
+
+      - name: Show the server log on failure
+        if: failure()
+        run: cat server.log

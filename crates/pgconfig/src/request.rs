@@ -6,7 +6,7 @@ use std::num::NonZeroU32;
 
 use serde::{Deserialize, Serialize, Serializer};
 
-use crate::bytes::Bytes;
+use crate::bytes::{Bytes, BytesError};
 use crate::version::PgVersion;
 
 /// Defines an enum whose variants each have one canonical name and a set of
@@ -178,78 +178,48 @@ impl std::error::Error for TuningError {}
 impl TryFrom<RawTuningRequest> for TuningRequest {
     type Error = TuningError;
 
+    /// Validates every field and reports all the problems, in field order.
     fn try_from(raw: RawTuningRequest) -> Result<Self, TuningError> {
         let mut problems = Vec::new();
-        let mut missing = |field: &'static str, hint: &str| {
-            problems.push(Problem {
-                field,
-                missing: true,
-                message: format!("{field} is required: {hint}."),
-            });
-        };
+        let text = |result: Result<_, _>| result.map_err(|error: BytesError| error.to_string());
 
-        let total_ram = match &raw.total_ram {
-            None => {
-                missing(
-                    "total_ram",
-                    "the memory dedicated to PostgreSQL, such as 16GB",
-                );
-                None
-            }
-            Some(text) => {
-                Some(Bytes::parse(text).map_err(|error| ("total_ram", error.to_string())))
-            }
-        };
-        let total_cpu = match raw.total_cpu {
-            None => {
-                missing("total_cpu", "the number of logical CPUs, such as 8");
-                None
-            }
-            Some(count) => Some(positive("total_cpu", count)),
-        };
-        let postgres_version = match &raw.postgres_version {
-            None => {
-                missing("postgres_version", "the PostgreSQL version, such as 18.4");
-                None
-            }
-            Some(text) => Some(
-                PgVersion::parse(text).map_err(|error| ("postgres_version", error.to_string())),
-            ),
-        };
-
-        let profile = raw
-            .profile
-            .as_deref()
-            .map(|text| named("profile", Profile::parse(text)));
-        let disk_type = raw
-            .disk_type
-            .as_deref()
-            .map(|text| named("disk_type", DiskType::parse(text)));
-        let os = raw.os.as_deref().map(|text| named("os", Os::parse(text)));
-        let arch = raw
-            .arch
-            .as_deref()
-            .map(|text| named("arch", Arch::parse(text)));
-        let max_connections = raw
-            .max_connections
-            .map(|count| positive("max_connections", count));
-
-        let mut invalid = |(field, message): (&'static str, String)| {
-            problems.push(Problem {
-                field,
-                missing: false,
-                message: format!("{field}: {message}"),
-            });
-        };
-        let total_ram = total_ram.and_then(|result| result.map_err(&mut invalid).ok());
-        let total_cpu = total_cpu.and_then(|result| result.map_err(&mut invalid).ok());
-        let postgres_version =
-            postgres_version.and_then(|result| result.map_err(&mut invalid).ok());
-        let profile = profile.and_then(|result| result.map_err(&mut invalid).ok());
-        let disk_type = disk_type.and_then(|result| result.map_err(&mut invalid).ok());
-        let os = os.and_then(|result| result.map_err(&mut invalid).ok());
-        let arch = arch.and_then(|result| result.map_err(&mut invalid).ok());
-        let max_connections = max_connections.and_then(|result| result.map_err(&mut invalid).ok());
+        let total_ram = required(
+            &mut problems,
+            "total_ram",
+            "the memory dedicated to PostgreSQL, such as 16GB",
+            raw.total_ram.as_deref().map(|ram| text(Bytes::parse(ram))),
+        );
+        let total_cpu = required(
+            &mut problems,
+            "total_cpu",
+            "the number of logical CPUs, such as 8",
+            raw.total_cpu.map(positive),
+        );
+        let postgres_version = required(
+            &mut problems,
+            "postgres_version",
+            "the PostgreSQL version, such as 18.4",
+            raw.postgres_version
+                .as_deref()
+                .map(|version| PgVersion::parse(version).map_err(|error| error.to_string())),
+        );
+        let profile = optional(
+            &mut problems,
+            "profile",
+            raw.profile.as_deref().map(Profile::parse),
+        );
+        let disk_type = optional(
+            &mut problems,
+            "disk_type",
+            raw.disk_type.as_deref().map(DiskType::parse),
+        );
+        let os = optional(&mut problems, "os", raw.os.as_deref().map(Os::parse));
+        let arch = optional(&mut problems, "arch", raw.arch.as_deref().map(Arch::parse));
+        let max_connections = optional(
+            &mut problems,
+            "max_connections",
+            raw.max_connections.map(positive),
+        );
 
         match (total_ram, total_cpu, postgres_version) {
             (Some(total_ram), Some(total_cpu), Some(postgres_version)) if problems.is_empty() => {
@@ -269,17 +239,50 @@ impl TryFrom<RawTuningRequest> for TuningRequest {
     }
 }
 
-type Checked<T> = Result<T, (&'static str, String)>;
+/// The value of a required field, recording a problem when it is absent or
+/// invalid.
+fn required<T>(
+    problems: &mut Vec<Problem>,
+    field: &'static str,
+    hint: &str,
+    parsed: Option<Result<T, String>>,
+) -> Option<T> {
+    if parsed.is_none() {
+        let message = format!("{field} is required: {hint}.");
+        problems.push(Problem {
+            field,
+            missing: true,
+            message,
+        });
+    }
+    optional(problems, field, parsed)
+}
 
-fn positive(field: &'static str, count: i64) -> Checked<NonZeroU32> {
+/// The value of an optional field, recording a problem when it is invalid.
+fn optional<T>(
+    problems: &mut Vec<Problem>,
+    field: &'static str,
+    parsed: Option<Result<T, String>>,
+) -> Option<T> {
+    match parsed? {
+        Ok(value) => Some(value),
+        Err(message) => {
+            let message = format!("{field}: {message}");
+            problems.push(Problem {
+                field,
+                missing: false,
+                message,
+            });
+            None
+        }
+    }
+}
+
+fn positive(count: i64) -> Result<NonZeroU32, String> {
     u32::try_from(count)
         .ok()
         .and_then(NonZeroU32::new)
-        .ok_or_else(|| (field, format!("{count} is not a positive integer.")))
-}
-
-fn named<T>(field: &'static str, parsed: Result<T, String>) -> Checked<T> {
-    parsed.map_err(|message| (field, message))
+        .ok_or_else(|| format!("{count} is not a positive integer."))
 }
 
 #[cfg(test)]
