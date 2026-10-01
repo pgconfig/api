@@ -22,3 +22,13 @@ run: web
 check-conf version="18":
     cargo build -p pgconfigctl
     scripts/check-conf-loads.sh target/debug/pgconfigctl {{version}}
+
+# Windows compiles only on its own runner, so it is left out. The builds run
+# one at a time: two `cargo zigbuild` runs that start together race on their
+# linker wrappers.
+
+# Rehearse the release build of the Linux and macOS targets.
+release-build: web
+    goreleaser build --snapshot --clean --parallelism 1 \
+        --id pgconfigctl-linux --id pgconfig-server-linux \
+        --id pgconfigctl-macos --id pgconfig-server-macos

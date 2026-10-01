@@ -10,10 +10,13 @@ just test         # Web tests, then cargo test (goldens included)
 just lint         # cargo fmt --check and cargo clippy -D warnings
 just run          # Serve the API, the web app, and MCP on :3000
 just check-conf   # Load a generated config in PostgreSQL (needs Docker)
+just release-build  # Rehearse the release build for Linux and macOS
 ```
 
-The toolchain is pinned in `mise.toml`. Run cargo and npm through
-`mise exec --` when they are not on the `PATH`.
+`mise.toml` lists every tool the repository uses: Rust, Node, just, Go for the
+docs generator, and the release tooling. `mise install` sets them up. Do not
+add another tool manager, such as Nix. Run commands through `mise exec --`
+when the tools are not on the `PATH`.
 
 ## Project Structure
 
