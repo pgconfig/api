@@ -1,53 +1,69 @@
-# Full example
+# Example and rules
 
-The example below its used by the `UI`:
+## A full example
+
+This is the call the web app makes for its export panel: an OLTP server with
+16GB of RAM and 8 CPUs on SSD, as `ALTER SYSTEM` statements, with the logging
+settings for pgBadger.
 
 ```bash
-$ curl 'https://api.pgconfig.org/v1/tuning/get-config?environment_name=WEB&format=alter_system&include_pgbadger=true&log_format=stderr&max_connections=100&pg_version=9.6&total_ram=2GB'
+curl 'https://api.pgconfig.org/v1/tuning/get-config?pg_version=17&total_ram=16GB&cpus=8&max_connections=100&environment_name=OLTP&drive_type=SSD&os_type=linux&arch=amd64&format=alter_system&include_pgbadger=true&log_format=jsonlog'
 ```
 
-## How the values are calculated?
+## How the values are calculated
 
-Default values are set in the [`pkg/category` package](https://github.com/pgconfig/api/tree/main/pkg/category). Take by example the [Checkpoint Configuration category](https://github.com/pgconfig/api/blob/main/pkg/category/checkpoint.go#L18-L26):
+Every interface computes its values in one place:
+[`crates/pgconfig/src/rules.rs`](https://github.com/momoi-labs/pgconfig/blob/main/crates/pgconfig/src/rules.rs).
 
-```go
-// ...
-	return &CheckpointCfg{
-		MinWALSize:                 config.Byte(2 * config.GB),
-		MaxWALSize:                 config.Byte(3 * config.GB),
-		CheckpointCompletionTarget: 0.5,
-		WALBuffers:                 -1, // -1 means automatic tuning
-		CheckpointSegments:         16,
-	}
-```
+The calculation starts from the memory the profile may use (see
+[Profiles](/guide/environment)):
 
-Once the default values are set, they are computed based in the input, set in the [`pkg/rules` package](https://github.com/pgconfig/api/tree/main/pkg/rules). Take by example [the storage rules](https://github.com/pgconfig/api/blob/main/pkg/rules/storage.go#L8-L24):
+| Setting | Starting value |
+| --- | --- |
+| `shared_buffers` | 25% of the profile's memory |
+| `effective_cache_size` | 75% of the profile's memory |
+| `work_mem` | The profile's `work_mem` share, divided by `max_connections` |
+| `maintenance_work_mem` | 5% of the profile's memory |
+| `max_worker_processes`, `max_parallel_workers` | The number of CPUs, and at least 8 |
 
-```go
-// ...
-func computeStorage(in *config.Input, cfg *category.ExportCfg) (*category.ExportCfg, error) {
+Then the environment adjusts those values, in this order:
 
-	switch in.DiskType {
-	case "SSD":
-		cfg.Storage.EffectiveIOConcurrency = 200
-	case "SAN":
-		cfg.Storage.EffectiveIOConcurrency = 300
-	default:
-		cfg.Storage.EffectiveIOConcurrency = 2
-	}
+| Step | Condition | Adjustment |
+| --- | --- | --- |
+| Architecture | 32-bit (`386`, `i686`) | Cap `shared_buffers`, `work_mem`, and `maintenance_work_mem` at 4GB |
+| PostgreSQL version | 9.6 or older | Cap `shared_buffers` at 512MB |
+| Operating system | Windows before PostgreSQL 18 | Cap `work_mem` and `maintenance_work_mem` at 2097151kB |
+| Profile | `DESKTOP` | Set `shared_buffers` to the total RAM divided by 16. This replaces the caps above |
+| PostgreSQL version | Older than 9.6 | Cap `shared_buffers` at 8GB |
 
-	if in.DiskType != "HDD" {
-		cfg.Storage.RandomPageCost = 1.1
-	}
+The storage settings depend on `drive_type`:
 
-	return cfg, nil
-}
-```
+| `drive_type` | `effective_io_concurrency` | `random_page_cost` |
+| --- | --- | --- |
+| `HDD` | 2 | 4.0 |
+| `SSD` | 200 | 1.1, or 1.8 for `DW` |
+| `SAN` | 300 | 1.1, or 1.8 for `DW` |
 
-The [rules are computed in the following order](https://github.com/pgconfig/api/blob/main/pkg/rules/compute.go#L12-L22):
+From PostgreSQL 13, `maintenance_io_concurrency` gets the value of
+`effective_io_concurrency`.
 
-1. Arch
-1. OS
-1. Profile
-1. Storage
-1. Postgres Version
+PostgreSQL 18 adds asynchronous I/O. `io_workers` is a share of the CPUs,
+rounded up: 10% for `DESKTOP`, 20% for `WEB`, 25% for `MIXED`, 30% for `OLTP`,
+and 40% for `DW`, plus 10% on HDD. The result is at least 2, and at most the
+number of CPUs or 32, whichever is lower.
+
+Last, the settings the PostgreSQL version does not have are left out:
+
+| PostgreSQL version | Left out |
+| --- | --- |
+| Older than 18 | `io_method`, `io_workers`, `io_max_combine_limit`, `io_max_concurrency`, `file_copy_method` |
+| Older than 13 | `maintenance_io_concurrency` |
+| Older than 10 | `max_parallel_workers` |
+| Older than 9.6 | `max_parallel_workers_per_gather` |
+| Older than 9.5 | `min_wal_size`, `max_wal_size`. `checkpoint_segments` appears instead |
+| Older than 9.4 | `max_worker_processes` |
+
+## Want the reason for each value?
+
+REST v1 returns values only. The [MCP](/guide/mcp) tool returns each value
+with the reason for it, including any cap that changed it.

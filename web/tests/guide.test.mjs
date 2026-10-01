@@ -25,10 +25,10 @@ const { GUIDE_GROUPS, GUIDE_PAGES, findGuidePage, guidePath } = await import(
   pathToFileURL(join(outDir, "pages.mjs"))
 );
 
-test("the guide carries the seven documentation pages and the MCP page", () => {
+test("the guide carries the REST v1 pages and the MCP page", () => {
   assert.deepStrictEqual(
     GUIDE_PAGES.map((page) => page.slug),
-    ["", "api", "environment", "other-options", "example", "v2", "mcp", "config"],
+    ["", "api", "environment", "other-options", "example", "mcp"],
   );
 });
 
@@ -36,13 +36,14 @@ test("the guide index answers at /guide and every other page under it", () => {
   assert.strictEqual(guidePath(""), "/guide");
   assert.strictEqual(guidePath("mcp"), "/guide/mcp");
   assert.strictEqual(findGuidePage(undefined)?.slug, "");
-  assert.strictEqual(findGuidePage("other-options")?.title, "Other options");
+  assert.strictEqual(findGuidePage("other-options")?.title, "Other endpoints");
   assert.strictEqual(findGuidePage("missing"), undefined);
 });
 
 test("the guide navigation reaches every page it lists exactly once", () => {
   const listed = GUIDE_GROUPS.flatMap((group) => group.pages.map((page) => page.slug));
-  assert.deepStrictEqual(listed, ["", "api", "environment", "other-options", "example", "v2", "mcp"]);
+  assert.deepStrictEqual(listed, ["", "api", "environment", "other-options", "example", "mcp"]);
+  assert.strictEqual(listed.length, GUIDE_PAGES.length, "a page is missing from the navigation");
   for (const slug of listed) assert.ok(findGuidePage(slug), `no page for "${slug}"`);
 });
 
@@ -78,6 +79,14 @@ test("every link inside the site leads somewhere the site answers", () => {
         routes.has(target) || served || serverPaths.test(target),
         `"${page.slug}" links to ${target}, which is not a guide page, a public file or a server path`,
       );
+    }
+  }
+});
+
+test("no page describes what the API no longer does", () => {
+  for (const page of GUIDE_PAGES) {
+    for (const stale of ["2.0 beta", "/v1/generators/", "pkg/category", "pkg/rules", "V2 API proposal"]) {
+      assert.ok(!page.source.includes(stale), `"${page.slug}" still mentions ${stale}`);
     }
   }
 });
