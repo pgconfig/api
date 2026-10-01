@@ -3,6 +3,7 @@
 use std::net::{Ipv4Addr, SocketAddr};
 
 use clap::Parser;
+use pgconfig_server::Config;
 use tokio::net::TcpListener;
 
 #[derive(Parser)]
@@ -11,6 +12,16 @@ struct Args {
     /// Listen port
     #[arg(long, env = "PORT", default_value_t = 3000)]
     port: u16,
+
+    /// Browser origins that may call /mcp, separated by commas. Native clients
+    /// send no Origin and are always accepted
+    #[arg(
+        long = "mcp-allowed-origins",
+        env = "PGCONFIG_MCP_ALLOWED_ORIGINS",
+        value_delimiter = ',',
+        default_values_t = Config::default().mcp_allowed_origins
+    )]
+    mcp_allowed_origins: Vec<String>,
 }
 
 #[tokio::main]
@@ -27,7 +38,10 @@ async fn main() -> std::io::Result<()> {
     let listener = TcpListener::bind(address).await?;
     tracing::info!(version = %pgconfig::build::pretty(), %address, "PGConfig API");
 
-    axum::serve(listener, pgconfig_server::app())
+    let config = Config {
+        mcp_allowed_origins: args.mcp_allowed_origins,
+    };
+    axum::serve(listener, pgconfig_server::app_with(config))
         .with_graceful_shutdown(shutdown())
         .await
 }
