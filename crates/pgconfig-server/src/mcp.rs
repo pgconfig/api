@@ -60,7 +60,9 @@ pub(crate) fn router(allowed_origins: Vec<String>) -> Router {
         // endpoint is public, anonymous, and read-only, and it has to answer
         // on whatever hostname it is deployed under.
         .disable_allowed_hosts()
-        .with_allowed_origins(allowed_origins.clone())
+        // The same policy as `official_origins_only`, enforced a second time
+        // by the transport.
+        .with_allowed_origins(allowed_origins.iter().map(|origin| with_port(origin)))
         .enforce_origin_validation();
     let service: StreamableHttpService<TuningServer, LocalSessionManager> =
         StreamableHttpService::new(|| Ok(TuningServer::default()), Default::default(), config);
@@ -71,6 +73,25 @@ pub(crate) fn router(allowed_origins: Vec<String>) -> Router {
             Arc::new(allowed_origins),
             official_origins_only,
         ))
+}
+
+/// The origin with its port written out. A browser leaves the default port of
+/// the scheme out of `Origin`, and the transport wants it stated: an entry
+/// without a port matches any port there.
+fn with_port(origin: &str) -> String {
+    let default_port = match origin.split_once("://") {
+        Some(("https", _)) => 443,
+        Some(("http", _)) => 80,
+        _ => return origin.to_string(),
+    };
+    let host = origin.rsplit_once("://").map_or(origin, |(_, host)| host);
+    // An IPv6 host has colons of its own, so only what follows `]` counts.
+    let after_address = host.rsplit_once(']').map_or(host, |(_, rest)| rest);
+    if after_address.contains(':') {
+        origin.to_string()
+    } else {
+        format!("{origin}:{default_port}")
+    }
 }
 
 /// A request without an `Origin` comes from a native client and passes. A
@@ -571,6 +592,19 @@ mod tests {
             text(&result),
             "The recommendation did not finish within 0 seconds. Call the tool again with the same arguments."
         );
+    }
+
+    #[test]
+    fn an_origin_without_a_port_gets_the_default_of_its_scheme() {
+        assert_eq!(
+            with_port("https://pgconfig.org"),
+            "https://pgconfig.org:443"
+        );
+        assert_eq!(with_port("http://localhost"), "http://localhost:80");
+        assert_eq!(with_port("http://localhost:5173"), "http://localhost:5173");
+        assert_eq!(with_port("https://[::1]"), "https://[::1]:443");
+        assert_eq!(with_port("https://[::1]:8443"), "https://[::1]:8443");
+        assert_eq!(with_port("null"), "null");
     }
 
     #[tokio::test]
