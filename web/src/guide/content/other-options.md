@@ -1,110 +1,62 @@
-# Another API Options
+# Other endpoints
 
-## All rules in all environments
+Every answer has the envelope that [get-config](/guide/api) shows: `data`,
+`jsonapi`, `links`, and `meta`. The examples on this page show `data` only.
 
-**URL:** [/v1/tuning/get-config-all-environments](https://api.pgconfig.org/v1/tuning/get-config-all-environments)
+## Every profile at once
 
-Show all rules for all environments. This endpoint is currently used by the site.
+`GET /v1/tuning/get-config-all-environments` answers the settings of the five
+profiles for one server. The web app draws its comparison from this route.
 
-```json
-...
-"data": [
-    {
-    "configuration": [..],
-    "environment": "WEB"
-    },
-    {
-    "configuration": [..],
-    "environment": "OLTP"
-    },
-    {
-    "configuration": [..],
-    "environment": "DW"
-    },
-    {
-    "configuration": [..],
-    "environment": "Mixed"
-    },
-    {
-    "configuration": [..],
-    "environment": "Desktop"
-    }
-]
-...
+It takes the parameters of [get-config](/guide/api), except
+`environment_name`, `format`, and `include_pgbadger`, which it ignores. The
+answer is always JSON.
+
+```bash
+curl 'https://api.pgconfig.org/v1/tuning/get-config-all-environments?total_ram=16GB&cpus=8'
 ```
 
-## List Environments
-
-**URL:** [/v1/tuning/list-environments`](https://api.pgconfig.org/v1/tuning/list-environments)
-
-Show all environments.
-
 ```json
-...
-"data": [
-    "WEB",
-    "OLTP",
-    "DW",
-    "Mixed",
-    "Desktop"
-],
-...
+{
+  "data": [
+    { "environment": "WEB", "configuration": [] },
+    { "environment": "OLTP", "configuration": [] },
+    { "environment": "DW", "configuration": [] },
+    { "environment": "MIXED", "configuration": [] },
+    { "environment": "DESKTOP", "configuration": [] }
+  ]
+}
 ```
 
-## PGBadger Configuration
+Each `configuration` holds the same categories that `get-config` returns in
+`data`. They are left empty here to keep the example short.
 
-**URL:** [/v1/generators/pgbadger/get-config`](https://api.pgconfig.org/v1/generators/pgbadger/get-config)
+## List the profiles
 
-Show the pgbadger configurations (accepts the <code>format</code> parameter)
-
+`GET /v1/tuning/list-environments` answers the profile names.
 
 ```json
-...
-"data": [
-    {
-    "category": "log_config",
-    "description": "Logging configuration for pgbadger",
-    "parameters": [
-        {
-        "config_value": "on",
-        "name": "logging_collector"
-        },
-        {
-        "config_value": "on",
-        "name": "log_checkpoints"
-        },
-        {
-        "config_value": "on",
-        "name": "log_connections"
-        },
-        {
-        "config_value": "on",
-        "name": "log_disconnections"
-        },
-        {
-        "config_value": "on",
-        "name": "log_lock_waits"
-        },
-        {
-        "config_value": "0",
-        "name": "log_temp_files"
-        },
-        {
-        "config_value": "C",
-        "format": "String",
-        "name": "lc_messages"
-        },
-        {
-        "comment": "Adjust the minimum time to collect data",
-        "config_value": "10s",
-        "format": "Time",
-        "name": "log_min_duration_statement"
-        },
-        {
-        "config_value": "0",
-        "name": "log_autovacuum_min_duration"
-        }
-    ]
-},
-...
+{
+  "data": ["WEB", "OLTP", "DW", "MIXED", "DESKTOP"]
+}
 ```
+
+## The version of the API
+
+`GET /v1/version` answers the release that is running and the commit it was
+built from.
+
+```json
+{
+  "data": {
+    "build": "1a2b3c4",
+    "pretty": "4.0.0 (1a2b3c4)",
+    "version": "4.0.0"
+  }
+}
+```
+
+## The OpenAPI document
+
+The Swagger UI is at [/docs](/docs/), and the OpenAPI 3.1 document at
+[/docs/openapi.json](/docs/openapi.json).

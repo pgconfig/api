@@ -1,190 +1,163 @@
-# API Specification
+# Get a configuration
 
-This project it's API that [pgconfig.org](http://pgconfig.org) uses to calculate the tuning values and stuff.
+`GET /v1/tuning/get-config` returns the recommended settings for one server.
+The web app uses this route, and you can call it from anything that speaks
+HTTP.
 
-## How it works
+## A first call
 
-The web interface ([pgconfig.org website](http://pgconfig.org) or just `UI`) access this api on the address [`https://api.pgconfig.org/v1/tuning/get-config`](https://api.pgconfig.org/v1/tuning/get-config).
-
-You can call it from `curl`, eg:
+Without parameters, the route answers for its defaults: PostgreSQL 18, 2GB of
+RAM, 2 CPUs, the `WEB` profile, and HDD storage.
 
 ```bash
-$ curl 'https://api.pgconfig.org/v1/tuning/get-config'
-{"data": [{"category": "memory_related","description": "Memory Configuration","parameters": [{"config_value": "512MB","format": "Bytes","name": "shared_buffers"},{"config_value": "2GB","format": "Bytes","name": "effective_cache_size"},{"config_value": "20MB","format": "Bytes","name": "work_mem"},{"config_value": "128MB","format": "Bytes","name": "maintenance_work_mem"}]},{"category": "checkpoint_related","description": "Checkpoint Related Configuration","parameters": [{"config_value": "512MB","format": "Bytes","name": "min_wal_size"},{"config_value": "2GB","format": "Bytes","name": "max_wal_size"},{"config_value": 0.7,"format": "Float","name": "checkpoint_completion_target"},{"config_value": "15MB","format": "Bytes","name": "wal_buffers"}]},{"category": "network_related","description": "Network Related Configuration","parameters": [{"config_value": "*","format": "String","name": "listen_addresses"},{"config_value": 100,"format": "Decimal","name": "max_connections"}]}],"jsonapi": {"version": "1.0"},"links": {"self": "http://api.pgconfig.org/v1/tuning/get-config"},"meta": {"arguments": {},"copyright": "PGConfig API","version": "2.0 beta"}}
+curl 'https://api.pgconfig.org/v1/tuning/get-config'
 ```
 
-With a little formating, looks like this:
+The answer is JSON. The settings are in `data`, grouped by category. This is
+the first of the five categories:
 
 ```json
-{  
-   "data":[  
-      {  
-         "category":"memory_related",
-         "description":"Memory Configuration",
-         "parameters":[  
-            {  
-               "config_value":"512MB",
-               "format":"Bytes",
-               "name":"shared_buffers"
-            },
-            {  
-               "config_value":"2GB",
-               "format":"Bytes",
-               "name":"effective_cache_size"
-            },
-            {  
-               "config_value":"20MB",
-               "format":"Bytes",
-               "name":"work_mem"
-            },
-            {  
-               "config_value":"128MB",
-               "format":"Bytes",
-               "name":"maintenance_work_mem"
-            }
-         ]
-      },
-      {  
-         "category":"checkpoint_related",
-         "description":"Checkpoint Related Configuration",
-         "parameters":[  
-            {  
-               "config_value":"512MB",
-               "format":"Bytes",
-               "name":"min_wal_size"
-            },
-            {  
-               "config_value":"2GB",
-               "format":"Bytes",
-               "name":"max_wal_size"
-            },
-            {  
-               "config_value":0.7,
-               "format":"Float",
-               "name":"checkpoint_completion_target"
-            },
-            {  
-               "config_value":"15MB",
-               "format":"Bytes",
-               "name":"wal_buffers"
-            }
-         ]
-      },
-      {  
-         "category":"network_related",
-         "description":"Network Related Configuration",
-         "parameters":[  
-            {  
-               "config_value":"*",
-               "format":"String",
-               "name":"listen_addresses"
-            },
-            {  
-               "config_value":100,
-               "format":"Decimal",
-               "name":"max_connections"
-            }
-         ]
-      }
-   ],
-   "jsonapi":{  
-      "version":"1.0"
-   },
-   "links":{  
-      "self":"http://api.pgconfig.org/v1/tuning/get-config"
-   },
-   "meta":{  
-      "arguments":{  
-
-      },
-      "copyright":"PGConfig API",
-      "version":"2.0 beta"
-   }
+{
+  "data": [
+    {
+      "category": "memory_related",
+      "description": "Memory Configuration",
+      "parameters": [
+        { "config_value": "512MB", "format": "Byte", "name": "shared_buffers" },
+        { "config_value": "2GB", "format": "Byte", "name": "effective_cache_size" },
+        { "config_value": "5MB", "format": "Byte", "name": "work_mem" },
+        { "config_value": "102MB", "format": "Byte", "name": "maintenance_work_mem" }
+      ]
+    }
+  ],
+  "jsonapi": { "version": "1.0" },
+  "links": { "self": "https://api.pgconfig.org/v1/tuning/get-config" },
+  "meta": {
+    "arguments": {},
+    "copyright": "PGConfig API",
+    "version": "4.0.0 (1a2b3c4)"
+  }
 }
 ```
 
-Basically, the important data are in the `data` node, grouped by categories, just like in the `UI`. :)
+The categories are `memory_related`, `checkpoint_related`, `network_related`,
+`storage_type`, and `worker_related`. A setting the PostgreSQL version does not
+have is left out.
 
-A important thing about this is that you can format the output displayed more conveniently, only informing the `format=conf` parameters, eg:
+## Describe your server
+
+Put the facts about the server in the query string:
 
 ```bash
-$ curl 'https://api.pgconfig.org/v1/tuning/get-config?format=conf'
-# Generated by PGConfig 2.0 beta
-## http://pgconfig.org
+curl 'https://api.pgconfig.org/v1/tuning/get-config?total_ram=16GB&cpus=8&pg_version=17&environment_name=OLTP&drive_type=SSD'
+```
+
+| Parameter | Accepted values | Default | Meaning |
+| --- | --- | --- | --- |
+| `pg_version` | `9.1` to `9.6`, `10` to `18` | `18` | PostgreSQL version |
+| `total_ram` | A number followed by `KB`, `MB`, `GB`, or `TB` | `2GB` | Memory dedicated to PostgreSQL |
+| `cpus` | A positive integer | `2` | Logical CPUs, hyperthreads included |
+| `max_connections` | A positive integer | `100` | Expected number of connections |
+| `environment_name` | `WEB`, `OLTP`, `DW`, `MIXED`, `DESKTOP` | `WEB` | The workload. See [Profiles](/guide/environment) |
+| `drive_type` | `HDD`, `SSD`, `SAN` | `HDD` | Storage under the data directory |
+| `os_type` | `linux`, `windows`, `unix`, `darwin` | `linux` | Operating system |
+| `arch` | `amd64`, `x86-64`, `386`, `i686`, `arm`, `arm64` | `amd64` | CPU architecture |
+
+> [!CAUTION]
+> Write `total_ram` with its unit, such as `4GB`. A number without a unit is
+> read as bytes.
+
+> [!NOTE]
+> Write `drive_type` in uppercase and `os_type` in lowercase, as the table
+> shows. The API does not reject another spelling. It answers a configuration
+> that misses the storage or Windows adjustments. The profile name is accepted
+> in any case.
+
+## Choose the output
+
+`format` selects what comes back:
+
+| `format` | Output |
+| --- | --- |
+| `json` | The JSON above. This is the default |
+| `conf` | A `postgresql.conf` fragment |
+| `alter_system` | `ALTER SYSTEM` statements |
+| `stackgres` | A StackGres `SGPostgresConfig` |
+
+Every format except `json` answers plain text. The first two lines carry the
+version and the URL that produced the output.
+
+```bash
+curl 'https://api.pgconfig.org/v1/tuning/get-config?format=conf&total_ram=16GB&cpus=8&pg_version=17&environment_name=OLTP&drive_type=SSD'
+```
+
+```ini
+# Generated by PGConfig 4.0.0 (1a2b3c4)
+# https://api.pgconfig.org/v1/tuning/get-config?format=conf&total_ram=16GB&cpus=8&pg_version=17&environment_name=OLTP&drive_type=SSD
 
 # Memory Configuration
-shared_buffers = 512MB
-effective_cache_size = 2GB
-work_mem = 20MB
-maintenance_work_mem = 128MB
+shared_buffers = 4GB
+effective_cache_size = 12GB
+work_mem = 57MB
+maintenance_work_mem = 819MB
 
 # Checkpoint Related Configuration
-min_wal_size = 512MB
-max_wal_size = 2GB
-checkpoint_completion_target = 0.7
-wal_buffers = 15MB
+min_wal_size = 2GB
+max_wal_size = 8GB
+checkpoint_completion_target = 0.9
+wal_buffers = -1
 
 # Network Related Configuration
 listen_addresses = '*'
 max_connections = 100
+
+# Storage Configuration
+random_page_cost = 1.1
+effective_io_concurrency = 200
+maintenance_io_concurrency = 200
+
+# Worker Processes Configuration
+max_worker_processes = 8
+max_parallel_workers_per_gather = 2
+max_parallel_workers = 8
 ```
 
-Another options for the `format` parameters are `json` (the default value) and `alter_system`, take a look:
+With `format=alter_system` the same settings come as statements:
+
+```sql
+-- Memory Configuration
+ALTER SYSTEM SET shared_buffers TO '4GB';
+ALTER SYSTEM SET effective_cache_size TO '12GB';
+ALTER SYSTEM SET work_mem TO '57MB';
+ALTER SYSTEM SET maintenance_work_mem TO '819MB';
+```
+
+## Optional additions
+
+| Parameter | Accepted values | Default | Effect |
+| --- | --- | --- | --- |
+| `show_doc` | `true`, `false` | `false` | Adds a `documentation` object to each parameter of the JSON output: what the setting does, its PostgreSQL default, and further reading |
+| `include_pgbadger` | `true`, `false` | `false` | Adds the logging settings [pgBadger](https://pgbadger.darold.net) needs |
+| `log_format` | `stderr`, `csvlog`, `syslog`, `jsonlog` | `jsonlog` from PostgreSQL 15, `stderr` before | The log destination, used with `include_pgbadger=true` |
+
+## Errors
+
+An invalid value answers HTTP 500 with the reason in `errors.message`:
 
 ```bash
-$ curl 'https://api.pgconfig.org/v1/tuning/get-config?format=alter_system'
--- Generated by PGConfig 2.0 beta
----- http://pgconfig.org
-
--- Memory Configuration
-ALTER SYSTEM SET shared_buffers TO '512MB';
-ALTER SYSTEM SET effective_cache_size TO '2GB';
-ALTER SYSTEM SET work_mem TO '20MB';
-ALTER SYSTEM SET maintenance_work_mem TO '128MB';
-
--- Checkpoint Related Configuration
-ALTER SYSTEM SET min_wal_size TO '512MB';
-ALTER SYSTEM SET max_wal_size TO '2GB';
-ALTER SYSTEM SET checkpoint_completion_target TO '0.7';
-ALTER SYSTEM SET wal_buffers TO '15MB';
-
--- Network Related Configuration
-ALTER SYSTEM SET listen_addresses TO '*';
-ALTER SYSTEM SET max_connections TO '100';
+curl 'https://api.pgconfig.org/v1/tuning/get-config?pg_version=abc'
 ```
 
-In short: to change the output, all you need is to do it's put the parameters in the URL.
+```json
+{
+  "errors": {
+    "code": 500,
+    "message": "could not parse args: could not parse pg version: strconv.ParseFloat: parsing \"abc\": invalid syntax"
+  },
+  "jsonapi": { "version": "1.0" },
+  "links": { "self": "https://api.pgconfig.org/v1/tuning/get-config?pg_version=abc" }
+}
+```
 
-## Available parameters
-
-
-> [!CAUTION]
-> Don't forget, when setting the `total_ram` parameter, set the value like the expression `[0-9]{1,}GB`, eg: `4GB`.
-
-The list below lists the available parameters:
-
-| Parameter        | Possible values                             | Default Value      | Description                                                           |
-| ---------------- |:-------------------------------------------:|:------------------:|-----------------------------------------------------------------------|
-| pg_version       | from `9.0` until `12`                       | `12`               | Defines the PostgreSQL Version                                        |
-| total_ram        | any value above `1GB`                       | `2GB`              | Defines the **total dedicated memory** to PostgreSQL                  |
-| max_connections  | any value above `1`                         | `100`              | **expected** number of connections                                    |
-| environment_name | `WEB`, `OLTP`, `DW`, `Mixed` and `Desktop`  | `WEB`              | Defines the environment that the server will run (more details below) |
-| os_type          | `Linux`, `Windows` and `Unix`               | `Linux`            | Defines the type of operating system used                             |
-| arch             | `x86-64` and `i686`                         | `x86-64`           | Defines the server architecture                                       |
-| drive_type       | `HDD`, `SSD` and `SAN`                      | `HDD`              | Defines the default storage type                                      |
-| cpus             | any value above `1`                         | `-1`               | Defines the total CPUs available                                      |
-| format           | `json`, `conf` and `alter_system`           | `json`             | Defines the output format                                             |
-
-### Specific for the `JSON` output
-
-
-| Parameter     | Possible values       | Default Value      | Description                                          |
-| ------------- |:---------------------:|:------------------:|------------------------------------------------------|
-| show_doc      | `true` or `false`     | `json`             | Shows the documentation                              |
-
-### Specific for the `conf` or `alter_system` output
-
-| Parameter            | Possible values                     | Default Value      | Description                                                                                |
-| -------------------- |:-----------------------------------:|:------------------:|--------------------------------------------------------------------------------------------|
-| include_pgbadger     | `true` or `false`                   | `json`             | Add the basic settings to enable pgbadger                                                  |
-| log_format           | `stderr`, `csvlog` and `syslog`     | `stderr`           | Sets de default log format for the pgbadger. (Used only when `include_pgbadger` is `true`) |
+A status of 500 for a bad argument is a known flaw of v1. It stays, because
+callers already depend on it.

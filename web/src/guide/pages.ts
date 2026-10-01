@@ -2,12 +2,10 @@
    guide and the repository cannot drift apart. */
 import mcp from "../../../docs/mcp.md?raw";
 import api from "./content/api.md?raw";
-import config from "./content/config.md?raw";
 import environment from "./content/environment.md?raw";
 import example from "./content/example.md?raw";
 import index from "./content/index.md?raw";
 import otherOptions from "./content/other-options.md?raw";
-import v2 from "./content/v2.md?raw";
 
 export type GuidePage = {
   /** The path segment under /guide. The index has none. */
@@ -20,36 +18,26 @@ export type GuidePage = {
 
 export type GuideGroup = { label?: string; pages: GuidePage[] };
 
-const overview: GuidePage = { slug: "", title: "Guide", source: index };
+const introduction: GuidePage = { slug: "", title: "Introduction", source: index };
 
 export const GUIDE_GROUPS: GuideGroup[] = [
-  { pages: [overview] },
+  { pages: [introduction] },
   {
-    label: "V1 API documentation",
+    label: "REST v1",
     pages: [
-      { slug: "api", title: "Overview", source: api },
-      { slug: "environment", title: "Environment", source: environment },
-      { slug: "other-options", title: "Other options", source: otherOptions },
-      { slug: "example", title: "Example", source: example },
+      { slug: "api", title: "Get a configuration", source: api },
+      { slug: "environment", title: "Profiles", source: environment },
+      { slug: "other-options", title: "Other endpoints", source: otherOptions },
+      { slug: "example", title: "Example and rules", source: example },
     ],
   },
   {
-    label: "More",
-    pages: [
-      { slug: "v2", title: "V2 proposal", source: v2 },
-      { slug: "mcp", title: "MCP", source: mcp },
-    ],
+    label: "AI agents",
+    pages: [{ slug: "mcp", title: "MCP", source: mcp }],
   },
 ];
 
-/* The documentation site never linked its Config page, a leftover of the site
-   template. It keeps an address here and stays out of the navigation. */
-const unlisted: GuidePage[] = [{ slug: "config", title: "Config", source: config }];
-
-export const GUIDE_PAGES: GuidePage[] = [
-  ...GUIDE_GROUPS.flatMap((group) => group.pages),
-  ...unlisted,
-];
+export const GUIDE_PAGES: GuidePage[] = GUIDE_GROUPS.flatMap((group) => group.pages);
 
 export function guidePath(slug: string): string {
   return slug ? `/guide/${slug}` : "/guide";
