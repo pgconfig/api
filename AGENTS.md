@@ -94,3 +94,25 @@ Rules:
 3. **PostgreSQL version defaults**: default is 18, supported 9.1–18
 4. **Rule order**: `computeVersion` must be last (removes unsupported parameters)
 5. **AIO parameters (PostgreSQL 18+)**: `io_method` and `io_workers` only available in ≥18. `io_workers` scaled by profile: Desktop 10%, WEB 20%, Mixed 25%, OLTP 30%, DW 40%, +10% for HDD.
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs for this repository live in GitHub Issues. See
+`docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+This repository uses the default triage labels. See
+`docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This is a single-context repository. See `docs/agents/domain.md`.
+
+### Commit convention
+
+Create commits with `my-commit` (conventional commits). PR titles and commit
+messages are validated by the `conventional-commits` workflow; merges use
+rebase-and-merge.
