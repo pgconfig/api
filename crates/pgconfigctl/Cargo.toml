@@ -1,0 +1,17 @@
+[package]
+name = "pgconfigctl"
+description = "CLI for the pgconfig.org website"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+pgconfig = { path = "../pgconfig" }
+sysinfo = { version = "0.39", default-features = false, features = ["system"] }
+
+[dev-dependencies]
+pgconfig-golden = { path = "../golden" }
+serde_json = { workspace = true }

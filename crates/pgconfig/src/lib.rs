@@ -7,6 +7,7 @@
 //! [`TuningResult`]. [`v1`] reproduces the output of REST v1 and
 //! `pgconfigctl` from the same rules.
 
+pub mod build;
 mod bytes;
 mod docs;
 mod reasons;

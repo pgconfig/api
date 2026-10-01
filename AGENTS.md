@@ -54,7 +54,13 @@ cargo test
 
 - `crates/pgconfig`: the tuning engine, no I/O. `tune` is the entry point.
   The `v1` module reproduces the output of REST v1 and `pgconfigctl`.
-- `crates/golden`: records and replays `tests/golden`.
+- `crates/pgconfigctl`: the CLI (clap). Same flags and output as the Go CLI.
+- `crates/pgconfig-server`: the HTTP server (axum). REST v1 and the OpenAPI
+  document under `/docs`.
+- `crates/golden`: records and replays `tests/golden`. `cargo test` replays
+  every golden against the Rust binaries.
+- `scripts/check-conf-loads.sh <pgconfigctl> <version>` loads a generated
+  config in a real PostgreSQL container.
 - The toolchain is pinned in `mise.toml`. Run cargo through `mise exec --` when
   it is not on the `PATH`.
 - `rules.yml` and `pg-docs.yml` are compiled into the crate by its `build.rs`.
