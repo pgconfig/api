@@ -7,15 +7,13 @@ import (
 	"os"
 	"sync"
 
-	"github.com/pgconfig/api/pkg/defaults"
-	"github.com/pgconfig/api/pkg/docs"
 	"gopkg.in/yaml.v2"
 )
 
 var (
 	targetFile string
 	limiter    chan int
-	file       docs.DocFile
+	file       DocFile
 	mu         sync.Mutex
 )
 
@@ -30,7 +28,7 @@ func init() {
 	flag.Parse()
 }
 
-func saveFile(file docs.DocFile) error {
+func saveFile(file DocFile) error {
 
 	f, err := os.Create(targetFile)
 
@@ -48,18 +46,18 @@ func saveFile(file docs.DocFile) error {
 	return nil
 }
 
-func updateDoc(ver float32, param string, parsed docs.ParamDoc) {
+func updateDoc(ver float32, param string, parsed ParamDoc) {
 	mu.Lock()
 	defer mu.Unlock()
-	file.Documentation[docs.FormatVer(ver)][param] = parsed
+	file.Documentation[FormatVer(ver)][param] = parsed
 }
 
 func main() {
-	file = docs.DocFile{
-		Documentation: make(map[string]docs.Doc),
+	file = DocFile{
+		Documentation: make(map[string]Doc),
 	}
 
-	allVersions := defaults.SupportedVersions
+	allVersions := supportedVersions
 
 	allParams := []string{
 		"shared_buffers",
@@ -87,7 +85,7 @@ func main() {
 	}
 
 	for _, ver := range allVersions {
-		file.Documentation[docs.FormatVer(ver)] = make(docs.Doc)
+		file.Documentation[FormatVer(ver)] = make(Doc)
 	}
 	var wg sync.WaitGroup
 	for _, param := range allParams {
@@ -116,15 +114,15 @@ func processParam(param string, ver float32, wg *sync.WaitGroup) {
 		<-limiter
 	}()
 
-	parsed, err := docs.Get(param, ver)
+	parsed, err := Get(param, ver)
 
 	// 404 means unsupported
 	if err != nil {
-		fmt.Printf("Processing %s from version %s... SKIPPED\n", param, docs.FormatVer(ver))
+		fmt.Printf("Processing %s from version %s... SKIPPED\n", param, FormatVer(ver))
 		return
 	}
 
-	fmt.Printf("Processing %s from version %s... \n", param, docs.FormatVer(ver))
+	fmt.Printf("Processing %s from version %s... \n", param, FormatVer(ver))
 
 	updateDoc(ver, param, parsed)
 }

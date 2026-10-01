@@ -7,33 +7,14 @@ on:
 
 jobs:
   build:
-    name: build (${{ matrix.implementation }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        implementation: [go, rust]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Go
-        if: matrix.implementation == 'go'
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.25.1'
-          cache: true
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - name: Build the Go pgconfigctl
-        if: matrix.implementation == 'go'
-        run: go build -o pgconfigctl cmd/pgconfigctl/main.go
-
-      - name: Set up Rust
-        if: matrix.implementation == 'rust'
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-
-      - name: Build the Rust pgconfigctl
-        if: matrix.implementation == 'rust'
+      - name: Build pgconfigctl
         run: |
           cargo build --locked --release -p pgconfigctl
           cp target/release/pgconfigctl pgconfigctl
@@ -41,21 +22,20 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pgconfigctl-${{ matrix.implementation }}-${{ github.sha }}
+          name: pgconfigctl-${{ github.sha }}
           path: pgconfigctl
           retention-days: 1
 
   # The generated postgresql.conf has to load in a real server of each
   # supported version that still has a container image.
   validate-config:
-    name: ${{ matrix.implementation }} on pg${{ matrix.pg_version }}
+    name: include on pg${{ matrix.pg_version }}
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
-        implementation: [go, rust]
         pg_version: ["9.5", "9.6", "10", "11", "12", "13", "14", "15", "16", "17", "18"]
 
     steps:
@@ -64,7 +44,7 @@ jobs:
       - name: Download pgconfigctl
         uses: actions/download-artifact@v4
         with:
-          name: pgconfigctl-${{ matrix.implementation }}-${{ github.sha }}
+          name: pgconfigctl-${{ github.sha }}
           path: .
 
       - name: Make executable

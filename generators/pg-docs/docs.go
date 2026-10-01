@@ -1,4 +1,4 @@
-package docs
+package main
 
 import (
 	"fmt"
@@ -157,4 +157,31 @@ func sanitizeDefault(val string) string {
 	}
 
 	return val
+}
+
+// Doc is a map with parameters
+type Doc map[string]ParamDoc
+
+// DocFile is the json/yaml structure of the doc file
+type DocFile struct {
+	Documentation map[string]Doc `json:"documentation"`
+}
+
+// supportedVersions lists the PostgreSQL releases the documentation covers.
+var supportedVersions = []float32{
+	9.1,
+	9.2,
+	9.3,
+	9.4,
+	9.5,
+	9.6,
+	10.0,
+	11.0,
+	12.0,
+	13.0,
+	14.0,
+	15.0,
+	16.0,
+	17.0,
+	18.0,
 }

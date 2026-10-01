@@ -9,6 +9,9 @@ on:
 permissions:
   contents: read
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
   release-config:
     runs-on: ubuntu-latest
@@ -25,50 +28,9 @@ jobs:
           version: v2.17.0
           args: check
 
-  build:
-    env:
-      CGO_ENABLED: 1
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - run: make build
-
+  # cargo test replays the goldens in tests/golden against the server and the
+  # CLI, so this job is also the compatibility check of REST v1.
   test:
-    env:
-      CGO_ENABLED: 1
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - name: Set Go toolchain (workaround for Go 1.25 covdata bug)
-        run: go env -w GOTOOLCHAIN=go1.25.1+auto
-      - run: make test
-      - name: Send coverage
-        env:
-          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: make goveralls-push
-
-  # The goldens in tests/golden pin REST v1 and the CLI. A change to the Go
-  # rules has to come with re-recorded goldens.
-  golden:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - run: make build
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - run: >-
-          cargo run --locked -p pgconfig-golden -- check
-          --server-bin dist/api --cli-bin dist/pgconfigctl
-
-  rust:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -86,3 +48,34 @@ jobs:
       - run: cargo fmt --check
       - run: cargo clippy --all-targets --locked -- -D warnings
       - run: cargo test --locked --no-fail-fast
+
+  # The release builds for macOS and Windows, and the Linux job above never
+  # compiles or links their platform code. Building both binaries and running
+  # the CLI on its detected defaults catches what would break there.
+  platforms:
+    name: build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: cargo build --locked -p pgconfigctl -p pgconfig-server
+      - run: cargo run --locked -p pgconfigctl -- tune
+
+  # The scraper that writes pg-docs.yml is the one Go program left. It runs
+  # rarely, so CI only keeps it compiling.
+  pg-docs-generator:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: generators/pg-docs
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: generators/pg-docs/go.mod
+          cache-dependency-path: generators/pg-docs/go.sum
+      - run: go vet ./...

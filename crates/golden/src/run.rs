@@ -18,8 +18,9 @@ pub struct Server {
 
 impl Server {
     /// Starts `bin --port <free port>` in `cwd` and waits until it answers
-    /// `/v1/version`. The Go API reads `rules.yml` and `pg-docs.yml` from its
-    /// working directory, so `cwd` is the repository root.
+    /// `/v1/version`. The Go API the goldens were recorded from read
+    /// `rules.yml` and `pg-docs.yml` from its working directory, so `cwd` is
+    /// the repository root.
     pub fn spawn(bin: &Path, cwd: &Path) -> io::Result<Self> {
         let port = TcpListener::bind((Ipv4Addr::LOCALHOST, 0))?
             .local_addr()?
@@ -81,8 +82,8 @@ pub struct CliOutput {
     pub stdout: String,
 }
 
-/// Runs the CLI once. `home` is an empty directory: the Go CLI looks for
-/// `$HOME/.pgconfigctl.yaml` and announces it on stdout when it finds one.
+/// Runs the CLI once. `home` is an empty directory: the Go CLI looked for
+/// `$HOME/.pgconfigctl.yaml` and announced it on stdout when it found one.
 pub fn cli(bin: &Path, args: &[String], home: &Path) -> io::Result<CliOutput> {
     let output = Command::new(bin)
         .args(args)
