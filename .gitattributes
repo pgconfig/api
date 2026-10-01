@@ -1,0 +1,2 @@
+# Recorded from the binaries by `cargo run -p pgconfig-golden -- record`.
+tests/golden/**/*.jsonl linguist-generated=true

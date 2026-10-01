@@ -1,0 +1,16 @@
+[package]
+name = "pgconfig-golden"
+description = "Records and replays the golden files in tests/golden against the pgconfig binaries"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[[bin]]
+name = "golden"
+path = "src/bin/golden.rs"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }

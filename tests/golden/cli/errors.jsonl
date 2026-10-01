@@ -1,0 +1,13 @@
+{"args":["tune","--ram","8GB","--cpus","4","--os","linux","--arch","amd64","--os","freebsd"],"exit_code":2}
+{"args":["tune","--ram","8GB","--cpus","4","--os","linux","--arch","amd64","--arch","ppc64"],"exit_code":2}
+{"args":["tune","--ram","8GB","--cpus","4","--os","linux","--arch","amd64","--arch","AMD64"],"exit_code":2}
+{"args":["tune","--ram","8GB","--cpus","4","--os","linux","--arch","amd64","--profile","bogus"],"exit_code":1}
+{"args":["tune","--ram","8GB","--cpus","4","--os","linux","--arch","amd64","--format","bogus"],"exit_code":1}
+{"args":["tune","--ram","8GB","--cpus","4","--os","linux","--arch","amd64","--version","abc"],"exit_code":1}
+{"args":["tune","--ram","8GB","--cpus","4","--os","linux","--arch","amd64","--cpus","abc"],"exit_code":1}
+{"args":["tune","--ram","8GB","--cpus","4","--os","linux","--arch","amd64","--cpus","1.5"],"exit_code":1}
+{"args":["tune","--ram","8GB","--cpus","4","--os","linux","--arch","amd64","--max-connections","abc"],"exit_code":1}
+{"args":["tune","--ram","8GB","--cpus","4","--os","linux","--arch","amd64","--include-pgbadger=maybe"],"exit_code":1}
+{"args":["tune","--ram","8GB","--cpus","4","--os","linux","--arch","amd64","--no-such-flag"],"exit_code":1}
+{"args":["tune","--ram","8GB","--cpus","4","--os","linux","--arch","amd64","--env-name","WEB"],"exit_code":1}
+{"args":["no-such-command"],"exit_code":1}
