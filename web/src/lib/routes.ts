@@ -26,7 +26,7 @@ export function guideSlug(pathname: string): string {
 
 /**
  * The breadcrumb for an address. A page of the app is named alone, as the
- * header's title. `guideTitle` gives the title of a documentation page, or
+ * header's title. `guideTitle` gives the title of a docs page, or
  * nothing for an unknown one.
  */
 export function crumbsFor(
@@ -39,6 +39,6 @@ export function crumbsFor(
   if (!isGuidePath(path)) return [{ label: "Not found" }];
 
   const slug = guideSlug(path);
-  if (!slug) return [{ label: "Documentation" }];
-  return [{ label: "Documentation", to: "/guide" }, { label: guideTitle(slug) ?? "Not found" }];
+  if (!slug) return [{ label: "Docs" }];
+  return [{ label: "Docs", to: "/guide" }, { label: guideTitle(slug) ?? "Not found" }];
 }
