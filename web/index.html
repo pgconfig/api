@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en"
+  data-accent="cobalt"
+  data-border-style="rail"
+  data-corner-marks="none"
+  data-corner-size="off"
+  data-mark-size="large"
+  data-visual-style="default"
+  data-app-shell="default"
+>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="/database-marker-white.png">
+  <title>PGConfig</title>
+  <script>
+    /* Runs before the body parses, so the stored theme is on :root for the
+       first paint and there is no flash of the wrong theme. No stored theme
+       means following the system, which needs no attribute at all. */
+    try {
+      var stored = localStorage.getItem("theme");
+      if (stored === "light" || stored === "dark") document.documentElement.dataset.theme = stored;
+    } catch (cause) {}
+  </script>
+</head>
+<body>
+<noscript>
+  <strong>PGConfig needs JavaScript to work. Enable it to continue.</strong>
+</noscript>
+<div id="root"></div>
+<script type="module" src="/src/main.tsx"></script>
+</body>
+</html>

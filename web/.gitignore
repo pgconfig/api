@@ -1,0 +1,8 @@
+# The web app is built by `npm run build` into dist/, which the server embeds.
+# The directory itself is tracked because rust-embed needs it to exist to
+# compile. public/.gitkeep puts the marker back after every build.
+node_modules
+dist/*
+!dist/.gitkeep
+# Scratch builds the guide test makes and removes.
+.guide-test-*
