@@ -1,0 +1,4 @@
+[tools]
+rust = "1.97"
+# The web app is a React app built with Vite. Node is a build tool only.
+node = "24"

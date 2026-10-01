@@ -53,3 +53,28 @@ jobs:
           COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: make goveralls-push
 
+  # The goldens in tests/golden pin REST v1 and the CLI. A change to the Go
+  # rules has to come with re-recorded goldens.
+  golden:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: make build
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: >-
+          cargo run --locked -p pgconfig-golden -- check
+          --server-bin dist/api --cli-bin dist/pgconfigctl
+
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: rustfmt, clippy
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets --locked -- -D warnings
+      - run: cargo test --locked --no-fail-fast

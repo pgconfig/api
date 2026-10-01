@@ -38,6 +38,8 @@ make clean        # Remove dist/ and generated docs
 - `make test` runs all tests with coverage (generates `covprofile`)
 - Test files follow `*_test.go` pattern
 - CI runs tests on push/pull request (`.github/workflows/cover.yml`)
+- `tests/golden/` pins the output of REST v1 and `pgconfigctl`. A change to the
+  rules must come with re-recorded goldens. See `tests/golden/README.md`.
 
 ## Adding a New Rule
 

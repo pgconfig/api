@@ -31,3 +31,6 @@ result
 # Release tooling
 /node_modules
 /release-notes.md
+
+# Cargo build output
+/target
