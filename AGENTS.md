@@ -1,91 +1,95 @@
-# Agent Guide for pgconfig/api
+# Agent Guide for pgconfig
 
 Essential commands, structure, and patterns for AI agents.
 
 ## Essential Commands
 
 ```bash
-make docs         # Generate Swagger API documentation
-make test         # Run all tests with race detector and coverage
-make lint         # Run go vet (requires docs generated first)
-make build        # Clean, generate docs, lint, and build binaries
-make clean        # Remove dist/ and generated docs
+just web          # Build the web app, which the server embeds
+just test         # Web tests, then cargo test (goldens included)
+just lint         # cargo fmt --check and cargo clippy -D warnings
+just run          # Serve the API, the web app, and MCP on :3000
+just check-conf   # Load a generated config in PostgreSQL (needs Docker)
 ```
+
+The toolchain is pinned in `mise.toml`. Run cargo and npm through
+`mise exec --` when they are not on the `PATH`.
 
 ## Project Structure
 
 ```
 .
-├── cmd/                 # API and CLI entry points
-├── pkg/                 # Core packages (input, rules, category, format, docs)
-├── generators/pg-docs/  # Tool to generate pg-docs.yml
-├── rules.yml            # Rule metadata (categories, abstracts, recommendations)
-└── pg-docs.yml          # PostgreSQL parameter documentation per version
+├── crates/pgconfig/         # Tuning engine, no I/O. `tune` is the entry point
+├── crates/pgconfig-server/  # axum: REST v1, OpenAPI at /docs, MCP at /mcp, web app
+├── crates/pgconfigctl/      # clap CLI
+├── crates/golden/           # Records and replays tests/golden
+├── web/                     # React 19, Vite, Kiso: comparison, export, guide
+├── tests/golden/            # Recorded REST v1 and CLI outputs
+├── generators/pg-docs/      # Go tool that scrapes pg-docs.yml (own module)
+├── rules.yml                # Rule metadata (abstracts, recommendations)
+└── pg-docs.yml              # PostgreSQL parameter documentation per version
 ```
 
 ## Code Patterns
 
-- **Go 1.25.1**, module `github.com/pgconfig/api`
-- **Fiber** for API, **Cobra** for CLI, **Swagger** for docs
+- **Rust**, edition 2024, one Cargo workspace. `rustfmt.toml` sets
+  `max_width = 100`.
+- **axum** for HTTP, **clap** for the CLI, **utoipa** for OpenAPI, **rmcp** for
+  MCP.
 - **English Language**: All code comments, documentation, and variable names must be in English.
-- Input parsing: `pkg/input/bytes.Parse()` for byte units, `profile.Profile` for workload types
-- Rule pipeline in `pkg/rules/compute.go` (order: arch → OS → profile → storage → AIO → version)
-- Three output formats: `json`, `alter_system`, `conf`
-- Configuration files: `rules.yml` and `pg-docs.yml` loaded at startup
+- `crates/pgconfig/src/rules.rs` is the one place values are computed. `tune`
+  and the `v1` module both start from it.
+- `tune` takes a Tuning Request and returns recommendations with reasons,
+  assumptions, and warnings. Use the domain terms: Tuning Request, Tuning
+  Recommendation, Tuning Assumption, PostgreSQL Version, PostgreSQL Major
+  Version.
+- The `v1` module reproduces REST v1 and `pgconfigctl`, known defects included.
+  Read `docs/adr/0001-rust-engine-with-v1-frozen-by-goldens.md` before
+  changing it.
+- `rules.yml` and `pg-docs.yml` are compiled into the crate by its `build.rs`.
+  No YAML is parsed at run time.
+- Three v1 output formats besides JSON: `conf`, `alter_system`, `stackgres`.
 
 ## Testing
 
-- `make test` runs all tests with coverage (generates `covprofile`)
-- Test files follow `*_test.go` pattern
-- CI runs tests on push/pull request (`.github/workflows/cover.yml`)
-- `tests/golden/` pins the output of REST v1 and `pgconfigctl`. A change to the
-  rules must come with re-recorded goldens. See `tests/golden/README.md`.
-
-## Rust workspace
-
-The Rust rewrite lives next to the Go code until the cutover. See
-`docs/research/rust-migration-assessment.md`.
-
-```bash
-cargo fmt --check
-cargo clippy --all-targets -- -D warnings
-cargo test
-```
-
-- `crates/pgconfig`: the tuning engine, no I/O. `tune` is the entry point.
-  The `v1` module reproduces the output of REST v1 and `pgconfigctl`.
-- `crates/pgconfigctl`: the CLI (clap). Same flags and output as the Go CLI.
-- `crates/pgconfig-server`: the HTTP server (axum). REST v1, the OpenAPI
-  document under `/docs`, the MCP endpoint at `/mcp`, and the web app on every
-  other path. `docs/mcp.md` is the MCP contract: change it with the code.
-- `web/`: the web app (React 19, Vite, `@momoi-labs/kiso-react`): the profile
-  comparison, the export page, and the guide under `/guide`. The server embeds
-  `web/dist`, which is not committed, so build the web app before cargo:
-  `cd web && npm ci && npm test && npm run build`. `cargo test` fails with
-  `the web bundle is missing` when you have not.
-- `crates/golden`: records and replays `tests/golden`. `cargo test` replays
-  every golden against the Rust binaries.
-- `scripts/check-conf-loads.sh <pgconfigctl> <version>` loads a generated
-  config in a real PostgreSQL container.
-- The toolchain is pinned in `mise.toml`. Run cargo through `mise exec --` when
-  it is not on the `PATH`.
-- `rules.yml` and `pg-docs.yml` are compiled into the crate by its `build.rs`.
+- `cargo test` runs the unit tests and replays every golden against the Rust
+  server and CLI. `tests/golden/README.md` explains the goldens.
+- A change to a rule must come with re-recorded goldens. Never edit a golden
+  by hand, and never weaken one to make a test pass.
+- The server tests need the web bundle: run `just web` first. `cargo test`
+  fails with `the web bundle is missing` when you have not.
+- `crates/pgconfig/tests/snapshots` holds `insta` snapshots of full results.
+- CI: `cover.yml` (Verify), `integration.yml` (the generated config loads in
+  PostgreSQL 9.5 to 18), `mcp-conformance.yml`.
 
 ## Adding a New Rule
 
-1. Create function in `pkg/rules/` with signature `func(*input.Input, *category.ExportCfg) (*category.ExportCfg, error)`
-2. Add to `allRules` slice in `pkg/rules/compute.go` (mind order)
-3. Write unit tests
-4. Update `rules.yml` if rule needs metadata
+1. Add the calculation to `compute` in `crates/pgconfig/src/rules.rs`, and the
+   setting to `Computed` and `Computed::groups`. A setting the release lacks
+   is `None`, never zero.
+2. Add its reason in `crates/pgconfig/src/reasons.rs`.
+3. Write the test first, in `crates/pgconfig/tests/tuning.rs`.
+4. Update `rules.yml` if the rule needs metadata, and `pg-docs.yml` through
+   the generator if it adds a parameter.
+5. Record the goldens again and review the diff. A rule change alters REST v1
+   output, so it needs a changeset.
+
+## MCP
+
+`docs/mcp.md` is the public contract of `/mcp`. Change it with the code, and
+keep the server stateless and read-only.
 
 ## CI/CD
 
-- **cover.yml**: runs `make build`, `make test`, and the release config checks
-  in parallel
+- **cover.yml**: release config checks, the web and Rust test suite, a build on
+  macOS and Windows, and a check that the docs generator compiles
+- **integration.yml**: loads the generated config in PostgreSQL 9.5 to 18
+- **mcp-conformance.yml**: the official MCP conformance suite, pinned
 - **changesets.yml**: on `main`, opens or updates the Changesets version PR;
   merging it tags `v<version>` and calls `release.yml`
-- **release.yml**: publishes a tag with GoReleaser for multi-arch binaries and
-  Docker images, using the tag's `CHANGELOG.md` entry as release notes
+- **release.yml**: builds every target, then publishes with GoReleaser:
+  binaries, deb and rpm packages, and Docker images, using the tag's
+  `CHANGELOG.md` entry as release notes
 - **pr-title.yml**: validates pull request titles as Conventional Commits
 
 ## Commit Conventions
@@ -121,11 +125,19 @@ Rules:
 
 ## Gotchas
 
-1. **Swagger docs before building**: `make build` depends on `make docs`
-2. **Byte parsing**: case‑insensitive, expects unit (KB, MB, GB, TB)
-3. **PostgreSQL version defaults**: default is 18, supported 9.1–18
-4. **Rule order**: `computeVersion` must be last (removes unsupported parameters)
-5. **AIO parameters (PostgreSQL 18+)**: `io_method` and `io_workers` only available in ≥18. `io_workers` scaled by profile: Desktop 10%, WEB 20%, Mixed 25%, OLTP 30%, DW 40%, +10% for HDD.
+1. **Web before cargo**: the server embeds `web/dist`, which is not committed.
+2. **REST v1 is frozen**: its defaults, error texts, and HTTP 500 for invalid
+   input are pinned by the goldens. Fix v1 behavior in a new API version.
+3. **Byte parsing**: v1 is permissive (`2GB`, `2gb`, a bare number means
+   bytes). `tune` is strict and requires a unit.
+4. **PostgreSQL version defaults**: default is 18, supported 9.1–18.
+5. **AIO parameters (PostgreSQL 18+)**: `io_method` and `io_workers` only
+   available in ≥18. `io_workers` scaled by profile: Desktop 10%, WEB 20%,
+   Mixed 25%, OLTP 30%, DW 40%, +10% for HDD, capped at 32.
+6. **Float arithmetic**: the memory formulas run in `f32` in the order Go ran
+   them. Reordering an operation changes outputs.
+7. **The docs generator**: `cd generators/pg-docs && go run . --target-file
+   ../../pg-docs.yml`. It scrapes postgresqlco.nf and runs rarely.
 
 ## Agent skills
 
