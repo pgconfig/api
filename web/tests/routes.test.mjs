@@ -4,8 +4,6 @@ import { crumbsFor, guideSlug, isGuidePath, isTuningPath } from "../src/lib/rout
 
 const titles = { api: "Overview", mcp: "MCP" };
 const titleOf = (slug) => titles[slug];
-const home = "/?cpus=4";
-const root = { label: "PGConfig", to: home };
 
 test("the comparison, its old address and the export page tune a server", () => {
   assert.strictEqual(isTuningPath("/"), true);
@@ -35,34 +33,32 @@ test("a guide address names its page, and the index has no name", () => {
   assert.strictEqual(guideSlug("/guide/mcp/"), "mcp");
 });
 
-test("the comparison is one step from the root, at either address", () => {
-  const expected = [root, { label: "Profile comparison" }];
-  assert.deepStrictEqual(crumbsFor("/", home, titleOf), expected);
-  assert.deepStrictEqual(crumbsFor("/tuning", home, titleOf), expected);
+test("the comparison is named alone, at either address", () => {
+  const expected = [{ label: "Profile comparison" }];
+  assert.deepStrictEqual(crumbsFor("/", titleOf), expected);
+  assert.deepStrictEqual(crumbsFor("/tuning", titleOf), expected);
 });
 
-test("the export page is one step from the root", () => {
-  assert.deepStrictEqual(crumbsFor("/export", home, titleOf), [root, { label: "Export" }]);
+test("the export page is named alone", () => {
+  assert.deepStrictEqual(crumbsFor("/export", titleOf), [{ label: "Export" }]);
 });
 
-test("the guide index is one step from the root", () => {
-  assert.deepStrictEqual(crumbsFor("/guide", home, titleOf), [root, { label: "Guide" }]);
-  assert.deepStrictEqual(crumbsFor("/guide/", home, titleOf), [root, { label: "Guide" }]);
+test("the documentation index is named alone", () => {
+  assert.deepStrictEqual(crumbsFor("/guide", titleOf), [{ label: "Documentation" }]);
+  assert.deepStrictEqual(crumbsFor("/guide/", titleOf), [{ label: "Documentation" }]);
 });
 
-test("a guide page sits under the guide, by its title", () => {
-  assert.deepStrictEqual(crumbsFor("/guide/mcp", home, titleOf), [
-    root,
-    { label: "Guide", to: "/guide" },
+test("a documentation page sits under the documentation, by its title", () => {
+  assert.deepStrictEqual(crumbsFor("/guide/mcp", titleOf), [
+    { label: "Documentation", to: "/guide" },
     { label: "MCP" },
   ]);
 });
 
 test("an address with no page is named as not found", () => {
-  assert.deepStrictEqual(crumbsFor("/guide/missing", home, titleOf), [
-    root,
-    { label: "Guide", to: "/guide" },
+  assert.deepStrictEqual(crumbsFor("/guide/missing", titleOf), [
+    { label: "Documentation", to: "/guide" },
     { label: "Not found" },
   ]);
-  assert.deepStrictEqual(crumbsFor("/nope", home, titleOf), [root, { label: "Not found" }]);
+  assert.deepStrictEqual(crumbsFor("/nope", titleOf), [{ label: "Not found" }]);
 });

@@ -18,8 +18,37 @@
 }
 .skip-link:focus { translate: 0 0; }
 
-/* A filled drawing among Kiso's stroked icons. */
+/* Remix Icon draws filled shapes, where Kiso's own icons are strokes. */
 .icon-filled { fill: currentColor; stroke: none; }
+/* Lucide draws on a 24px grid with a 2px stroke. */
+.icon-stroked { stroke-width: 2; }
+
+/* ---------------------------------------------------------------------------
+   Header: the sidebar toggle, the page's name, and the page's own controls.
+   The shell's toggle lives in the sidebar; this app keeps it in the header,
+   beside the title, where the previous app had it.
+   --------------------------------------------------------------------------- */
+.sidebar .sidebar-toggle { display: none; }
+.sidebar .sidebar-header-collapsible { grid-template-columns: minmax(0, 1fr); }
+.header-separator { align-self: center; height: var(--spacing-lg); }
+.header-title [aria-current="page"] { font-size: var(--type-size-body); }
+.header-actions { display: flex; align-items: center; gap: var(--spacing-sm); min-width: 0; }
+.profile-select { display: flex; align-items: center; gap: var(--spacing-sm); min-width: 0; }
+.profile-select > .icon, .profile-select-label { flex: none; color: var(--color-muted-foreground); }
+/* Wide enough for the longest profile name, so the header does not shift. */
+.profile-select .select { width: 21rem; }
+@media (max-width: 1023px) {
+  /* The sidebar is stacked above the page here and has nothing to collapse. */
+  .header-sidebar-toggle, .header-separator { display: none; }
+}
+@media (max-width: 767px) {
+  .header-title { display: none; }
+  .header-actions, .profile-select { flex: 1; }
+  .profile-select .select { width: 100%; }
+}
+@media (max-width: 639px) {
+  .profile-select-label { display: none; }
+}
 
 /* ---------------------------------------------------------------------------
    Brand: the elephant, the API version, and the psql prompt wordmark.
@@ -47,16 +76,44 @@
 }
 
 /* ---------------------------------------------------------------------------
-   The form: one labelled field per fact about the server.
+   The filters: one chip per fact about the server, in a row under the header.
+   A chip is a field's frame around an icon, a short label, and a bare control.
    --------------------------------------------------------------------------- */
-.config-filters {
-  display: grid; gap: var(--spacing-md);
-  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+.filter-bar {
+  display: grid; gap: var(--spacing-sm);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
 }
-/* The profile's names are sentences, so its field takes two tracks. */
-.config-filters-profile { grid-column: span 2; }
-@media (max-width: 400px) {
-  .config-filters-profile { grid-column: auto; }
+.filter-chip {
+  display: flex; align-items: center; gap: var(--spacing-xs);
+  min-width: 0; height: var(--size-control-sm);
+  padding-inline: var(--spacing-sm);
+  border: 1px solid var(--color-input);
+  border-radius: var(--appearance-control-corners, var(--radius-md));
+  background: var(--color-card);
+  font-size: var(--type-size-label);
+}
+.filter-chip:hover { border-color: var(--color-border-strong); }
+/* The frame is the chip, so the focus ring goes around it. */
+.filter-chip:focus-within { outline: 2px solid var(--color-ring); outline-offset: 2px; }
+.filter-chip > .icon, .filter-chip-label { flex: none; color: var(--color-muted-foreground); }
+.filter-chip :is(.input, .select) {
+  flex: 1; min-width: 0; height: 100%;
+  padding-block: 0; padding-inline-start: 0;
+  border: 0; border-radius: 0; background-color: transparent; box-shadow: none;
+  font-size: inherit; font-weight: var(--type-weight-medium);
+  outline: none;
+}
+.filter-chip .input { padding-inline-end: 0; text-align: center; }
+.filter-chip .select { padding-inline-end: var(--spacing-lg); background-position: right 0 center; }
+.filter-chip-unit { flex: none; font-weight: var(--type-weight-medium); }
+@media (max-width: 1023px) {
+  /* One chip per line, with the labels in a column of their own. */
+  .filter-bar { grid-template-columns: minmax(0, 1fr); padding-inline: var(--presentation-page-padding); }
+  .filter-chip { height: var(--size-control-md); gap: var(--spacing-sm); }
+  .filter-chip-label { width: 3.5rem; }
 }
 
 /* ---------------------------------------------------------------------------
@@ -64,24 +121,48 @@
    and the export panel scroll on their own inside Kiso's Split. Below that the
    document scrolls and the export has a page of its own.
    --------------------------------------------------------------------------- */
-.compare-page { max-width: none; }
 @media (min-width: 1024px) {
   .app-shell:has(.compare-page) { height: 100vh; }
   .app-shell:has(.compare-page) > main { display: flex; flex-direction: column; min-height: 0; }
   .app-shell:has(.compare-page) > main > * { flex: none; }
-  .app-shell > main > .compare-page { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-  .compare-page > * { flex: none; }
-  .compare-page > .compare-split { flex: 1; min-height: 0; }
+  .app-shell > main > .compare-page { flex: 1; min-height: 0; display: flex; }
+  .compare-page > .compare-split { flex: 1; min-width: 0; min-height: 0; }
 }
-.compare-split > .compare-pane { padding-inline-end: var(--spacing-lg); }
+.compare-split > .compare-pane, .compare-stack {
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--spacing-lg); align-content: start;
+  padding: var(--presentation-page-padding);
+}
 /* With the panel closed the table takes the width the Splitter had given away. */
-.compare-split[data-export="closed"] > .compare-pane { flex-grow: 1; padding-inline-end: 0; }
-.compare-split > .export-pane {
-  display: flex; flex-direction: column; gap: var(--spacing-md);
-  padding-inline-start: var(--spacing-lg);
-  overflow: hidden;
+.compare-split[data-export="closed"] > .compare-pane { flex-grow: 1; }
+
+/* The export panel is docked to the right edge: a title row, then its body. */
+.compare-split > .export-pane { display: flex; flex-direction: column; overflow: hidden; }
+.export-pane-header {
+  flex: none;
+  display: flex; align-items: center; gap: var(--spacing-sm);
+  height: calc(var(--size-control-lg) + var(--spacing-sm));
+  padding-inline: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
 }
+.export-pane-header > .icon { color: var(--color-muted-foreground); }
+.export-pane-header > h2 { margin: 0; font-size: var(--type-size-body); font-weight: var(--type-weight-medium); }
+.export-pane-body { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: var(--spacing-md); }
+/* After the rule that lays the panel out, so a closed panel stays closed. */
 .compare-split > [hidden] { display: none; }
+
+/* Closed, the panel leaves a tab on the edge it came from. */
+.export-tab {
+  position: fixed; inset-inline-end: 0; top: 50%; translate: 0 -50%; z-index: 20;
+  display: grid; justify-items: center; gap: var(--spacing-xs);
+  padding: var(--spacing-md) var(--spacing-sm);
+  border: 1px solid var(--color-border); border-inline-end: 0;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  background: var(--color-card); color: var(--color-muted-foreground);
+  font: inherit; font-size: var(--type-size-metadata); font-weight: var(--type-weight-medium);
+  cursor: pointer;
+}
+.export-tab:hover { background: var(--color-accent-surface-hover); color: var(--color-foreground); }
+.export-page-title > .icon { color: var(--color-muted-foreground); }
 
 /* Columns keep their share of the width, so the five profiles line up from
    one category's table to the next. A value too long for its column is cut
@@ -143,8 +224,20 @@
   .export-panel[data-layout="page"] .export-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .export-panel[data-layout="page"] .export-pgbadger { grid-column: 1 / -1; }
 }
-/* The frame holds its size and the code scrolls inside it, both ways. */
-.export-code { display: flex; padding: 0; min-height: 10rem; max-height: min(75vh, 36rem); }
+/* The output is one card: a title row with the copy button, then the code,
+   which gives up its own frame and scrolls inside the card, both ways. */
+.export-output { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+.export-output-header {
+  flex: none;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+}
+.export-code {
+  display: flex; margin: 0; padding: 0;
+  min-height: 10rem; max-height: min(75vh, 36rem);
+  border: 0; border-radius: 0; box-shadow: none;
+}
+.export-code::before { content: none; }
 .export-code > code {
   flex: 1; min-width: 0; overflow: auto;
   padding: var(--spacing-md);
@@ -152,6 +245,7 @@
 }
 /* Beside the comparison, the panel takes the height its pane has left. */
 .export-panel[data-layout="split"] { flex: 1; min-height: 0; }
+.export-panel[data-layout="split"] .export-output { flex: 1; min-height: 0; }
 .export-panel[data-layout="split"] .export-code { flex: 1; min-height: 0; max-height: none; }
 
 /* ---------------------------------------------------------------------------

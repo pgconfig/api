@@ -50,7 +50,7 @@ export function ComparisonRowDetail({
           <div className="row-wrap">
             <Button asChild variant="primary">
               <a href={confUrl} target="_blank" rel="noreferrer">
-                <Icon name="lightbulb" />
+                <Icon name="lightbulb-line" />
                 <span>
                   Learn more on Postgresql<strong>co.nf</strong>
                 </span>
@@ -59,7 +59,7 @@ export function ComparisonRowDetail({
             {documentation.url && (
               <Button asChild>
                 <a href={documentation.url} target="_blank" rel="noreferrer">
-                  <Icon name="doc" />
+                  <Icon name="file-text-line" />
                   Check the docs
                 </a>
               </Button>

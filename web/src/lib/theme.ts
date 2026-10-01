@@ -28,6 +28,16 @@ export function applyTheme(theme: string): void {
   else document.documentElement.dataset.theme = theme;
 }
 
+/** Whether the page shows dark: the stored choice, or else the system's. */
+export function isDarkTheme(theme: string, systemDark: boolean): boolean {
+  return theme === "system" ? systemDark : theme === "dark";
+}
+
+/** The theme a toggle picks: the opposite of what is showing. */
+export function toggledTheme(theme: string, systemDark: boolean): "light" | "dark" {
+  return isDarkTheme(theme, systemDark) ? "light" : "dark";
+}
+
 export function useTheme(): [string, (theme: string) => void] {
   const [theme, setTheme] = useState(currentTheme);
 
