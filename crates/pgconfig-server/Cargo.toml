@@ -1,6 +1,6 @@
 [package]
 name = "pgconfig-server"
-description = "The pgconfig HTTP server: REST v1 and MCP"
+description = "The pgconfig HTTP server: REST v1, MCP, and the web app"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -10,8 +10,10 @@ publish = false
 [dependencies]
 axum = "0.8"
 clap = { version = "4", features = ["derive", "env"] }
+mime_guess = "2"
 pgconfig = { path = "../pgconfig" }
 rmcp = { version = "3", default-features = false, features = ["server", "transport-streamable-http-server"] }
+rust-embed = "8"
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { version = "1", features = ["macros", "net", "rt-multi-thread", "signal"] }
