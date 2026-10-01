@@ -1,5 +1,6 @@
 import { Fragment, useId, useMemo, useState } from "react";
 import {
+  Separator,
   Skeleton,
   Table,
   TableBody,
@@ -76,6 +77,7 @@ function ComparisonCategory({
       <h2 id={`${id}-title`} className="t-h3">
         {title}
       </h2>
+      <Separator />
       {compact && (
         <p className="muted t-label">
           Comparing PostgreSQL defaults with recommended {profileColumnLabel(currentEnv)}{" "}
@@ -199,6 +201,7 @@ function ComparisonSkeleton({ compact }: { compact: boolean }) {
       {[4, 4].map((rows, section) => (
         <div key={section} className="stack-sm">
           <Skeleton className="comparison-skeleton-title" />
+          <Separator />
           <div className="table-wrap">
             <Table className="comparison-table" aria-hidden="true">
               <TableBody>
