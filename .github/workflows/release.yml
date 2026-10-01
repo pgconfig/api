@@ -72,7 +72,7 @@ jobs:
         run: node scripts/release-version.mjs notes > release-notes.md
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
 
