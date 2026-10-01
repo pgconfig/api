@@ -1,0 +1,207 @@
+/* App-local layer, on top of Kiso. The design system arrives as a package
+   (@momoi-labs/kiso-react/styles.css, imported before this file), so everything
+   here is either a screen Kiso has a pattern for but no block, or a rule Kiso
+   deliberately leaves to the product. Values come from Kiso's tokens. */
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
+/* The way past the sidebar for keyboard users: off screen until focused. */
+.skip-link {
+  position: absolute; inset-block-start: var(--spacing-sm); inset-inline-start: var(--spacing-sm);
+  z-index: 80; padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border); border-radius: var(--radius-md);
+  background: var(--color-elevated-surface);
+  translate: 0 -200%;
+}
+.skip-link:focus { translate: 0 0; }
+
+/* A filled drawing among Kiso's stroked icons. */
+.icon-filled { fill: currentColor; stroke: none; }
+
+/* ---------------------------------------------------------------------------
+   Brand: the elephant, the API version, and the psql prompt wordmark.
+   --------------------------------------------------------------------------- */
+.brand-block { display: grid; gap: var(--spacing-sm); min-width: 0; }
+.brand-logo { display: block; padding-inline: var(--spacing-lg); border-radius: var(--radius-md); }
+.brand-logo img { display: block; width: 100%; height: auto; }
+.brand-wordmark {
+  font-size: var(--type-size-h1);
+  font-weight: var(--type-weight-medium);
+  line-height: var(--type-line-height-tight);
+  white-space: nowrap;
+}
+.brand-wordmark .muted { font-weight: var(--type-weight-regular); }
+.terminal-cursor {
+  display: inline-block; width: 0.55em; height: 1.1em;
+  margin-inline-start: 1ch; translate: 0 0.2em;
+  background: currentColor;
+  animation: terminal-cursor-blink 1.06s step-end infinite;
+}
+@keyframes terminal-cursor-blink { 50%, 100% { opacity: 0; } }
+/* Stacked above the page on a narrow screen, the sidebar has no room for it. */
+@media (max-width: 1023px) {
+  .brand-logo { display: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   The form: one labelled field per fact about the server.
+   --------------------------------------------------------------------------- */
+.config-filters {
+  display: grid; gap: var(--spacing-md);
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+}
+/* The profile's names are sentences, so its field takes two tracks. */
+.config-filters-profile { grid-column: span 2; }
+@media (max-width: 400px) {
+  .config-filters-profile { grid-column: auto; }
+}
+
+/* ---------------------------------------------------------------------------
+   Profile comparison. From 1024px the page fills the viewport, so the table
+   and the export panel scroll on their own inside Kiso's Split. Below that the
+   document scrolls and the export has a page of its own.
+   --------------------------------------------------------------------------- */
+.compare-page { max-width: none; }
+@media (min-width: 1024px) {
+  .app-shell:has(.compare-page) { height: 100vh; }
+  .app-shell:has(.compare-page) > main { display: flex; flex-direction: column; min-height: 0; }
+  .app-shell:has(.compare-page) > main > * { flex: none; }
+  .app-shell > main > .compare-page { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .compare-page > * { flex: none; }
+  .compare-page > .compare-split { flex: 1; min-height: 0; }
+}
+.compare-split > .compare-pane { padding-inline-end: var(--spacing-lg); }
+/* With the panel closed the table takes the width the Splitter had given away. */
+.compare-split[data-export="closed"] > .compare-pane { flex-grow: 1; padding-inline-end: 0; }
+.compare-split > .export-pane {
+  display: flex; flex-direction: column; gap: var(--spacing-md);
+  padding-inline-start: var(--spacing-lg);
+  overflow: hidden;
+}
+.compare-split > [hidden] { display: none; }
+
+/* Columns keep their share of the width, so the five profiles line up from
+   one category's table to the next. A value too long for its column is cut
+   with an ellipsis and stays readable in its title. */
+.comparison-table { table-layout: fixed; }
+.comparison-col-name { width: 29%; }
+.comparison-col-default { width: 13%; }
+/* A narrow screen keeps three columns: the name, the default, one profile. */
+.comparison-table[data-compact] .comparison-col-name { width: 50%; }
+.comparison-table[data-compact] .comparison-col-default { width: 25%; }
+.comparison-table :is(th, td) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.comparison-table :is(th, td):first-child { white-space: normal; overflow-wrap: anywhere; }
+
+.comparison-row { cursor: pointer; }
+.comparison-table tbody tr.comparison-row[data-expanded] { background: var(--color-accent-surface); }
+.comparison-toggle {
+  display: flex; align-items: center; gap: var(--spacing-sm);
+  width: 100%; padding: 0; border: 0; background: none;
+  color: inherit; font: inherit; font-weight: var(--type-weight-medium);
+  text-align: start; cursor: pointer;
+}
+.comparison-toggle .icon { color: var(--color-muted-foreground); }
+
+/* The selected profile's column. The header carries the selection; the cells
+   take the faint tint, one step stronger under the pointer so the hovered row
+   still reads across it. */
+.comparison-profile {
+  padding: 0; border: 0; background: none;
+  color: inherit; font: inherit; cursor: pointer;
+}
+.comparison-table td[data-pick] { cursor: pointer; }
+.comparison-table thead th[data-selected] {
+  background: var(--color-selected);
+  color: var(--color-selected-foreground);
+}
+.comparison-table tbody td[data-selected] { background: var(--color-accent-surface); }
+.comparison-table tbody tr:hover td[data-selected] { background: var(--color-accent-surface-hover); }
+
+/* The detail under a row is prose, not a row of values. */
+.comparison-table tbody tr.comparison-detail-row,
+.comparison-table tbody tr.comparison-detail-row:hover { background: var(--color-muted); }
+.comparison-table .comparison-detail-row > td {
+  padding: var(--spacing-lg);
+  white-space: normal; overflow: visible;
+}
+.comparison-detail {
+  display: grid; gap: var(--spacing-xl); align-items: start;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+}
+.comparison-readings { display: grid; gap: var(--spacing-xs); margin: 0; padding-inline-start: var(--spacing-lg); }
+.comparison-skeleton-title { width: 12rem; }
+
+/* ---------------------------------------------------------------------------
+   Export: the options, then the generated configuration in Kiso's code frame.
+   --------------------------------------------------------------------------- */
+.export-panel { display: flex; flex-direction: column; gap: var(--spacing-md); min-width: 0; }
+.export-options { display: grid; gap: var(--spacing-md); }
+@media (min-width: 640px) {
+  .export-panel[data-layout="page"] .export-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .export-panel[data-layout="page"] .export-pgbadger { grid-column: 1 / -1; }
+}
+/* The frame holds its size and the code scrolls inside it, both ways. */
+.export-code { display: flex; padding: 0; min-height: 10rem; max-height: min(75vh, 36rem); }
+.export-code > code {
+  flex: 1; min-width: 0; overflow: auto;
+  padding: var(--spacing-md);
+  white-space: pre; tab-size: 2;
+}
+/* Beside the comparison, the panel takes the height its pane has left. */
+.export-panel[data-layout="split"] { flex: 1; min-height: 0; }
+.export-panel[data-layout="split"] .export-code { flex: 1; min-height: 0; max-height: none; }
+
+/* ---------------------------------------------------------------------------
+   Rendered Markdown: parameter documentation and the guide.
+   --------------------------------------------------------------------------- */
+.markdown-body { min-width: 0; overflow-wrap: anywhere; }
+.markdown-body :is(p, ul, ol, pre, blockquote, .table-wrap) { margin-block: 0 var(--spacing-md); }
+.markdown-body :is(h1, h2, h3, h4) {
+  margin-block: var(--spacing-xl) var(--spacing-md);
+  /* A heading reached by its anchor stops below the sticky header. */
+  scroll-margin-block-start: calc(var(--size-control-lg) + var(--spacing-md) + var(--spacing-lg));
+}
+.markdown-body > :first-child { margin-block-start: 0; }
+.markdown-body > :last-child { margin-block-end: 0; }
+.markdown-body :is(ul, ol) { padding-inline-start: var(--spacing-xl); }
+.markdown-body li + li { margin-block-start: var(--spacing-xs); }
+.markdown-body img { display: block; max-width: 100%; height: auto; }
+.markdown-body blockquote {
+  margin-inline: 0; padding-inline-start: var(--spacing-md);
+  border-inline-start: 2px solid var(--color-border-strong);
+  color: var(--color-muted-foreground);
+}
+/* Documentation cells hold sentences, so they wrap and align to the top. */
+.markdown-body .table tbody td { vertical-align: top; overflow-wrap: normal; }
+/* A column the Markdown centres or right-aligns keeps its header in line. */
+.markdown-body .table th[align="center"] { text-align: center; }
+.markdown-body .table th[align="right"] { text-align: end; }
+
+/* Syntax colours, in Kiso's text roles so they hold in both themes. */
+.hljs-comment, .hljs-quote, .hljs-meta { color: var(--color-muted-foreground); }
+.hljs-keyword, .hljs-built_in, .hljs-type, .hljs-section, .hljs-attr, .hljs-attribute { color: var(--color-link); }
+.hljs-string, .hljs-symbol, .hljs-bullet { color: var(--color-success); }
+.hljs-number, .hljs-literal { color: var(--color-warning); }
+
+/* ---------------------------------------------------------------------------
+   Guide: its own navigation beside the page it leads to.
+   --------------------------------------------------------------------------- */
+.guide-page {
+  grid-template-columns: 13rem minmax(0, 1fr);
+  column-gap: var(--spacing-2xl);
+  align-items: start;
+}
+.guide-nav {
+  display: grid; gap: var(--spacing-lg);
+  /* Below the sticky header, which is one large control plus its padding. */
+  position: sticky;
+  top: calc(var(--size-control-lg) + var(--spacing-md) + var(--presentation-page-padding));
+}
+.guide-article { min-width: 0; max-width: 52rem; }
+@media (max-width: 1023px) {
+  .guide-page { grid-template-columns: minmax(0, 1fr); row-gap: var(--spacing-md); }
+  .guide-nav { position: static; }
+}
