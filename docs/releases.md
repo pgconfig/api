@@ -79,7 +79,8 @@ already created. Tags before the Rust cutover cannot be retried this way.
 
 ## Verification
 
-Run these checks before merging release changes:
+`mise install` provides every tool used here. Run these checks before merging
+release changes:
 
 ```sh
 npm ci
@@ -92,10 +93,20 @@ The tests exercise Changesets in a temporary Git repository. They verify that
 the Cargo workspace follows the package version, and that tagging a version
 twice, or a version that already has a bare tag, does not publish again.
 
-To rehearse the build of this machine's target, build the web app and run a
-snapshot:
+To rehearse the build, compile the Linux and macOS targets as a snapshot:
 
 ```sh
-just web
-goreleaser build --snapshot --clean --single-target
+just release-build
 ```
+
+It needs the Rust targets once:
+
+```sh
+rustup target add x86_64-unknown-linux-musl aarch64-unknown-linux-musl \
+  x86_64-apple-darwin aarch64-apple-darwin
+```
+
+The Windows target compiles only on its own runner, so a full
+`goreleaser release --snapshot` does not complete on a Mac or on Linux. The
+packaging of archives, packages, and images runs for the first time in the
+Release workflow.

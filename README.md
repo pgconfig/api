@@ -100,8 +100,8 @@ adjusted by the environment.
 
 ## Development
 
-The toolchain is pinned in `mise.toml`: Rust and Node, which only builds the
-web app. With [just](https://github.com/casey/just):
+`mise install` sets up every tool the repository uses, pinned in `mise.toml`.
+Node only builds the web app. Then, with [just](https://github.com/casey/just):
 
 ```sh
 just web     # build the web app, which the server embeds

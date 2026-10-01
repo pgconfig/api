@@ -1,4 +1,15 @@
+# Every tool the repository's commands use. `mise install` sets up a machine.
 [tools]
 rust = "1.97"
 # The web app is a React app built with Vite. Node is a build tool only.
 node = "24"
+just = "1"
+# Only generators/pg-docs is Go.
+go = "1.25"
+
+# Release tooling. The versions follow the workflows in .github/workflows.
+goreleaser = "2.17.0"
+actionlint = "1.7"
+# Cross-compiles the static Linux binaries, for a local release rehearsal.
+zig = "0.13.0"
+"cargo:cargo-zigbuild" = "0.20"
