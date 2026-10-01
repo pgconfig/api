@@ -10,17 +10,19 @@ import {
   BreadcrumbSeparator,
   Button,
   Separator,
+  ThemeSelector,
 } from "@momoi-labs/kiso-react";
 
 import { apiVersionLabel } from "../lib/api.js";
 import { isGuidePath, type Crumb } from "../lib/routes.js";
-import { isDarkTheme, toggledTheme, useTheme } from "../lib/theme.js";
-import { useMediaQuery } from "../lib/useMediaQuery.js";
+import { useTheme } from "../lib/theme.js";
 import { Icon } from "./Icon.js";
 
+const REPOSITORY = "https://github.com/momoi-labs/pgconfig";
+
 /**
- * The app's frame. The sidebar has the brand, the comparison, and the three
- * links at its foot. The header has the sidebar toggle, the page's name, and
+ * The app's frame. The sidebar has the brand, the three destinations, and the
+ * theme at its foot. The header has the sidebar toggle, the page's name, and
  * whatever `actions` the page puts beside it. `tuningSearch` is the form's
  * query string, carried by every link back to the comparison so leaving it
  * does not reset the form.
@@ -39,7 +41,6 @@ export function Shell({
   children: ReactNode;
 }) {
   const [theme, setTheme] = useTheme();
-  const systemDark = useMediaQuery("(prefers-color-scheme: dark)");
   const [collapsed, setCollapsed] = useState(false);
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -84,39 +85,24 @@ export function Shell({
                 leading: <Icon name="equalizer-line" />,
                 onClick: () => navigate(compare),
               },
+              {
+                href: "/guide",
+                label: "Docs",
+                active: isGuidePath(pathname),
+                leading: <Icon name="book-open-line" />,
+                onClick: () => navigate("/guide"),
+              },
+              {
+                href: REPOSITORY,
+                label: "Contribute",
+                leading: <Icon name="github-fill" />,
+                // The repository is another site, so it opens beside the app.
+                onClick: () => window.open(REPOSITORY, "_blank", "noopener,noreferrer"),
+              },
             ],
           },
         ]}
-        footer={
-          <>
-            <a
-              className="nav-item"
-              href="https://github.com/momoi-labs/pgconfig"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <Icon name="github-fill" />
-              Contribute
-            </a>
-            <RouterLink
-              className="nav-item"
-              to="/guide"
-              aria-current={isGuidePath(pathname) ? "page" : undefined}
-            >
-              <Icon name="book-open-line" />
-              Documentation
-            </RouterLink>
-            <button
-              type="button"
-              className="nav-item"
-              title="Toggle theme"
-              onClick={() => setTheme(toggledTheme(theme, systemDark))}
-            >
-              <Icon name={isDarkTheme(theme, systemDark) ? "sun-line" : "moon-line"} />
-              Theme
-            </button>
-          </>
-        }
+        footer={<ThemeSelector theme={theme} onChange={setTheme} />}
         header={
           <>
             <Button

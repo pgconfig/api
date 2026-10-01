@@ -43,21 +43,21 @@ test("the export page is named alone", () => {
   assert.deepStrictEqual(crumbsFor("/export", titleOf), [{ label: "Export" }]);
 });
 
-test("the documentation index is named alone", () => {
-  assert.deepStrictEqual(crumbsFor("/guide", titleOf), [{ label: "Documentation" }]);
-  assert.deepStrictEqual(crumbsFor("/guide/", titleOf), [{ label: "Documentation" }]);
+test("the docs index is named alone", () => {
+  assert.deepStrictEqual(crumbsFor("/guide", titleOf), [{ label: "Docs" }]);
+  assert.deepStrictEqual(crumbsFor("/guide/", titleOf), [{ label: "Docs" }]);
 });
 
-test("a documentation page sits under the documentation, by its title", () => {
+test("a docs page sits under the docs, by its title", () => {
   assert.deepStrictEqual(crumbsFor("/guide/mcp", titleOf), [
-    { label: "Documentation", to: "/guide" },
+    { label: "Docs", to: "/guide" },
     { label: "MCP" },
   ]);
 });
 
 test("an address with no page is named as not found", () => {
   assert.deepStrictEqual(crumbsFor("/guide/missing", titleOf), [
-    { label: "Documentation", to: "/guide" },
+    { label: "Docs", to: "/guide" },
     { label: "Not found" },
   ]);
   assert.deepStrictEqual(crumbsFor("/nope", titleOf), [{ label: "Not found" }]);
