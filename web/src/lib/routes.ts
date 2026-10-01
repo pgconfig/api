@@ -25,21 +25,20 @@ export function guideSlug(pathname: string): string {
 }
 
 /**
- * The breadcrumb for an address. `home` is where the root leads, and
- * `guideTitle` gives the title of a guide page, or nothing for an unknown one.
+ * The breadcrumb for an address. A page of the app is named alone, as the
+ * header's title. `guideTitle` gives the title of a documentation page, or
+ * nothing for an unknown one.
  */
 export function crumbsFor(
   pathname: string,
-  home: string,
   guideTitle: (slug: string) => string | undefined,
 ): Crumb[] {
   const path = normalize(pathname);
-  const root: Crumb = { label: "PGConfig", to: home };
-  if (path === "/" || path === "/tuning") return [root, { label: "Profile comparison" }];
-  if (path === "/export") return [root, { label: "Export" }];
-  if (!isGuidePath(path)) return [root, { label: "Not found" }];
+  if (path === "/" || path === "/tuning") return [{ label: "Profile comparison" }];
+  if (path === "/export") return [{ label: "Export" }];
+  if (!isGuidePath(path)) return [{ label: "Not found" }];
 
   const slug = guideSlug(path);
-  if (!slug) return [root, { label: "Guide" }];
-  return [root, { label: "Guide", to: "/guide" }, { label: guideTitle(slug) ?? "Not found" }];
+  if (!slug) return [{ label: "Documentation" }];
+  return [{ label: "Documentation", to: "/guide" }, { label: guideTitle(slug) ?? "Not found" }];
 }

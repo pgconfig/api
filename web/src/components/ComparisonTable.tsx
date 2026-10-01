@@ -141,7 +141,7 @@ function ComparisonCategory({
                         aria-expanded={open}
                         aria-controls={open ? detailId : undefined}
                       >
-                        <Icon name={open ? "chevron-down" : "chevron-right"} />
+                        <Icon name={open ? "arrow-down-s-line" : "arrow-right-s-line"} />
                         <span className="mono">{breakable(param.name)}</span>
                       </button>
                     </TableCell>

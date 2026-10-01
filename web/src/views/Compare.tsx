@@ -1,15 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link as RouterLink, useLocation } from "react-router";
-import {
-  Button,
-  PageHeader,
-  PageHeaderTitle,
-  Pane,
-  Spinner,
-  Split,
-  Splitter,
-  useToast,
-} from "@momoi-labs/kiso-react";
+import { Button, Pane, Split, Splitter, useToast } from "@momoi-labs/kiso-react";
 
 import { ComparisonTable } from "../components/ComparisonTable.js";
 import { ConfigFilters } from "../components/ConfigFilters.js";
@@ -31,13 +21,12 @@ import { DESKTOP, useMediaQuery } from "../lib/useMediaQuery.js";
 import type { Tuning } from "../lib/useTuning.js";
 
 /**
- * Every profile's recommendation side by side. On a desktop the generated
- * configuration sits in a resizable pane beside the table; narrow screens
- * reach it on the Export page instead.
+ * Every profile's recommendation side by side, under the row of filters. On a
+ * desktop the generated configuration sits in a resizable panel beside the
+ * table; narrow screens reach it on the Export page instead.
  */
 export function Compare({ form, tuning }: { form: ConfigForm; tuning: Tuning }) {
   const isDesktop = useMediaQuery(DESKTOP);
-  const { search } = useLocation();
   const { selectProfile } = useConfigForm();
   const [exportOpen, setExportOpen] = useState(() => readPanelOpen(document.cookie));
   const [size] = useState(() => readPanelSize(document.cookie));
@@ -71,87 +60,84 @@ export function Compare({ form, tuning }: { form: ConfigForm; tuning: Tuning }) 
       onSelectProfile={selectProfile}
     />
   );
+  const error = tuning.error && <LoadError reason={tuning.error} onRetry={tuning.retry} />;
 
   return (
-    <div className="page compare-page" id="content">
-      <PageHeader
-        actions={
-          <>
-            {tuning.loading && <Spinner label="Loading recommendations" />}
-            {isDesktop ? (
-              <Button
-                size="sm"
-                aria-expanded={exportOpen}
-                aria-controls="export-panel"
-                onClick={() => showExport(!exportOpen)}
-              >
-                <Icon name="export" />
-                Export
-              </Button>
-            ) : (
-              <Button asChild size="sm">
-                <RouterLink to={{ pathname: "/export", search }}>
-                  <Icon name="export" />
-                  Export
-                </RouterLink>
-              </Button>
-            )}
-          </>
-        }
-      >
-        <PageHeaderTitle>Profile comparison</PageHeaderTitle>
-      </PageHeader>
-
+    <>
       <ConfigFilters />
-
-      {tuning.error && <LoadError reason={tuning.error} onRetry={tuning.retry} />}
-
-      {isDesktop ? (
-        <Split className="compare-split" data-export={exportOpen ? "open" : "closed"}>
-          <Pane className="compare-pane">{table}</Pane>
-          <Splitter
-            hidden={!exportOpen}
-            defaultSize={size}
-            min={EXPORT_PANEL_MIN_SIZE}
-            max={EXPORT_PANEL_MAX_SIZE}
-            aria-label="Resize the comparison and export panes"
-            onSizeChange={(next) => {
-              document.cookie = panelCookie(EXPORT_PANEL_SIZE_COOKIE, Math.round(next));
-            }}
-          />
-          <Pane
-            id="export-panel"
-            className="grow export-pane"
-            hidden={!exportOpen}
-            role="region"
-            aria-labelledby="export-panel-title"
-          >
-            <div className="between">
-              <h2 id="export-panel-title" className="t-h3">
-                Export
-              </h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="btn-icon"
-                aria-label="Close export panel"
-                title="Close export panel"
-                onClick={() => showExport(false)}
-              >
-                <Icon name="x" />
-              </Button>
-            </div>
-            <ExportPanel
-              layout="split"
-              exported={tuning.exported}
-              pgVersion={pgVersion}
-              onChange={tuning.setExportForm}
+      <div className="compare-page" id="content">
+        {isDesktop ? (
+          <Split className="compare-split" data-export={exportOpen ? "open" : "closed"}>
+            <Pane className="compare-pane">
+              {error}
+              {table}
+            </Pane>
+            <Splitter
+              hidden={!exportOpen}
+              defaultSize={size}
+              min={EXPORT_PANEL_MIN_SIZE}
+              max={EXPORT_PANEL_MAX_SIZE}
+              aria-label="Resize the comparison and export panes"
+              onSizeChange={(next) => {
+                document.cookie = panelCookie(EXPORT_PANEL_SIZE_COOKIE, Math.round(next));
+              }}
             />
-          </Pane>
-        </Split>
-      ) : (
-        table
-      )}
-    </div>
+            <Pane
+              id="export-panel"
+              className="grow export-pane"
+              hidden={!exportOpen}
+              role="region"
+              aria-labelledby="export-panel-title"
+            >
+              <div className="export-pane-header">
+                <Icon name="file-down" />
+                <h2 id="export-panel-title" className="grow truncate">
+                  Export
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="btn-icon"
+                  aria-expanded="true"
+                  aria-controls="export-panel"
+                  aria-label="Close export panel"
+                  title="Close export panel"
+                  onClick={() => showExport(false)}
+                >
+                  <Icon name="panel-right-close" />
+                </Button>
+              </div>
+              <div className="export-pane-body">
+                <ExportPanel
+                  layout="split"
+                  exported={tuning.exported}
+                  pgVersion={pgVersion}
+                  onChange={tuning.setExportForm}
+                />
+              </div>
+            </Pane>
+          </Split>
+        ) : (
+          <div className="compare-stack">
+            {error}
+            {table}
+          </div>
+        )}
+
+        {isDesktop && !exportOpen && (
+          <button
+            type="button"
+            className="export-tab"
+            aria-controls="export-panel"
+            aria-expanded="false"
+            title="Open export panel"
+            onClick={() => showExport(true)}
+          >
+            <Icon name="file-down" />
+            Export
+          </button>
+        )}
+      </div>
+    </>
   );
 }

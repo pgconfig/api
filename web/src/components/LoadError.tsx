@@ -6,7 +6,7 @@ import { Icon } from "./Icon.js";
 export function LoadError({ reason, onRetry }: { reason: string; onRetry: () => void }) {
   return (
     <Alert variant="error">
-      <Icon name="caution" />
+      <Icon name="circle-alert" />
       <AlertContent>
         <AlertTitle>Could not get data from the API</AlertTitle>
         <AlertDescription>{reason}. Check the values above, then try again.</AlertDescription>

@@ -92,23 +92,26 @@ export function ExportPanel({
         </div>
       </div>
 
-      <div className="between">
-        <span className="t-label muted">Generated configuration</span>
-        <Button size="sm" disabled={!text} onClick={copy}>
-          <Icon name="copy" />
-          Copy
-        </Button>
-      </div>
+      {/* One frame for the output: its title and the copy button, then the text. */}
+      <section className="card export-output">
+        <div className="between export-output-header">
+          <span className="t-label muted">Generated configuration</span>
+          <Button size="sm" disabled={!text} onClick={copy}>
+            <Icon name="file-copy-line" />
+            Copy
+          </Button>
+        </div>
 
-      {text ? (
-        <pre className="export-code">
-          <code className={`hljs ${language}`} dangerouslySetInnerHTML={{ __html: html }} />
-        </pre>
-      ) : (
-        <EmptyState size="sm" variant="informational">
-          <EmptyStateDescription>Configuration output will appear here.</EmptyStateDescription>
-        </EmptyState>
-      )}
+        {text ? (
+          <pre className="export-code">
+            <code className={`hljs ${language}`} dangerouslySetInnerHTML={{ __html: html }} />
+          </pre>
+        ) : (
+          <EmptyState size="sm" variant="informational">
+            <EmptyStateDescription>Configuration output will appear here.</EmptyStateDescription>
+          </EmptyState>
+        )}
+      </section>
     </div>
   );
 }

@@ -1,9 +1,9 @@
 import { useEffect } from "react";
-import { Link as RouterLink, useLocation, useNavigate } from "react-router";
-import { Button, PageHeader, PageHeaderTitle, Spinner } from "@momoi-labs/kiso-react";
+import { useLocation, useNavigate } from "react-router";
 
 import { ConfigFilters } from "../components/ConfigFilters.js";
 import { ExportPanel } from "../components/ExportPanel.js";
+import { Icon } from "../components/Icon.js";
 import { LoadError } from "../components/LoadError.js";
 import { EXPORT_PANEL_STATE_COOKIE, panelCookie } from "../lib/exportPanelState.js";
 import type { ConfigForm } from "../lib/formQuery.js";
@@ -29,30 +29,23 @@ export function Export({ form, tuning }: { form: ConfigForm; tuning: Tuning }) {
   if (isDesktop) return null;
 
   return (
-    <div className="page" id="content">
-      <PageHeader
-        actions={
-          <>
-            {tuning.loading && <Spinner label="Loading configuration" />}
-            <Button asChild size="sm">
-              <RouterLink to={{ pathname: "/", search }}>Compare</RouterLink>
-            </Button>
-          </>
-        }
-      >
-        <PageHeaderTitle>Export</PageHeaderTitle>
-      </PageHeader>
-
+    <>
       <ConfigFilters />
+      <div className="page" id="content">
+        <div className="row export-page-title">
+          <Icon name="file-down" />
+          <h1 className="t-h3">Export</h1>
+        </div>
 
-      {tuning.error && <LoadError reason={tuning.error} onRetry={tuning.retry} />}
+        {tuning.error && <LoadError reason={tuning.error} onRetry={tuning.retry} />}
 
-      <ExportPanel
-        layout="page"
-        exported={tuning.exported}
-        pgVersion={String(form.pg_version)}
-        onChange={tuning.setExportForm}
-      />
-    </div>
+        <ExportPanel
+          layout="page"
+          exported={tuning.exported}
+          pgVersion={String(form.pg_version)}
+          onChange={tuning.setExportForm}
+        />
+      </div>
+    </>
   );
 }

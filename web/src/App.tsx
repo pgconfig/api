@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Route, Routes, useLocation } from "react-router";
 
+import { HeaderActions } from "./components/HeaderActions.js";
 import { Shell } from "./components/Shell.js";
 import { findGuidePage } from "./guide/pages.js";
 import { buildUrlArgs } from "./lib/formQuery.js";
@@ -28,8 +29,16 @@ export function App() {
   return (
     <Shell
       apiVersion={tuning.apiVersion}
-      crumbs={crumbsFor(pathname, `/${tuningSearch}`, (slug) => findGuidePage(slug)?.title)}
+      crumbs={crumbsFor(pathname, (slug) => findGuidePage(slug)?.title)}
       tuningSearch={tuningSearch}
+      actions={
+        tunes && (
+          <HeaderActions
+            page={pathname.startsWith("/export") ? "export" : "compare"}
+            loading={tuning.loading}
+          />
+        )
+      }
     >
       <Routes>
         <Route path="/" element={<Compare form={form} tuning={tuning} />} />

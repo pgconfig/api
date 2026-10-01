@@ -12,9 +12,9 @@ const ALERTS: Record<
 > = {
   NOTE: { title: "Note", variant: "info", icon: "info" },
   TIP: { title: "Tip", variant: "success", icon: "lightbulb" },
-  IMPORTANT: { title: "Important", variant: "info", icon: "important" },
-  WARNING: { title: "Warning", variant: "warning", icon: "warning" },
-  CAUTION: { title: "Caution", variant: "error", icon: "caution" },
+  IMPORTANT: { title: "Important", variant: "info", icon: "message-square-warning" },
+  WARNING: { title: "Warning", variant: "warning", icon: "triangle-alert" },
+  CAUTION: { title: "Caution", variant: "error", icon: "circle-alert" },
 };
 
 /**
