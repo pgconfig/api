@@ -15,7 +15,7 @@ test("the document carries Kiso's appearance and leaves the theme to the system"
   assert.deepStrictEqual(attributes, {
     lang: "en",
     "data-accent": "cobalt",
-    "data-border-style": "rail",
+    "data-border-style": "square",
     "data-corner-marks": "none",
     "data-corner-size": "off",
     "data-mark-size": "large",
