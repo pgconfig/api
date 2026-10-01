@@ -50,6 +50,14 @@ fn method(method: &'static str, path: &str) -> RestCase {
     }
 }
 
+fn forwarded(path: &str, headers: &[(&'static str, &'static str)]) -> RestCase {
+    RestCase {
+        method: "GET",
+        path: path.into(),
+        request_headers: headers.to_vec(),
+    }
+}
+
 fn config(query: impl AsRef<str>) -> RestCase {
     get(format!("/v1/tuning/get-config?{}", query.as_ref()))
 }
@@ -138,6 +146,31 @@ fn routes() -> RestGroup {
         with_origin(config("format=conf")),
         with_origin(config("pg_version=abc")),
         preflight,
+        // Behind a proxy, links.self and the conf header follow the forwarded
+        // scheme and host. Production sits behind one.
+        forwarded("/v1/version", &[("X-Forwarded-Proto", "https")]),
+        forwarded("/v1/version", &[("X-Forwarded-Host", "api.pgconfig.org")]),
+        forwarded(
+            "/v1/tuning/get-config?format=conf",
+            &[
+                ("X-Forwarded-Host", "api.pgconfig.org"),
+                ("X-Forwarded-Proto", "https"),
+            ],
+        ),
+        forwarded("/v1/nope", &[("X-Forwarded-Proto", "https")]),
+        forwarded("/v1/version", &[("X-Forwarded-Proto", "https, http")]),
+        forwarded(
+            "/v1/version",
+            &[("X-Forwarded-Host", "a.example, b.example")],
+        ),
+        forwarded("/v1/version", &[("X-Forwarded-Protocol", "https")]),
+        forwarded("/v1/version", &[("X-Forwarded-Ssl", "on")]),
+        forwarded("/v1/version", &[("X-Forwarded-Ssl", "off")]),
+        forwarded("/v1/version", &[("X-Url-Scheme", "https")]),
+        forwarded(
+            "/v1/version",
+            &[("Forwarded", "proto=https;host=x.example")],
+        ),
     ];
     RestGroup {
         name: "routes".into(),
