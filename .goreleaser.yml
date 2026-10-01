@@ -1,50 +1,78 @@
 version: 2
-before:
-  hooks:
-    - make docs
+project_name: pgconfig
 
+# The release workflow compiles every target, and the web app the server
+# embeds, in parallel jobs. This configuration then imports those binaries.
+# A local run compiles with Cargo, and needs `npm run build` in web/ first.
 builds:
-  - id: pgconfigctl
+  - id: pgconfigctl-linux
+    builder: rust
+    tool: '{{ if index .Env "PGCONFIG_PREBUILT_DIR" }}./scripts/release-cargo.sh{{ else }}cargo{{ end }}'
     binary: pgconfigctl
-    main: cmd/pgconfigctl/main.go
+    flags: [--release, --locked, --package=pgconfigctl]
     env:
-      - CGO_ENABLED=0
-    goos:
-      - linux
-      - windows
-      - darwin
-    ignore:
-      - goos: windows
-        goarch: arm64
-    goarch:
-      - amd64
-      - arm64
-    ldflags:
-      - -s
-      - -w
-      - -X github.com/pgconfig/api/pkg/version.Tag={{.Version}}
-      - -X github.com/pgconfig/api/pkg/version.Commit={{.Commit}}
+      - PGCONFIG_COMMIT={{ .FullCommit }}
+    # musl links statically, like the Go binaries these replace: the binary
+    # runs in a scratch image and on any distribution.
+    targets:
+      - x86_64-unknown-linux-musl
+      - aarch64-unknown-linux-musl
+  - id: pgconfigctl-macos
+    builder: rust
+    tool: '{{ if index .Env "PGCONFIG_PREBUILT_DIR" }}./scripts/release-cargo.sh{{ else }}cargo{{ end }}'
+    command: build
+    binary: pgconfigctl
+    flags: [--release, --locked, --package=pgconfigctl]
+    env:
+      - PGCONFIG_COMMIT={{ .FullCommit }}
+    targets:
+      - x86_64-apple-darwin
+      - aarch64-apple-darwin
+  - id: pgconfigctl-windows
+    builder: rust
+    tool: '{{ if index .Env "PGCONFIG_PREBUILT_DIR" }}./scripts/release-cargo.sh{{ else }}cargo{{ end }}'
+    command: build
+    binary: pgconfigctl
+    flags: [--release, --locked, --package=pgconfigctl]
+    env:
+      - PGCONFIG_COMMIT={{ .FullCommit }}
+    targets:
+      - x86_64-pc-windows-msvc
 
-  - id: api
-    binary: api
-    main: cmd/api/main.go
+  - id: pgconfig-server-linux
+    builder: rust
+    tool: '{{ if index .Env "PGCONFIG_PREBUILT_DIR" }}./scripts/release-cargo.sh{{ else }}cargo{{ end }}'
+    binary: pgconfig-server
+    flags: [--release, --locked, --package=pgconfig-server]
     env:
-      - CGO_ENABLED=0
-    goos:
-      - linux
-      - windows
-      - darwin
-    ignore:
-      - goos: windows
-        goarch: arm64
-    goarch:
-      - amd64
-      - arm64
-    ldflags:
-      - -s
-      - -w
-      - -X github.com/pgconfig/api/pkg/version.Tag={{.Version}}
-      - -X github.com/pgconfig/api/pkg/version.Commit={{.Commit}}
+      - PGCONFIG_COMMIT={{ .FullCommit }}
+    targets:
+      - x86_64-unknown-linux-musl
+      - aarch64-unknown-linux-musl
+  - id: pgconfig-server-macos
+    builder: rust
+    tool: '{{ if index .Env "PGCONFIG_PREBUILT_DIR" }}./scripts/release-cargo.sh{{ else }}cargo{{ end }}'
+    command: build
+    binary: pgconfig-server
+    flags: [--release, --locked, --package=pgconfig-server]
+    env:
+      - PGCONFIG_COMMIT={{ .FullCommit }}
+    targets:
+      - x86_64-apple-darwin
+      - aarch64-apple-darwin
+  - id: pgconfig-server-windows
+    builder: rust
+    tool: '{{ if index .Env "PGCONFIG_PREBUILT_DIR" }}./scripts/release-cargo.sh{{ else }}cargo{{ end }}'
+    command: build
+    binary: pgconfig-server
+    flags: [--release, --locked, --package=pgconfig-server]
+    env:
+      - PGCONFIG_COMMIT={{ .FullCommit }}
+    targets:
+      - x86_64-pc-windows-msvc
+
+# The package and archive names are the ones the Go releases used, so a
+# script that downloads a release keeps working.
 nfpms:
   - id: default
     package_name: pgconfigctl
@@ -56,9 +84,6 @@ nfpms:
       {{- else if eq .Os "windows" }}Windows
       {{- else }}{{ .Os }}{{ end }}-
       {{ .Arch }}
-
-    # builds:
-    #   - pgconfigctl
 
     homepage: https://pgconfig.org/
     maintainer: Sebastian Webber <sebastian@pgconfig.org>
@@ -72,8 +97,6 @@ nfpms:
 
 archives:
   - id: pgconfigctl
-    # builds:
-    #   - pgconfigctl
     name_template: >-
       {{ .Binary }}-
       {{ .Version }}-
@@ -82,13 +105,8 @@ archives:
       {{- else if eq .Os "windows" }}Windows
       {{- else }}{{ .Os }}{{ end }}-
       {{ .Arch }}
-    # format: binary # deprecated
     formats:
-      - tar.gz # standard default, user likely wants binary-only but v2 deprecates raw binary output in archives?
-      # If 'binary' format is desired, it's usually just copying the file.
-      # If I comment out format, it defaults to tar.gz.
-      # If I use formats: ["binary"] it might work if 'binary' is still a valid value inside the list.
-      # Let's try formats: ["binary"] first as the user had 'format: binary'.
+      - tar.gz
       - binary
 
 checksum:
@@ -98,10 +116,13 @@ release:
   footer: >-
     ## Docker Images
 
-    - `docker pull docker.io/pgconfig/api:v{{ .Version }}`
-    - `docker pull ghcr.io/pgconfig/api:v{{ .Version }}`
-    - `docker pull docker.io/pgconfig/pgconfigctl:v{{ .Version }}`
-    - `docker pull ghcr.io/pgconfig/pgconfigctl:v{{ .Version }}`
+    - `docker pull ghcr.io/momoi-labs/pgconfig:v{{ .Version }}`
+    - `docker pull ghcr.io/momoi-labs/pgconfigctl:v{{ .Version }}`
+
+    The images `pgconfig/api` and `pgconfig/pgconfigctl`, on Docker Hub and on
+    `ghcr.io/pgconfig`, stopped at 3.6.1. `ghcr.io/momoi-labs/pgconfig`
+    replaces `pgconfig/api`: its binary is `pgconfig-server`, and it needs no
+    `rules.yml` or `pg-docs.yml` next to it.
 
 snapshot:
   version_template: "{{ .Tag }}-next"
@@ -122,11 +143,10 @@ changelog:
 dockers_v2:
   - id: pgconfigctl
     ids:
-      - pgconfigctl
-    dockerfile: cmd/pgconfigctl/Dockerfile
+      - pgconfigctl-linux
+    dockerfile: crates/pgconfigctl/Dockerfile
     images:
-      - "docker.io/pgconfig/pgconfigctl"
-      - "ghcr.io/pgconfig/pgconfigctl"
+      - "ghcr.io/momoi-labs/pgconfigctl"
     tags:
       - "v{{ .Version }}"
       - "v{{ .Major }}.{{ .Minor }}"
@@ -134,8 +154,8 @@ dockers_v2:
       - "latest"
     labels:
       "org.opencontainers.image.created": "{{.Date}}"
-      "org.opencontainers.image.title": "pgconfig-{{.ProjectName}}"
-      "org.opencontainers.image.website": "pgconfig.org"
+      "org.opencontainers.image.title": "pgconfigctl"
+      "org.opencontainers.image.source": "https://github.com/momoi-labs/pgconfig"
       "org.opencontainers.image.revision": "{{.FullCommit}}"
       "org.opencontainers.image.version": "{{.Version}}"
     platforms:
@@ -145,16 +165,12 @@ dockers_v2:
       - "--provenance=false"
     sbom: false
 
-  - id: api
+  - id: pgconfig
     ids:
-      - api
-    dockerfile: cmd/api/Dockerfile
-    extra_files:
-      - rules.yml
-      - pg-docs.yml
+      - pgconfig-server-linux
+    dockerfile: crates/pgconfig-server/Dockerfile
     images:
-      - "docker.io/pgconfig/api"
-      - "ghcr.io/pgconfig/api"
+      - "ghcr.io/momoi-labs/pgconfig"
     tags:
       - "v{{ .Version }}"
       - "v{{ .Major }}.{{ .Minor }}"
@@ -162,8 +178,8 @@ dockers_v2:
       - "latest"
     labels:
       "org.opencontainers.image.created": "{{.Date}}"
-      "org.opencontainers.image.title": "pgconfig-{{.ProjectName}}"
-      "org.opencontainers.image.website": "pgconfig.org"
+      "org.opencontainers.image.title": "pgconfig"
+      "org.opencontainers.image.source": "https://github.com/momoi-labs/pgconfig"
       "org.opencontainers.image.revision": "{{.FullCommit}}"
       "org.opencontainers.image.version": "{{.Version}}"
     platforms:
