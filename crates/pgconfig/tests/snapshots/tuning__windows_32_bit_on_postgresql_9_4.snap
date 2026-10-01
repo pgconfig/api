@@ -1,0 +1,69 @@
+---
+source: crates/pgconfig/tests/tuning.rs
+expression: "tuned(RawTuningRequest\n{\n    total_ram: Some(\"64GB\".into()), postgres_version: Some(\"9.4.26\".into()),\n    os: Some(\"windows\".into()), arch: Some(\"i686\".into()), disk_type:\n    Some(\"HDD\".into()), max_connections: Some(2000), ..complete()\n})"
+---
+{
+  "request": {
+    "os": "windows",
+    "arch": "386",
+    "total_ram": "64GB",
+    "profile": "WEB",
+    "disk_type": "HDD",
+    "max_connections": 2000,
+    "total_cpu": 8,
+    "postgres_version": "9.4.26"
+  },
+  "assumptions": [],
+  "warnings": [
+    {
+      "code": "high_max_connections",
+      "message": "max_connections is 2000. Every connection takes memory, and work_mem is divided among them. Above 1000 connections, consider a connection pooler in front of PostgreSQL."
+    }
+  ],
+  "recommendations": {
+    "checkpoint_completion_target": {
+      "value": "0.9",
+      "reason": "Set to 0.9 to spread checkpoint I/O across most of the checkpoint interval."
+    },
+    "checkpoint_segments": {
+      "value": "16",
+      "reason": "Set to 16 as the legacy checkpoint segment count for PostgreSQL releases before 9.5."
+    },
+    "effective_cache_size": {
+      "value": "48GB",
+      "reason": "Set to 48GB from memory available to the PostgreSQL and operating-system caches."
+    },
+    "effective_io_concurrency": {
+      "value": "2",
+      "reason": "Set to 2 for the requested HDD storage; the storage policy replaces the initial Windows compatibility value."
+    },
+    "maintenance_work_mem": {
+      "value": "2GB",
+      "reason": "Set to 2GB. Capped from 3GB to 2GB by the Windows limit of PostgreSQL releases before 18."
+    },
+    "max_connections": {
+      "value": "2000",
+      "reason": "Set to 2000 to match the requested connection limit."
+    },
+    "max_worker_processes": {
+      "value": "8",
+      "reason": "Set to 8 to match the 8 logical CPUs."
+    },
+    "random_page_cost": {
+      "value": "4.0",
+      "reason": "Set to 4.0 for HDD storage and the WEB workload profile."
+    },
+    "shared_buffers": {
+      "value": "512MB",
+      "reason": "Set to 512MB. Capped from 16GB to 4GB for the 32-bit architecture. Then capped from 4GB to 512MB for PostgreSQL 9.6 and older."
+    },
+    "wal_buffers": {
+      "value": "-1",
+      "reason": "Set to -1 to use automatic PostgreSQL tuning for the WEB workload profile."
+    },
+    "work_mem": {
+      "value": "8MB",
+      "reason": "Set to 8MB from available memory for the WEB profile and 2000 connections."
+    }
+  }
+}

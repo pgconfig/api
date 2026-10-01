@@ -1,0 +1,100 @@
+---
+source: crates/pgconfig/tests/tuning.rs
+expression: "tuned(RawTuningRequest\n{\n    total_ram: Some(\"64GB\".into()), total_cpu: Some(32), postgres_version:\n    Some(\"18.4\".into()), profile: Some(\"OLTP\".into()), ..complete()\n})"
+---
+{
+  "request": {
+    "os": "linux",
+    "arch": "amd64",
+    "total_ram": "64GB",
+    "profile": "OLTP",
+    "disk_type": "SSD",
+    "max_connections": 100,
+    "total_cpu": 32,
+    "postgres_version": "18.4"
+  },
+  "assumptions": [],
+  "warnings": [],
+  "recommendations": {
+    "checkpoint_completion_target": {
+      "value": "0.9",
+      "reason": "Set to 0.9 to spread checkpoint I/O across most of the checkpoint interval."
+    },
+    "effective_cache_size": {
+      "value": "48GB",
+      "reason": "Set to 48GB from memory available to the PostgreSQL and operating-system caches."
+    },
+    "effective_io_concurrency": {
+      "value": "200",
+      "reason": "Set to 200 for the requested SSD storage."
+    },
+    "file_copy_method": {
+      "value": "copy",
+      "reason": "Set to copy as the copy method for file operations."
+    },
+    "io_max_combine_limit": {
+      "value": "16",
+      "reason": "Set to 16 for the OLTP workload profile."
+    },
+    "io_max_concurrency": {
+      "value": "128",
+      "reason": "Set to 128 for the OLTP workload profile."
+    },
+    "io_method": {
+      "value": "worker",
+      "reason": "Set to worker to use worker-based asynchronous I/O."
+    },
+    "io_workers": {
+      "value": "10",
+      "reason": "Set to 10 from 32 logical CPUs and the OLTP profile."
+    },
+    "maintenance_io_concurrency": {
+      "value": "200",
+      "reason": "Set to 200 for the requested SSD storage."
+    },
+    "maintenance_work_mem": {
+      "value": "3GB",
+      "reason": "Set to 3GB as 5% of memory available to the OLTP profile."
+    },
+    "max_connections": {
+      "value": "100",
+      "reason": "Set to 100 to match the requested connection limit."
+    },
+    "max_parallel_workers": {
+      "value": "32",
+      "reason": "Set to 32 to match the 32 logical CPUs."
+    },
+    "max_parallel_workers_per_gather": {
+      "value": "2",
+      "reason": "Set to 2 as the parallel-query default for the OLTP workload profile."
+    },
+    "max_wal_size": {
+      "value": "8GB",
+      "reason": "Set to 8GB for the OLTP workload profile."
+    },
+    "max_worker_processes": {
+      "value": "32",
+      "reason": "Set to 32 to match the 32 logical CPUs."
+    },
+    "min_wal_size": {
+      "value": "2GB",
+      "reason": "Set to 2GB for the OLTP workload profile."
+    },
+    "random_page_cost": {
+      "value": "1.1",
+      "reason": "Set to 1.1 for SSD storage and the OLTP workload profile."
+    },
+    "shared_buffers": {
+      "value": "16GB",
+      "reason": "Set to 16GB from the memory share for the OLTP profile."
+    },
+    "wal_buffers": {
+      "value": "32MB",
+      "reason": "Set to 32MB for OLTP because the profile's share of memory for shared_buffers exceeds 8GB."
+    },
+    "work_mem": {
+      "value": "229MB",
+      "reason": "Set to 229MB from available memory for the OLTP profile and 100 connections."
+    }
+  }
+}

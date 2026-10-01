@@ -41,6 +41,24 @@ make clean        # Remove dist/ and generated docs
 - `tests/golden/` pins the output of REST v1 and `pgconfigctl`. A change to the
   rules must come with re-recorded goldens. See `tests/golden/README.md`.
 
+## Rust workspace
+
+The Rust rewrite lives next to the Go code until the cutover. See
+`docs/research/rust-migration-assessment.md`.
+
+```bash
+cargo fmt --check
+cargo clippy --all-targets -- -D warnings
+cargo test
+```
+
+- `crates/pgconfig`: the tuning engine, no I/O. `tune` is the entry point.
+  The `v1` module reproduces the output of REST v1 and `pgconfigctl`.
+- `crates/golden`: records and replays `tests/golden`.
+- The toolchain is pinned in `mise.toml`. Run cargo through `mise exec --` when
+  it is not on the `PATH`.
+- `rules.yml` and `pg-docs.yml` are compiled into the crate by its `build.rs`.
+
 ## Adding a New Rule
 
 1. Create function in `pkg/rules/` with signature `func(*input.Input, *category.ExportCfg) (*category.ExportCfg, error)`

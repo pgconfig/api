@@ -1,0 +1,21 @@
+[package]
+name = "pgconfig"
+description = "PostgreSQL configuration tuning: turns the facts about a server into recommended settings"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+# The data files live at the repository root, outside the crate. Publishing
+# needs them inside it first.
+publish = false
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[build-dependencies]
+yaml-rust2 = { version = "0.13", default-features = false }
+
+[dev-dependencies]
+insta = { version = "1", features = ["json"] }
+pgconfig-golden = { path = "../golden" }
