@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router";
 import {
   ApplicationShell,
@@ -8,7 +8,6 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-  Button,
   Separator,
   ThemeSelector,
 } from "@momoi-labs/kiso-react";
@@ -22,7 +21,7 @@ const REPOSITORY = "https://github.com/momoi-labs/pgconfig";
 
 /**
  * The app's frame. The sidebar has the brand, the three destinations, and the
- * theme at its foot. The header has the sidebar toggle, the page's name, and
+ * theme at its foot. The header has Kiso's sidebar toggle, the page's name, and
  * whatever `actions` the page puts beside it. `tuningSearch` is the form's
  * query string, carried by every link back to the comparison so leaving it
  * does not reset the form.
@@ -41,12 +40,10 @@ export function Shell({
   children: ReactNode;
 }) {
   const [theme, setTheme] = useTheme();
-  const [collapsed, setCollapsed] = useState(false);
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const versionLabel = apiVersionLabel(apiVersion);
   const compare = { pathname: "/", search: tuningSearch };
-  const sidebarLabel = collapsed ? "Expand sidebar" : "Collapse sidebar";
 
   return (
     <>
@@ -55,8 +52,7 @@ export function Shell({
       </a>
       <ApplicationShell
         collapsible
-        collapsed={collapsed}
-        onCollapsedChange={setCollapsed}
+        togglePlacement="header"
         brand={
           <div className="brand-block">
             <RouterLink to={compare} className="brand-logo" aria-label="PGConfig home">
@@ -105,17 +101,6 @@ export function Shell({
         footer={<ThemeSelector theme={theme} onChange={setTheme} />}
         header={
           <>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="btn-icon header-sidebar-toggle"
-              aria-expanded={!collapsed}
-              aria-label={sidebarLabel}
-              title={sidebarLabel}
-              onClick={() => setCollapsed(!collapsed)}
-            >
-              <Icon name="side-bar-line" />
-            </Button>
             <Separator orientation="vertical" className="header-separator" />
             <Breadcrumb className="grow header-title">
               <BreadcrumbList>
