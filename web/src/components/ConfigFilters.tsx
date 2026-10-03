@@ -1,4 +1,4 @@
-import type { ChangeEvent } from "react";
+import { useState } from "react";
 import {
   FormField,
   Select,
@@ -9,7 +9,7 @@ import {
 } from "@momoi-labs/kiso-react";
 
 import type { Option } from "../lib/exportForm.js";
-import type { ConfigForm } from "../lib/formQuery.js";
+import { parseCount, type ConfigForm } from "../lib/formQuery.js";
 import {
   ARCH_OPTIONS,
   DRIVE_TYPE_OPTIONS,
@@ -61,7 +61,11 @@ function FilterSelect({
   );
 }
 
-/** One fact about the server that is a count: icon, short label, number. */
+/**
+ * One fact about the server that is a count: icon, short label, number. The
+ * field keeps what is being typed, so it can be emptied and retyped; the form
+ * only hears about it once the text is a count.
+ */
 function FilterNumber({
   icon,
   label,
@@ -75,8 +79,10 @@ function FilterNumber({
   name: string;
   suffix?: string;
   value: number;
-  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onChange: (count: number) => void;
 }) {
+  const [draft, setDraft] = useState<string | null>(null);
+
   return (
     <FormField
       label={label}
@@ -87,8 +93,13 @@ function FilterNumber({
       type="number"
       min={1}
       aria-label={name}
-      value={value}
-      onChange={onChange}
+      value={draft ?? value}
+      onChange={(event) => {
+        setDraft(event.target.value);
+        const count = parseCount(event.target.value);
+        if (count !== null) onChange(count);
+      }}
+      onBlur={() => setDraft(null)}
     />
   );
 }
@@ -100,8 +111,8 @@ function FilterNumber({
 export function ConfigFilters() {
   const { form, update } = useConfigForm();
 
-  const number = (field: NumberField) => (event: ChangeEvent<HTMLInputElement>) => {
-    update({ [field]: parseInt(event.target.value, 10) || 1 } as Partial<ConfigForm>);
+  const number = (field: NumberField) => (count: number) => {
+    update({ [field]: count } as Partial<ConfigForm>);
   };
 
   return (

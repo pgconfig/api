@@ -4,6 +4,7 @@ import {
   DEFAULT_FORM,
   buildUrlArgs,
   formToQuery,
+  parseCount,
   parseFormQuery,
 } from "../src/lib/formQuery.ts";
 
@@ -78,4 +79,17 @@ test("the address bar gets every field as text, without the memory unit", () => 
 test("a form survives a round trip through the address bar", () => {
   const form = { ...DEFAULT_FORM, environment_name: "DW", total_ram: 64, pg_version: 9.4 };
   assert.deepStrictEqual(parseFormQuery(new URLSearchParams(formToQuery(form))), form);
+});
+
+test("a count is read from what the field holds while it is being typed", () => {
+  assert.strictEqual(parseCount("8"), 8);
+  assert.strictEqual(parseCount("128"), 128);
+  // A fraction is cut to its whole part, as the form always did.
+  assert.strictEqual(parseCount("1.5"), 1);
+});
+
+test("a field that is empty or below one has no count yet", () => {
+  for (const text of ["", " ", "0", "-5", "abc"]) {
+    assert.strictEqual(parseCount(text), null, JSON.stringify(text));
+  }
 });
