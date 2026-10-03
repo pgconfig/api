@@ -182,6 +182,10 @@
 }
 .comparison-toggle .icon { color: var(--color-muted-foreground); }
 
+/* The default is the reference the profiles are read against, so its column
+   is subdued. */
+.comparison-table :is(th, td)[data-reference] { background: var(--color-muted); }
+
 /* The selected profile's column. The header carries the selection; the cells
    take the faint tint, one step stronger under the pointer so the hovered row
    still reads across it. */
@@ -197,13 +201,11 @@
 .comparison-table tbody td[data-selected] { background: var(--color-accent-surface); }
 .comparison-table tbody tr:hover td[data-selected] { background: var(--color-accent-surface-hover); }
 
-/* The detail under a row is prose, not a row of values. */
-.comparison-table tbody tr.comparison-detail-row,
-.comparison-table tbody tr.comparison-detail-row:hover { background: var(--color-muted); }
-.comparison-table .comparison-detail-row > td {
-  padding: var(--spacing-lg);
-  white-space: normal; overflow: visible;
-}
+/* The detail under a row is prose, not a row of values. Kiso's table-detail
+   gives it reading padding; the columns above still cut long values. */
+.comparison-table tbody tr.table-detail,
+.comparison-table tbody tr.table-detail:hover { background: var(--color-muted); }
+.comparison-table .table-detail > td { overflow: visible; }
 .comparison-detail {
   display: grid; gap: var(--spacing-xl); align-items: start;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
