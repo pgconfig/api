@@ -60,6 +60,11 @@ jobs:
       run:
         shell: bash
     steps:
+      # A Windows runner checks files out with CRLF. The version check reads
+      # Cargo.toml line by line, and the binaries embed text files, so every
+      # runner keeps the line endings the repository has.
+      - run: git config --global core.autocrlf false
+
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.tag || github.ref }}
