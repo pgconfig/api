@@ -107,7 +107,14 @@ function ComparisonCategory({
               {envs.map((env) => {
                 const selected = isSelected(env, currentEnv);
                 return (
-                  <TableHead key={env} data-selected={selected || undefined}>
+                  <TableHead
+                    key={env}
+                    data-selected={selected || undefined}
+                    data-pick={compact ? undefined : true}
+                    onClick={
+                      compact ? undefined : () => onSelectProfile(ENV_COLUMN_TO_PROFILE[env])
+                    }
+                  >
                     {compact ? (
                       profileColumnLabel(currentEnv)
                     ) : (
@@ -116,7 +123,6 @@ function ComparisonCategory({
                         className="comparison-profile"
                         aria-pressed={selected}
                         title={`Select the ${env.toUpperCase()} profile`}
-                        onClick={() => onSelectProfile(ENV_COLUMN_TO_PROFILE[env])}
                       >
                         {env.toUpperCase()}
                       </button>
