@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { Button, Pane, Split, Splitter, useToast } from "@momoi-labs/kiso-react";
+import { useState } from "react";
+import { Button, Pane, Split, Splitter } from "@momoi-labs/kiso-react";
 
 import { ComparisonTable } from "../components/ComparisonTable.js";
 import { ConfigFilters } from "../components/ConfigFilters.js";
@@ -32,18 +32,6 @@ export function Compare({ form, tuning }: { form: ConfigForm; tuning: Tuning }) 
   const [size] = useState(() => readPanelSize(document.cookie));
   const pgVersion = String(form.pg_version);
 
-  // Said once when the page opens, as the reminder of what the table compares.
-  const notify = useToast();
-  const announced = useRef(false);
-  useEffect(() => {
-    if (announced.current) return;
-    announced.current = true;
-    notify(
-      "neutral",
-      `Comparing the ${form.environment_name.toUpperCase()} profile against all profiles.`,
-    );
-  }, [notify, form.environment_name]);
-
   function showExport(open: boolean) {
     setExportOpen(open);
     document.cookie = panelCookie(EXPORT_PANEL_STATE_COOKIE, open);
@@ -65,6 +53,11 @@ export function Compare({ form, tuning }: { form: ConfigForm; tuning: Tuning }) 
   return (
     <>
       <ConfigFilters />
+      {/* What the table compares, for assistive technology. It is said again
+          when the profile changes, and never drawn. */}
+      <p className="visually-hidden" role="status">
+        Comparing the {form.environment_name.toUpperCase()} profile against all profiles.
+      </p>
       <div className="compare-page" id="content">
         {isDesktop ? (
           <Split className="compare-split" data-export={exportOpen ? "open" : "closed"}>
