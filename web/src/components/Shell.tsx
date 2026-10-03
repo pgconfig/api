@@ -2,25 +2,27 @@ import type { ReactNode } from "react";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router";
 import {
   ApplicationShell,
+  Badge,
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
+  Dot,
   Separator,
   ThemeSelector,
 } from "@momoi-labs/kiso-react";
 
 import { apiVersionLabel } from "../lib/api.js";
-import { isGuidePath, type Crumb } from "../lib/routes.js";
+import { isGuidePath, isMcpPath, type Crumb } from "../lib/routes.js";
 import { useTheme } from "../lib/theme.js";
 import { Icon } from "./Icon.js";
 
 const REPOSITORY = "https://github.com/momoi-labs/pgconfig";
 
 /**
- * The app's frame. The sidebar has the brand, the three destinations, and the
+ * The app's frame. The sidebar has the brand, the four destinations, and the
  * theme at its foot. The header has Kiso's sidebar toggle, the page's name, and
  * whatever `actions` the page puts beside it. `tuningSearch` is the form's
  * query string, carried by every link back to the comparison so leaving it
@@ -84,9 +86,23 @@ export function Shell({
               {
                 href: "/guide",
                 label: "Docs",
-                active: isGuidePath(pathname),
+                active: isGuidePath(pathname) && !isMcpPath(pathname),
                 leading: <Icon name="book-open-line" />,
                 onClick: () => navigate("/guide"),
+              },
+              {
+                // The newest way in, so it gets a place of its own and a mark.
+                href: "/guide/mcp",
+                label: "MCP",
+                active: isMcpPath(pathname),
+                leading: <Icon name="robot-2-line" />,
+                trailing: (
+                  <Badge variant="info">
+                    <Dot variant="info" />
+                    New
+                  </Badge>
+                ),
+                onClick: () => navigate("/guide/mcp"),
               },
               {
                 href: REPOSITORY,

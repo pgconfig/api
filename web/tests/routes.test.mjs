@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { crumbsFor, guideSlug, isGuidePath, isTuningPath } from "../src/lib/routes.ts";
+import {
+  crumbsFor,
+  guideSlug,
+  isGuidePath,
+  isMcpPath,
+  isTuningPath,
+} from "../src/lib/routes.ts";
 
 const titles = { api: "Overview", mcp: "MCP" };
 const titleOf = (slug) => titles[slug];
@@ -24,6 +30,14 @@ test("only /guide and what is under it belongs to the guide", () => {
   assert.strictEqual(isGuidePath("/guide/mcp"), true);
   assert.strictEqual(isGuidePath("/guidelines"), false);
   assert.strictEqual(isGuidePath("/"), false);
+});
+
+test("the MCP page has its own place in the sidebar, apart from the docs", () => {
+  assert.strictEqual(isMcpPath("/guide/mcp"), true);
+  assert.strictEqual(isMcpPath("/guide/mcp/"), true);
+  assert.strictEqual(isMcpPath("/guide"), false);
+  assert.strictEqual(isMcpPath("/guide/api"), false);
+  assert.strictEqual(isMcpPath("/mcp"), false);
 });
 
 test("a guide address names its page, and the index has no name", () => {
