@@ -5,6 +5,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFrame,
   TableHead,
   TableHeader,
   TableRow,
@@ -84,9 +85,11 @@ function ComparisonCategory({
           values. Change application profile above to switch environments.
         </p>
       )}
-      <div className="table-wrap">
+      <TableFrame frame="none">
         <Table
           className="comparison-table"
+          density="spacious"
+          header="plain"
           data-compact={compact || undefined}
           aria-labelledby={`${id}-title`}
         >
@@ -100,7 +103,7 @@ function ComparisonCategory({
           <TableHeader>
             <TableRow>
               <TableHead>Parameter</TableHead>
-              <TableHead>{compact ? "Default" : "Default value"}</TableHead>
+              <TableHead data-reference>{compact ? "Default" : "Default value"}</TableHead>
               {envs.map((env) => {
                 const selected = isSelected(env, currentEnv);
                 return (
@@ -147,7 +150,7 @@ function ComparisonCategory({
                         <span className="mono">{breakable(param.name)}</span>
                       </button>
                     </TableCell>
-                    <TableCell className="mono muted" title={defaultValue}>
+                    <TableCell className="mono muted" title={defaultValue} data-reference>
                       {defaultValue}
                     </TableCell>
                     {envs.map((env) => {
@@ -174,7 +177,7 @@ function ComparisonCategory({
                     })}
                   </TableRow>
                   {open && (
-                    <TableRow id={detailId} className="comparison-detail-row">
+                    <TableRow id={detailId} className="table-detail">
                       <TableCell colSpan={envs.length + 2}>
                         <ComparisonRowDetail row={param} pgVersion={pgVersion} />
                       </TableCell>
@@ -185,7 +188,7 @@ function ComparisonCategory({
             })}
           </TableBody>
         </Table>
-      </div>
+      </TableFrame>
     </section>
   );
 }
@@ -202,8 +205,8 @@ function ComparisonSkeleton({ compact }: { compact: boolean }) {
         <div key={section} className="stack-sm">
           <Skeleton className="comparison-skeleton-title" />
           <Separator />
-          <div className="table-wrap">
-            <Table className="comparison-table" aria-hidden="true">
+          <TableFrame frame="none">
+            <Table className="comparison-table" density="spacious" aria-hidden="true">
               <TableBody>
                 {Array.from({ length: rows }, (_, row) => (
                   <TableRow key={row}>
@@ -216,7 +219,7 @@ function ComparisonSkeleton({ compact }: { compact: boolean }) {
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </TableFrame>
         </div>
       ))}
     </div>
