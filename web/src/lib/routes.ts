@@ -24,6 +24,11 @@ export function guideSlug(pathname: string): string {
   return normalize(pathname).slice("/guide/".length);
 }
 
+/** The MCP page, which the sidebar links to on its own, beside the docs. */
+export function isMcpPath(pathname: string): boolean {
+  return isGuidePath(pathname) && guideSlug(pathname) === "mcp";
+}
+
 /**
  * The breadcrumb for an address. A page of the app is named alone, as the
  * header's title. `guideTitle` gives the title of a docs page, or
