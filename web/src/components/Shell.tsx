@@ -97,8 +97,8 @@ export function Shell({
                 active: isMcpPath(pathname),
                 leading: <Icon name="robot-2-line" />,
                 trailing: (
-                  <Badge variant="info">
-                    <Dot variant="info" />
+                  <Badge variant="success">
+                    <Dot variant="success" pulse />
                     New
                   </Badge>
                 ),
