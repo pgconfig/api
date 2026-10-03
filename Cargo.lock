@@ -960,7 +960,7 @@ checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
 
 [[package]]
 name = "pgconfig"
-version = "4.0.0"
+version = "4.1.0"
 dependencies = [
  "insta",
  "pgconfig-golden",
@@ -971,7 +971,7 @@ dependencies = [
 
 [[package]]
 name = "pgconfig-golden"
-version = "4.0.0"
+version = "4.1.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -986,7 +986,7 @@ dependencies = [
 
 [[package]]
 name = "pgconfig-server"
-version = "4.0.0"
+version = "4.1.0"
 dependencies = [
  "axum",
  "clap",
@@ -1010,7 +1010,7 @@ dependencies = [
 
 [[package]]
 name = "pgconfigctl"
-version = "4.0.0"
+version = "4.1.0"
 dependencies = [
  "clap",
  "pgconfig",
