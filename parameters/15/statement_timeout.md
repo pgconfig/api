@@ -1,0 +1,20 @@
+---
+name: "statement_timeout"
+version: "15"
+type: "integer"
+category: "Client Connection Defaults / Statement Behavior"
+short_desc: "Sets the maximum allowed duration of any statement."
+extra_desc: "A value of 0 turns off the timeout."
+context: "user"
+unit: "ms"
+default: "0"
+min: "0"
+max: "2147483647"
+url: "https://www.postgresql.org/docs/15/runtime-config-client.html#GUC-STATEMENT-TIMEOUT"
+---
+
+Abort any statement that takes more than the specified amount of time. If `log_min_error_statement` is set to `ERROR` or lower, the statement that timed out will also be logged. If this value is specified without units, it is taken as milliseconds. A value of zero (the default) disables the timeout.
+
+The timeout is measured from the time a command arrives at the server until it is completed by the server. If multiple SQL statements appear in a single simple-Query message, the timeout is applied to each statement separately. (PostgreSQL versions before 13 usually treated the timeout as applying to the whole query string.) In extended query protocol, the timeout starts running when any query-related message (Parse, Bind, Execute, Describe) arrives, and it is canceled by completion of an Execute or Sync message.
+
+Setting `statement_timeout` in `postgresql.conf` is not recommended because it would affect all sessions.

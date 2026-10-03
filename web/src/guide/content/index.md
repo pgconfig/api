@@ -11,7 +11,7 @@ the values.
 | Web app | You want to compare the profiles and copy a configuration | [Profile comparison](/) |
 | REST v1 | A script or an installer needs a configuration | [Get a configuration](/guide/api) |
 | `pgconfigctl` | You are on the server and want to tune it from the shell | [Releases](https://github.com/momoi-labs/pgconfig/releases) |
-| MCP | An AI agent should get values together with the reason for each | [MCP](/guide/mcp) |
+| MCP | An AI agent should get values together with the reason for each, or look up a parameter | [MCP](/guide/mcp) |
 
 ## Quick start
 

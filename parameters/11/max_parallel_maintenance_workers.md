@@ -1,0 +1,16 @@
+---
+name: "max_parallel_maintenance_workers"
+version: "11"
+type: "integer"
+category: "Resource Usage / Asynchronous Behavior"
+short_desc: "Sets the maximum number of parallel processes per maintenance operation."
+context: "user"
+default: "2"
+min: "0"
+max: "1024"
+url: "https://www.postgresql.org/docs/11/runtime-config-resource.html#GUC-MAX-PARALLEL-WORKERS-MAINTENANCE"
+---
+
+Sets the maximum number of parallel workers that can be started by a single utility command. Currently, the only parallel utility command that supports the use of parallel workers is `CREATE INDEX`, and only when building a B-tree index. Parallel workers are taken from the pool of processes established by [`max_worker_processes`](https://www.postgresql.org/docs/11/runtime-config-resource.html#GUC-MAX-WORKER-PROCESSES), limited by [`max_parallel_workers`](https://www.postgresql.org/docs/11/runtime-config-resource.html#GUC-MAX-PARALLEL-WORKERS). Note that the requested number of workers may not actually be available at run time. If this occurs, the utility operation will run with fewer workers than expected. The default value is 2. Setting this value to 0 disables the use of parallel workers by utility commands.
+
+Note that parallel utility commands should not consume substantially more memory than equivalent non-parallel operations. This strategy differs from that of parallel query, where resource limits generally apply per worker process. Parallel utility commands treat the resource limit `maintenance_work_mem` as a limit to be applied to the entire utility command, regardless of the number of parallel worker processes. However, parallel utility commands may still consume substantially more CPU resources and I/O bandwidth.

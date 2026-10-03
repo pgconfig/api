@@ -1,0 +1,12 @@
+---
+name: "track_commit_timestamp"
+version: "13"
+type: "boolean"
+category: "Replication"
+short_desc: "Collects transaction commit time."
+context: "postmaster"
+default: "off"
+url: "https://www.postgresql.org/docs/13/runtime-config-replication.html#GUC-TRACK-COMMIT-TIMESTAMP"
+---
+
+Record commit time of transactions. This parameter can only be set at server start. The default value is `off`.

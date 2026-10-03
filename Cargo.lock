@@ -978,6 +978,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "pgconfig-parameter-docs"
+version = "4.0.0"
+dependencies = [
+ "serde_json",
+]
+
+[[package]]
 name = "pgconfig-server"
 version = "4.0.0"
 dependencies = [

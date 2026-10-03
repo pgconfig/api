@@ -1,0 +1,16 @@
+# The PostgreSQL release tag each directory was extracted from.
+"9.1": REL9_1_24
+"9.2": REL9_2_24
+"9.3": REL9_3_25
+"9.4": REL9_4_26
+"9.5": REL9_5_25
+"9.6": REL9_6_24
+"10": REL_10_23
+"11": REL_11_22
+"12": REL_12_22
+"13": REL_13_23
+"14": REL_14_24
+"15": REL_15_19
+"16": REL_16_15
+"17": REL_17_11
+"18": REL_18_6

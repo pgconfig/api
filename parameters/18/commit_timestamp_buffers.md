@@ -1,0 +1,16 @@
+---
+name: "commit_timestamp_buffers"
+version: "18"
+type: "integer"
+category: "Resource Usage / Memory"
+short_desc: "Sets the size of the dedicated buffer pool used for the commit timestamp cache."
+extra_desc: "0 means use a fraction of \"shared_buffers\"."
+context: "postmaster"
+unit: "8kB"
+default: "0"
+min: "0"
+max: "131072"
+url: "https://www.postgresql.org/docs/18/runtime-config-resource.html#GUC-COMMIT-TIMESTAMP-BUFFERS"
+---
+
+Specifies the amount of memory to use to cache the contents of `pg_commit_ts` (see [Contents of PGDATA](https://www.postgresql.org/docs/18/storage-file-layout.html#PGDATA-CONTENTS-TABLE)). If this value is specified without units, it is taken as blocks, that is `BLCKSZ` bytes, typically 8kB. The default value is `0`, which requests `shared_buffers`/512 up to 1024 blocks, but not fewer than 16 blocks. This parameter can only be set at server start.

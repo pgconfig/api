@@ -1,0 +1,15 @@
+[package]
+name = "pgconfig-parameter-docs"
+description = "Extracts the PostgreSQL parameter documentation in parameters/ from a PostgreSQL git checkout"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[[bin]]
+name = "parameter-docs"
+path = "src/main.rs"
+
+[dependencies]
+serde_json = { workspace = true }

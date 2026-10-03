@@ -1,10 +1,14 @@
-//! The MCP endpoint: one tool, `recommend_postgres_configuration`, over
-//! stateless Streamable HTTP. The contract is `docs/mcp.md`.
+//! The MCP endpoint over stateless Streamable HTTP. The contract is
+//! `docs/mcp.md`. `recommend_postgres_configuration` recommends settings;
+//! `list_postgres_parameters` and `describe_postgres_parameter` read the
+//! PostgreSQL manual's entries that ship with the binary.
 //!
-//! This module adapts the protocol to `pgconfig::tune`. It owns the tool's
-//! schemas, the mapping of problems to tool errors, the origin policy, the
-//! timeout, and the call log. It owns no tuning rule.
+//! This module adapts the protocol to `pgconfig::tune` and to the parameter
+//! documentation. It owns the tools' schemas, the mapping of problems to tool
+//! errors, the origin policy, the timeout, and the call log. It owns no
+//! tuning rule.
 
+use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
@@ -18,7 +22,10 @@ use axum::http::header::{
 use axum::http::{HeaderValue, Method, StatusCode};
 use axum::middleware::{self, Next};
 use axum::response::{IntoResponse, Response};
-use pgconfig::{RawTuningRequest, TuningRequest, TuningResult, build};
+use pgconfig::{
+    ParameterDoc, PgMajor, PgVersion, RawTuningRequest, TuningRequest, TuningResult, build,
+    parameter_doc, parameter_docs,
+};
 use rmcp::model::{
     CallToolRequestParams, CallToolResponse, CallToolResult, ContentBlock, Implementation,
     JsonObject, ListToolsResult, PaginatedRequestParams, ServerCapabilities, ServerConfig, Tool,
@@ -31,6 +38,11 @@ use rmcp::{ErrorData, RoleServer, ServerHandler};
 use serde_json::{Value, json};
 
 const TOOL: &str = "recommend_postgres_configuration";
+
+/// How every tool describes `postgres_version`.
+const POSTGRES_VERSION_DESCRIPTION: &str = "PostgreSQL version as a string, such as 18.4, 17.10, or 9.6.24. Supported major versions: 9.1 to 9.6 and 10 to 18.";
+const LIST_TOOL: &str = "list_postgres_parameters";
+const DESCRIBE_TOOL: &str = "describe_postgres_parameter";
 
 /// How long one tool call may run. The rules take microseconds, so this only
 /// bounds a call that got stuck.
@@ -342,7 +354,7 @@ impl ServerHandler for TuningServer {
         ServerConfig::new(ServerCapabilities::builder().enable_tools().build())
             .with_server_info(Implementation::new("pgconfig", build::TAG))
             .with_instructions(
-                "Recommends PostgreSQL configuration values for a server. Call recommend_postgres_configuration with the server's memory, logical CPU count, and PostgreSQL version.",
+                "Recommends PostgreSQL configuration values for a server, and documents PostgreSQL parameters. Call recommend_postgres_configuration with the server's memory, logical CPU count, and PostgreSQL version. Call describe_postgres_parameter for what a parameter does in a version, and list_postgres_parameters to find a name.",
             )
     }
 
@@ -351,11 +363,11 @@ impl ServerHandler for TuningServer {
         _request: Option<PaginatedRequestParams>,
         _context: RequestContext<RoleServer>,
     ) -> Result<ListToolsResult, ErrorData> {
-        Ok(ListToolsResult::with_all_items(vec![tool()]))
+        Ok(ListToolsResult::with_all_items(tools()))
     }
 
     fn get_tool(&self, name: &str) -> Option<Tool> {
-        (name == TOOL).then(tool)
+        tools().into_iter().find(|tool| tool.name == name)
     }
 
     async fn call_tool(
@@ -363,15 +375,289 @@ impl ServerHandler for TuningServer {
         request: CallToolRequestParams,
         _context: RequestContext<RoleServer>,
     ) -> Result<CallToolResponse, ErrorData> {
-        if request.name != TOOL {
-            return Err(ErrorData::invalid_params(
-                format!("Unknown tool: {}", request.name),
+        let arguments = request.arguments.unwrap_or_default();
+        match request.name.as_ref() {
+            TOOL => Ok(self.call(&arguments).await.into()),
+            LIST_TOOL => {
+                Ok(run_documentation_tool(LIST_TOOL, || list_parameters(&arguments)).into())
+            }
+            DESCRIBE_TOOL => {
+                Ok(run_documentation_tool(DESCRIBE_TOOL, || describe_parameter(&arguments)).into())
+            }
+            name => Err(ErrorData::invalid_params(
+                format!("Unknown tool: {name}"),
                 None,
+            )),
+        }
+    }
+}
+
+/// Every tool, in the order discovery lists them.
+fn tools() -> Vec<Tool> {
+    vec![tool(), list_tool(), describe_tool()]
+}
+
+/// Runs a call to a documentation tool and writes its log line. These tools
+/// read data compiled into the binary, so they need no timeout.
+fn run_documentation_tool(
+    tool: &'static str,
+    run: impl FnOnce() -> Result<Value, String>,
+) -> CallToolResult {
+    let started = Instant::now();
+    let outcome = run();
+    let duration_ms = u64::try_from(started.elapsed().as_millis()).unwrap_or(u64::MAX);
+    match outcome {
+        Ok(structured) => {
+            tracing::info!(
+                tool,
+                status = "ok",
+                duration_ms,
+                server_version = build::TAG,
+                "tool call"
+            );
+            CallToolResult::structured(structured)
+        }
+        Err(message) => {
+            tracing::warn!(
+                tool,
+                status = "error",
+                error_code = "invalid_request",
+                duration_ms,
+                server_version = build::TAG,
+                "tool call"
+            );
+            CallToolResult::error(vec![ContentBlock::text(message)])
+        }
+    }
+}
+
+/// One text argument of a documentation tool.
+struct Argument {
+    name: &'static str,
+    required: bool,
+    /// A valid value, for the error messages.
+    example: &'static str,
+    /// What the value is, for the error messages.
+    what: &'static str,
+}
+
+/// How every documentation tool takes the PostgreSQL version.
+const POSTGRES_VERSION: Argument = Argument {
+    name: "postgres_version",
+    required: true,
+    example: "18.4",
+    what: "the PostgreSQL version",
+};
+
+/// The text arguments of a documentation tool. Every problem is collected,
+/// in argument order, so one error lets the caller fix the whole call.
+/// Every documentation tool takes `postgres_version`, which is parsed where
+/// it stands so that its problem keeps its place.
+struct Arguments {
+    values: HashMap<&'static str, String>,
+    major: Option<PgMajor>,
+    problems: Vec<String>,
+}
+
+impl Arguments {
+    fn read(arguments: &JsonObject, known: &[Argument]) -> Self {
+        let mut read = Arguments {
+            values: HashMap::new(),
+            major: None,
+            problems: Vec::new(),
+        };
+        for argument in known {
+            let name = argument.name;
+            match arguments.get(name) {
+                None | Some(Value::Null) if argument.required => read.problems.push(format!(
+                    "{name} is required: {}, such as {}.",
+                    argument.what, argument.example
+                )),
+                None | Some(Value::Null) => {}
+                Some(Value::String(text)) => {
+                    if name == POSTGRES_VERSION.name {
+                        match PgVersion::parse(text) {
+                            Ok(version) => read.major = Some(version.major()),
+                            Err(error) => read.problems.push(format!("{name}: {error}")),
+                        }
+                    }
+                    read.values.insert(name, text.clone());
+                }
+                Some(_) => read.problems.push(format!(
+                    "{name} must be a string, such as \"{}\".",
+                    argument.example
+                )),
+            }
+        }
+
+        let names: Vec<&str> = known.iter().map(|argument| argument.name).collect();
+        let listed = match names.as_slice() {
+            [only] => only.to_string(),
+            [first, second] => format!("{first} and {second}"),
+            [rest @ .., last] => format!("{}, and {last}", rest.join(", ")),
+            [] => String::new(),
+        };
+        for name in arguments
+            .keys()
+            .filter(|name| !names.contains(&name.as_str()))
+        {
+            read.problems.push(format!(
+                "{name} is not an argument of this tool. The arguments are {listed}."
             ));
         }
-        let arguments = request.arguments.unwrap_or_default();
-        Ok(self.call(&arguments).await.into())
+        read
     }
+
+    /// The values by name and the major version, or the error that lists
+    /// every problem.
+    fn finish(self) -> Result<(HashMap<&'static str, String>, PgMajor), String> {
+        match self.major {
+            Some(major) if self.problems.is_empty() => Ok((self.values, major)),
+            _ => Err(format!("Invalid request. {}", self.problems.join(" "))),
+        }
+    }
+}
+
+fn list_parameters(arguments: &JsonObject) -> Result<Value, String> {
+    let (values, major) = Arguments::read(
+        arguments,
+        &[
+            POSTGRES_VERSION,
+            Argument {
+                name: "category",
+                required: false,
+                example: "memory",
+                what: "a part of a category",
+            },
+            Argument {
+                name: "search",
+                required: false,
+                example: "vacuum",
+                what: "a part of a name or description",
+            },
+        ],
+    )
+    .finish()?;
+    let contains = |text: Option<&str>, part: Option<&String>| match part {
+        None => true,
+        Some(part) => text.is_some_and(|text| text.to_lowercase().contains(&part.to_lowercase())),
+    };
+    let (category, search) = (values.get("category"), values.get("search"));
+    let parameters: Vec<Value> = parameter_docs(major)
+        .iter()
+        .filter(|doc| contains(doc.category, category))
+        .filter(|doc| contains(Some(doc.name), search) || contains(doc.short_desc, search))
+        .map(|doc| {
+            let mut entry = serde_json::Map::new();
+            entry.insert("name".into(), Value::from(doc.name));
+            optional(&mut entry, "category", doc.category);
+            optional(&mut entry, "short_desc", doc.short_desc);
+            Value::Object(entry)
+        })
+        .collect();
+    Ok(json!({
+        "postgres_version": values[POSTGRES_VERSION.name],
+        "parameters": parameters,
+    }))
+}
+
+fn describe_parameter(arguments: &JsonObject) -> Result<Value, String> {
+    let (values, major) = Arguments::read(
+        arguments,
+        &[
+            Argument {
+                name: "name",
+                required: true,
+                example: "work_mem",
+                what: "the parameter name",
+            },
+            POSTGRES_VERSION,
+        ],
+    )
+    .finish()?;
+    let name = &values["name"];
+    let doc = parameter_doc(major, name).ok_or_else(|| unknown_parameter(name, major))?;
+
+    let mut result = serde_json::Map::new();
+    result.insert(
+        "postgres_version".into(),
+        Value::from(values[POSTGRES_VERSION.name].clone()),
+    );
+    result.insert("name".into(), Value::from(doc.name));
+    describe(&mut result, doc);
+    Ok(Value::Object(result))
+}
+
+fn describe(result: &mut JsonObject, doc: &ParameterDoc) {
+    optional(result, "type", doc.param_type);
+    optional(result, "category", doc.category);
+    optional(result, "short_desc", doc.short_desc);
+    optional(result, "extra_desc", doc.extra_desc);
+    optional(result, "context", doc.context);
+    optional(result, "unit", doc.unit);
+    optional(result, "default", doc.default);
+    optional(result, "min", doc.min);
+    optional(result, "max", doc.max);
+    if !doc.values.is_empty() {
+        result.insert("values".into(), Value::from(doc.values.to_vec()));
+    }
+    result.insert("url".into(), Value::from(doc.url));
+    result.insert("documentation".into(), Value::from(doc.text()));
+}
+
+fn optional(object: &mut JsonObject, key: &str, value: Option<&str>) {
+    if let Some(value) = value {
+        object.insert(key.into(), Value::from(value));
+    }
+}
+
+/// Why `name` has no entry: the major versions that have it, or the names
+/// it looks like.
+fn unknown_parameter(name: &str, major: PgMajor) -> String {
+    let mut message = format!("{name} is not a parameter of PostgreSQL {major}.");
+    let documented: Vec<PgMajor> = PgMajor::supported()
+        .filter(|other| parameter_doc(*other, name).is_some())
+        .collect();
+    if let (Some(first), Some(last)) = (documented.first(), documented.last()) {
+        let range = if first == last {
+            format!("only in PostgreSQL {first}")
+        } else {
+            format!("in PostgreSQL {first} to {last}")
+        };
+        message.push_str(&format!(" The manual documents it {range}."));
+    } else {
+        let lower = name.to_lowercase();
+        let mut close: Vec<(usize, &str)> = parameter_docs(major)
+            .iter()
+            .map(|doc| (distance(&lower, &doc.name.to_lowercase()), doc.name))
+            .filter(|(distance, _)| *distance <= 2)
+            .collect();
+        close.sort();
+        if !close.is_empty() {
+            let names: Vec<&str> = close.iter().take(3).map(|(_, name)| *name).collect();
+            message.push_str(&format!(" Did you mean {}?", names.join(", ")));
+        }
+    }
+    message.push_str(" Call list_postgres_parameters to find a name.");
+    message
+}
+
+/// The Levenshtein distance between two names.
+fn distance(a: &str, b: &str) -> usize {
+    let b: Vec<char> = b.chars().collect();
+    let mut row: Vec<usize> = (0..=b.len()).collect();
+    for (i, ca) in a.chars().enumerate() {
+        let mut diagonal = row[0];
+        row[0] = i + 1;
+        for (j, cb) in b.iter().enumerate() {
+            let above = row[j + 1];
+            row[j + 1] = (above + 1)
+                .min(row[j] + 1)
+                .min(diagonal + usize::from(ca != *cb));
+            diagonal = above;
+        }
+    }
+    row[b.len()]
 }
 
 fn tool() -> Tool {
@@ -380,8 +666,13 @@ fn tool() -> Tool {
         "Recommends PostgreSQL configuration values for one server. Give the memory dedicated to PostgreSQL, the logical CPU count, and the PostgreSQL version. The result lists each parameter with its value and the reason for it, the defaults assumed for omitted arguments, and warnings. It is deterministic and changes nothing.",
         object(input_schema()),
     );
-    tool.title = Some("Recommend PostgreSQL configuration".to_string());
     tool.output_schema = Some(Arc::new(object(output_schema())));
+    read_only(tool, "Recommend PostgreSQL configuration")
+}
+
+/// The annotations every tool shares: it reads and changes nothing.
+fn read_only(mut tool: Tool, title: &str) -> Tool {
+    tool.title = Some(title.to_string());
     tool.annotations = Some(
         ToolAnnotations::new()
             .read_only(true)
@@ -390,6 +681,83 @@ fn tool() -> Tool {
             .open_world(false),
     );
     tool
+}
+
+fn list_tool() -> Tool {
+    let text = |description: &str| json!({"type": "string", "description": description});
+    let mut tool = Tool::new(
+        LIST_TOOL,
+        "Lists the configuration parameters the PostgreSQL manual documents for one PostgreSQL version, with each one's category and short description. Narrow the list by category or by text. It reads the documentation that ships with pgconfig and changes nothing.",
+        object(json!({
+            "type": "object",
+            "properties": {
+                "postgres_version": text(POSTGRES_VERSION_DESCRIPTION),
+                "category": text("Keeps the parameters whose category contains this text, in any case, such as memory or Write-Ahead Log."),
+                "search": text("Keeps the parameters whose name or short description contains this text, in any case, such as vacuum."),
+            },
+            "required": ["postgres_version"],
+            "additionalProperties": false,
+        })),
+    );
+    tool.output_schema = Some(Arc::new(object(json!({
+        "type": "object",
+        "properties": {
+            "postgres_version": text("As supplied."),
+            "parameters": {
+                "type": "array",
+                "description": "Sorted by name. Empty when nothing matches.",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "name": text("The parameter name."),
+                        "category": text("The category pg_settings shows."),
+                        "short_desc": text("One line on what the parameter does."),
+                    },
+                    "required": ["name"],
+                },
+            },
+        },
+        "required": ["postgres_version", "parameters"],
+    }))));
+    read_only(tool, "List PostgreSQL parameters")
+}
+
+fn describe_tool() -> Tool {
+    let text = |description: &str| json!({"type": "string", "description": description});
+    let mut tool = Tool::new(
+        DESCRIBE_TOOL,
+        "Returns the PostgreSQL manual's entry for one configuration parameter in one PostgreSQL version: its type, its context, which tells whether a change needs a restart, its unit, default, limits, and accepted values, and the full text in Markdown, with a link to the official page. It reads the documentation that ships with pgconfig and changes nothing.",
+        object(json!({
+            "type": "object",
+            "properties": {
+                "name": text("The parameter name, in any case, such as work_mem."),
+                "postgres_version": text(POSTGRES_VERSION_DESCRIPTION),
+            },
+            "required": ["name", "postgres_version"],
+            "additionalProperties": false,
+        })),
+    );
+    tool.output_schema = Some(Arc::new(object(json!({
+        "type": "object",
+        "properties": {
+            "postgres_version": text("As supplied."),
+            "name": text("The name as the manual writes it."),
+            "type": text("boolean, integer, floating point, string, or enum."),
+            "category": text("The category pg_settings shows."),
+            "short_desc": text("One line on what the parameter does."),
+            "extra_desc": text("More detail, when PostgreSQL has it."),
+            "context": text("When a change takes effect: internal, postmaster (restart), sighup (reload), superuser-backend, backend, superuser, or user."),
+            "unit": text("The unit of the default and the limits, such as kB, 8kB, or ms."),
+            "default": text("The value PostgreSQL starts with, in the unit."),
+            "min": text("The lowest accepted value, in the unit."),
+            "max": text("The highest accepted value, in the unit."),
+            "values": {"type": "array", "items": {"type": "string"}, "description": "The values an enum accepts."},
+            "url": text("The entry in the PostgreSQL manual."),
+            "documentation": text("The manual's text, in Markdown."),
+        },
+        "required": ["postgres_version", "name", "url", "documentation"],
+    }))));
+    read_only(tool, "Describe a PostgreSQL parameter")
 }
 
 fn object(schema: Value) -> JsonObject {
@@ -416,7 +784,7 @@ fn input_schema() -> Value {
             },
             "postgres_version": {
                 "type": "string",
-                "description": "PostgreSQL version as a string, such as 18.4, 17.10, or 9.6.24. Supported major versions: 9.1 to 9.6 and 10 to 18.",
+                "description": POSTGRES_VERSION_DESCRIPTION,
             },
             "profile": {
                 "type": "string",

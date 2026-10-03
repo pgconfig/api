@@ -1,0 +1,12 @@
+---
+name: "track_wal_io_timing"
+version: "14"
+type: "boolean"
+category: "Statistics / Query and Index Statistics Collector"
+short_desc: "Collects timing statistics for WAL I/O activity."
+context: "superuser"
+default: "off"
+url: "https://www.postgresql.org/docs/14/runtime-config-statistics.html#GUC-TRACK-WAL-IO-TIMING"
+---
+
+Enables timing of WAL I/O calls. This parameter is off by default, as it will repeatedly query the operating system for the current time, which may cause significant overhead on some platforms. You can use the pg_test_timing tool to measure the overhead of timing on your system. I/O timing information is displayed in [`pg_stat_wal`](https://www.postgresql.org/docs/14/monitoring-stats.html#MONITORING-PG-STAT-WAL-VIEW). Only superusers can change this setting.

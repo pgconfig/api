@@ -1,0 +1,20 @@
+---
+name: "effective_io_concurrency"
+version: "16"
+type: "integer"
+category: "Resource Usage / Asynchronous Behavior"
+short_desc: "Number of simultaneous requests that can be handled efficiently by the disk subsystem."
+context: "user"
+default: "1"
+min: "0"
+max: "1000"
+url: "https://www.postgresql.org/docs/16/runtime-config-resource.html#GUC-EFFECTIVE-IO-CONCURRENCY"
+---
+
+Sets the number of concurrent disk I/O operations that PostgreSQL expects can be executed simultaneously. Raising this value will increase the number of I/O operations that any individual PostgreSQL session attempts to initiate in parallel. The allowed range is 1 to 1000, or zero to disable issuance of asynchronous I/O requests. Currently, this setting only affects bitmap heap scans.
+
+For magnetic drives, a good starting point for this setting is the number of separate drives comprising a RAID 0 stripe or RAID 1 mirror being used for the database. (For RAID 5 the parity drive should not be counted.) However, if the database is often busy with multiple queries issued in concurrent sessions, lower values may be sufficient to keep the disk array busy. A value higher than needed to keep the disks busy will only result in extra CPU overhead. SSDs and other memory-based storage can often process many concurrent requests, so the best value might be in the hundreds.
+
+Asynchronous I/O depends on an effective `posix_fadvise` function, which some operating systems lack. If the function is not present then setting this parameter to anything but zero will result in an error. On some operating systems (e.g., Solaris), the function is present but does not actually do anything.
+
+The default is 1 on supported systems, otherwise 0. This value can be overridden for tables in a particular tablespace by setting the tablespace parameter of the same name (see [ALTER TABLESPACE](https://www.postgresql.org/docs/16/sql-altertablespace.html)).
