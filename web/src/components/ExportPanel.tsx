@@ -92,7 +92,9 @@ export function ExportPanel({
         </div>
       </div>
 
-      {/* One frame for the output: its title and the copy button, then the text. */}
+      {/* One frame for the output: its title and the copy button, then the text.
+          The code block inside gives up its own frame through Kiso's border
+          style, so the card is the only one. */}
       <section className="card export-output">
         <div className="between export-output-header">
           <span className="t-label muted">Generated configuration</span>
@@ -103,9 +105,11 @@ export function ExportPanel({
         </div>
 
         {text ? (
-          <pre className="export-code">
-            <code className={`hljs ${language}`} dangerouslySetInnerHTML={{ __html: html }} />
-          </pre>
+          <div className="export-code" data-border-style="none">
+            <pre>
+              <code className={`hljs ${language}`} dangerouslySetInnerHTML={{ __html: html }} />
+            </pre>
+          </div>
         ) : (
           <EmptyState size="sm" variant="informational">
             <EmptyStateDescription>Configuration output will appear here.</EmptyStateDescription>

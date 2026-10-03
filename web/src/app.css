@@ -198,20 +198,16 @@
   .export-panel[data-layout="page"] .export-pgbadger { grid-column: 1 / -1; }
 }
 /* The output is one card: a title row with the copy button, then the code,
-   which gives up its own frame and scrolls inside the card, both ways. */
+   which scrolls inside the card, both ways. */
 .export-output { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
 .export-output-header {
   flex: none;
   padding: var(--spacing-sm) var(--spacing-md);
   border-bottom: 1px solid var(--color-border);
 }
-.export-code {
-  display: flex; margin: 0; padding: 0;
-  min-height: 10rem; max-height: min(75vh, 36rem);
-  border: 0; border-radius: 0; box-shadow: none;
-}
-.export-code::before { content: none; }
-.export-code > code {
+.export-code { display: flex; min-height: 10rem; max-height: min(75vh, 36rem); }
+.export-code > pre { flex: 1; min-width: 0; display: flex; padding: 0; }
+.export-code code {
   flex: 1; min-width: 0; overflow: auto;
   padding: var(--spacing-md);
   white-space: pre; tab-size: 2;
