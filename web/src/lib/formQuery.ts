@@ -50,6 +50,15 @@ export function parseFormQuery(query: URLSearchParams): ConfigForm {
   return form as ConfigForm;
 }
 
+/**
+ * The count a number field holds while it is being typed, or `null` when the
+ * text is not a count yet: empty, not a number, or below one.
+ */
+export function parseCount(text: string): number | null {
+  const count = parseInt(text, 10);
+  return Number.isNaN(count) || count < 1 ? null : count;
+}
+
 /** The form as API arguments. The API reads memory with its unit. */
 export function buildUrlArgs(form: ConfigForm | null | undefined): string {
   if (!form) return "";
