@@ -20,7 +20,8 @@ const ALERTS: Record<
 /**
  * Renders Markdown the API or the guide wrote. Alert blocks become Kiso
  * Alerts; they are part of the text, not live status, so they carry the
- * `note` role instead of the Alert's own.
+ * `note` role instead of the Alert's own, and the rail appearance Kiso has
+ * for notes inside reading content.
  */
 export function MarkdownContent({
   source,
@@ -40,7 +41,7 @@ export function MarkdownContent({
         }
         const alert = ALERTS[block.alertType];
         return (
-          <Alert key={index} variant={alert.variant} role="note">
+          <Alert key={index} variant={alert.variant} appearance="rail" role="note">
             <Icon name={alert.icon} />
             <AlertContent>
               <AlertTitle>{alert.title}</AlertTitle>
