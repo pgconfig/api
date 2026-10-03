@@ -16,7 +16,7 @@ jobs:
   release-config:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -33,7 +33,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # The web app ships inside the server, so it is built before cargo is.
       - uses: actions/setup-node@v4
         with:
@@ -60,7 +60,7 @@ jobs:
       matrix:
         os: [macos-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - run: cargo build --locked -p pgconfigctl -p pgconfig-server
       - run: cargo run --locked -p pgconfigctl -- tune
