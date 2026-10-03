@@ -83,6 +83,9 @@ test("the version workflow pushes the tag and hands it to the release only once"
   const pkg = JSON.parse(readFileSync(join(cwd, "package.json")));
   pkg.version = "3.6.1";
   writeFileSync(join(cwd, "package.json"), JSON.stringify(pkg));
+  // The copied manifests carry whatever version the repository is at. The
+  // scenario starts at 3.6.1, so the script itself brings them there.
+  assert.equal(run(cwd, "sync").status, 0);
   symlinkSync(resolve("node_modules"), join(cwd, "node_modules"), "dir");
   const exec = (cmd, args, env = {}) => {
     const result = spawnSync(cmd, args, {
