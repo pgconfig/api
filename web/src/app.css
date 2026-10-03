@@ -24,12 +24,8 @@
 .icon-stroked { stroke-width: 2; }
 
 /* ---------------------------------------------------------------------------
-   Header: the sidebar toggle, the page's name, and the page's own controls.
-   The shell's toggle lives in the sidebar; this app keeps it in the header,
-   beside the title, where the previous app had it.
+   Header: Kiso's sidebar toggle, the page's name, and the page's own controls.
    --------------------------------------------------------------------------- */
-.sidebar .sidebar-toggle { display: none; }
-.sidebar .sidebar-header-collapsible { grid-template-columns: minmax(0, 1fr); }
 .header-separator { align-self: center; height: var(--spacing-lg); }
 .header-title [aria-current="page"] { font-size: var(--type-size-body); }
 .header-actions { display: flex; align-items: center; gap: var(--spacing-sm); min-width: 0; }
@@ -38,8 +34,8 @@
 /* Wide enough for the longest profile name, so the header does not shift. */
 .profile-select .select { width: 21rem; }
 @media (max-width: 1023px) {
-  /* The sidebar is stacked above the page here and has nothing to collapse. */
-  .header-sidebar-toggle, .header-separator { display: none; }
+  /* Kiso hides the toggle here, so the rule beside it goes too. */
+  .header-separator { display: none; }
 }
 @media (max-width: 767px) {
   .header-title { display: none; }
