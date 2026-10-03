@@ -146,3 +146,14 @@ test("the release build checks files out with LF on every runner", () => {
   assert.ok(setting >= 0, "The build job must turn off line-ending conversion");
   assert.ok(setting < build.indexOf("actions/checkout"), "It must do so before the checkout");
 });
+
+test("the release notes footer lists one image per line", () => {
+  // A folded scalar joins the list into one line, which is how 4.0.0 shipped.
+  const config = readFileSync(resolve(".goreleaser.yml"), "utf8");
+  const footer = config.match(/\n  footer: (\S+)\n((?: {4}[^\n]*\n|\n)+)/);
+  assert.ok(footer, "The release must have a footer");
+  assert.equal(footer[1], "|", "The footer must be a literal block, so its lines stay apart");
+  const pulls = footer[2].split("\n").filter((line) => line.includes("docker pull"));
+  assert.equal(pulls.length, 2);
+  for (const line of pulls) assert.match(line, /^ {4}- `docker pull ghcr\.io\/momoi-labs\/[a-z]+:v\{\{ \.Version \}\}`$/);
+});
