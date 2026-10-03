@@ -72,8 +72,8 @@
 }
 
 /* ---------------------------------------------------------------------------
-   The filters: one chip per fact about the server, in a row under the header.
-   A chip is a field's frame around an icon, a short label, and a bare control.
+   The filters: one Kiso inline field per fact about the server, in a row
+   under the header. Only the row is the app's.
    --------------------------------------------------------------------------- */
 .filter-bar {
   display: grid; gap: var(--spacing-sm);
@@ -82,34 +82,9 @@
   border-bottom: 1px solid var(--color-border);
   background: var(--color-surface);
 }
-.filter-chip {
-  display: flex; align-items: center; gap: var(--spacing-xs);
-  min-width: 0; height: var(--size-control-sm);
-  padding-inline: var(--spacing-sm);
-  border: 1px solid var(--color-input);
-  border-radius: var(--appearance-control-corners, var(--radius-md));
-  background: var(--color-card);
-  font-size: var(--type-size-label);
-}
-.filter-chip:hover { border-color: var(--color-border-strong); }
-/* The frame is the chip, so the focus ring goes around it. */
-.filter-chip:focus-within { outline: 2px solid var(--color-ring); outline-offset: 2px; }
-.filter-chip > .icon, .filter-chip-label { flex: none; color: var(--color-muted-foreground); }
-.filter-chip :is(.input, .select) {
-  flex: 1; min-width: 0; height: 100%;
-  padding-block: 0; padding-inline-start: 0;
-  border: 0; border-radius: 0; background-color: transparent; box-shadow: none;
-  font-size: inherit; font-weight: var(--type-weight-medium);
-  outline: none;
-}
-.filter-chip .input { padding-inline-end: 0; text-align: center; }
-.filter-chip .select { padding-inline-end: var(--spacing-lg); background-position: right 0 center; }
-.filter-chip-unit { flex: none; font-weight: var(--type-weight-medium); }
 @media (max-width: 1023px) {
-  /* One chip per line, with the labels in a column of their own. */
+  /* One field per line. */
   .filter-bar { grid-template-columns: minmax(0, 1fr); padding-inline: var(--presentation-page-padding); }
-  .filter-chip { height: var(--size-control-md); gap: var(--spacing-sm); }
-  .filter-chip-label { width: 3.5rem; }
 }
 
 /* ---------------------------------------------------------------------------
