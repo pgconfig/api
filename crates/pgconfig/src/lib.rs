@@ -10,6 +10,7 @@
 pub mod build;
 mod bytes;
 mod docs;
+mod parameter_docs;
 mod reasons;
 mod request;
 mod rules;
@@ -18,6 +19,7 @@ pub mod v1;
 mod version;
 
 pub use bytes::{Bytes, BytesError};
+pub use parameter_docs::{ParameterDoc, parameter_doc, parameter_docs};
 pub use request::{
     Arch, DiskType, Os, Problem, Profile, RawTuningRequest, TuningError, TuningRequest,
 };

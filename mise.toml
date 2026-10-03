@@ -4,8 +4,6 @@ rust = "1.97"
 # The web app is a React app built with Vite. Node is a build tool only.
 node = "24"
 just = "1"
-# Only generators/pg-docs is Go.
-go = "1.25"
 
 # Release tooling. The versions follow the workflows in .github/workflows.
 goreleaser = "2.17.0"

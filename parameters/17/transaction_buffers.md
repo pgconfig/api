@@ -1,0 +1,16 @@
+---
+name: "transaction_buffers"
+version: "17"
+type: "integer"
+category: "Resource Usage / Memory"
+short_desc: "Sets the size of the dedicated buffer pool used for the transaction status cache."
+extra_desc: "Specify 0 to have this value determined as a fraction of shared_buffers."
+context: "postmaster"
+unit: "8kB"
+default: "0"
+min: "0"
+max: "131072"
+url: "https://www.postgresql.org/docs/17/runtime-config-resource.html#GUC-TRANSACTION-BUFFERS"
+---
+
+Specifies the amount of shared memory to use to cache the contents of `pg_xact` (see [Contents of PGDATA](https://www.postgresql.org/docs/17/storage-file-layout.html#PGDATA-CONTENTS-TABLE)). If this value is specified without units, it is taken as blocks, that is `BLCKSZ` bytes, typically 8kB. The default value is `0`, which requests `shared_buffers`/512 up to 1024 blocks, but not fewer than 16 blocks. This parameter can only be set at server start.

@@ -1,0 +1,15 @@
+---
+name: "max_wal_size"
+version: "9.5"
+type: "integer"
+category: "Write-Ahead Log / Checkpoints"
+short_desc: "Sets the WAL size that triggers a checkpoint."
+context: "sighup"
+unit: "16MB"
+default: "64"
+min: "2"
+max: "2147483647"
+url: "https://www.postgresql.org/docs/9.5/runtime-config-wal.html#GUC-MAX-WAL-SIZE"
+---
+
+Maximum size to let the WAL grow during automatic checkpoints. This is a soft limit; WAL size can exceed `max_wal_size` under special circumstances, like under heavy load, a failing `archive_command`, or a high `wal_keep_segments` setting. The default is 1 GB. Increasing this parameter can increase the amount of time needed for crash recovery. This parameter can only be set in the `postgresql.conf` file or on the server command line.

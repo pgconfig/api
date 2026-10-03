@@ -70,19 +70,28 @@ async fn the_server_identifies_as_pgconfig_with_the_release_version() {
 }
 
 #[tokio::test]
-async fn discovery_lists_one_read_only_tool() {
+async fn discovery_lists_three_read_only_tools() {
     let client = connect(serve(Config::default()).await).await;
 
     let tools = client.list_all_tools().await.unwrap();
 
-    assert_eq!(tools.len(), 1);
+    let names: Vec<&str> = tools.iter().map(|tool| tool.name.as_ref()).collect();
+    assert_eq!(
+        names,
+        [
+            TOOL,
+            "list_postgres_parameters",
+            "describe_postgres_parameter"
+        ]
+    );
+    for tool in &tools {
+        let annotations = tool.annotations.as_ref().expect("annotations");
+        assert_eq!(annotations.read_only_hint, Some(true));
+        assert_eq!(annotations.idempotent_hint, Some(true));
+        assert_eq!(annotations.destructive_hint, Some(false));
+        assert_eq!(annotations.open_world_hint, Some(false));
+    }
     let tool = &tools[0];
-    assert_eq!(tool.name, TOOL);
-    let annotations = tool.annotations.as_ref().expect("annotations");
-    assert_eq!(annotations.read_only_hint, Some(true));
-    assert_eq!(annotations.idempotent_hint, Some(true));
-    assert_eq!(annotations.destructive_hint, Some(false));
-    assert_eq!(annotations.open_world_hint, Some(false));
     assert_eq!(
         tool.input_schema["required"],
         json!(["total_ram", "total_cpu", "postgres_version"])

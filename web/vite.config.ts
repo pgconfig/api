@@ -3,7 +3,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 // `npm run dev` talks to a PGConfig server for everything the app does not
-// serve itself: the REST API, the Swagger UI and the MCP endpoint.
+// serve itself: the REST API, the Swagger UI, the MCP endpoint and the
+// parameter documentation.
 const server = process.env.PGCONFIG_DEV_PROXY_TARGET ?? "http://localhost:3999";
 
 // The server serves the build from its root and answers every path it does
@@ -21,7 +22,10 @@ export default defineConfig({
       allow: [import.meta.dirname, resolve(import.meta.dirname, "../docs")],
     },
     proxy: Object.fromEntries(
-      ["/v1", "/docs", "/mcp"].map((path) => [path, { target: server, changeOrigin: true }]),
+      ["/v1", "/docs", "/mcp", "/parameters"].map((path) => [
+        path,
+        { target: server, changeOrigin: true },
+      ]),
     ),
   },
 });

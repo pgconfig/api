@@ -1,10 +1,14 @@
 import { Button, Card, CardContent, Link } from "@momoi-labs/kiso-react";
 
 import type { ComparisonParam } from "../lib/formatters.js";
+import { useParameterDoc } from "../lib/useParameterDoc.js";
 import { Icon } from "./Icon.js";
 import { MarkdownContent } from "./MarkdownContent.js";
 
-/** What a parameter does and where to read more, shown under its row. */
+/**
+ * What a parameter does and where to read more, shown under its row. The
+ * PostgreSQL manual's entry replaces the text the API sent once it arrives.
+ */
 export function ComparisonRowDetail({
   row,
   pgVersion,
@@ -15,6 +19,9 @@ export function ComparisonRowDetail({
   const documentation = row.documentation ?? {};
   const readings = Object.entries(documentation.recomendations ?? {});
   const confUrl = `https://postgresqlco.nf/en/doc/param/${row.name}/${pgVersion}/`;
+  const doc = useParameterDoc(pgVersion, row.name);
+  const type = typeof doc?.fields.type === "string" ? doc.fields.type : documentation.type;
+  const docsUrl = typeof doc?.fields.url === "string" ? doc.fields.url : documentation.url;
 
   return (
     <div className="comparison-detail">
@@ -40,13 +47,17 @@ export function ComparisonRowDetail({
         <CardContent>
           <div>
             <strong className="mono">{row.name}</strong>
-            <small className="muted">&nbsp;({documentation.type})</small>
+            <small className="muted">&nbsp;({type})</small>
           </div>
-          {documentation.details?.map((detail) => (
-            <p key={detail} className="muted">
-              {detail}
-            </p>
-          ))}
+          {doc ? (
+            <MarkdownContent source={doc.text} />
+          ) : (
+            documentation.details?.map((detail) => (
+              <p key={detail} className="muted">
+                {detail}
+              </p>
+            ))
+          )}
           <div className="row-wrap">
             <Button asChild variant="primary">
               <a href={confUrl} target="_blank" rel="noreferrer">
@@ -56,9 +67,9 @@ export function ComparisonRowDetail({
                 </span>
               </a>
             </Button>
-            {documentation.url && (
+            {docsUrl && (
               <Button asChild>
-                <a href={documentation.url} target="_blank" rel="noreferrer">
+                <a href={docsUrl} target="_blank" rel="noreferrer">
                   <Icon name="file-text-line" />
                   Check the docs
                 </a>

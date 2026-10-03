@@ -11,6 +11,8 @@ This repository holds all of it, in Rust:
 | `crates/pgconfig` | The tuning engine. No I/O |
 | `crates/pgconfig-server` | One binary that serves REST v1, the web app, the guide, and MCP |
 | `crates/pgconfigctl` | The command-line tool |
+| `crates/parameter-docs` | Extracts `parameters/` from the PostgreSQL source |
+| `parameters/` | The PostgreSQL manual's entry for every parameter of every supported version |
 | `web/` | The web app, built with React and embedded in the server |
 
 ## Use it
@@ -43,7 +45,8 @@ installers call it unattended, so its behavior does not change.
 
 AI agents can ask for tuning recommendations over the Model Context Protocol at
 `https://api.pgconfig.org/mcp`. Each recommendation comes with the reason for
-its value. The contract is in [docs/mcp.md](docs/mcp.md).
+its value. They can also read the PostgreSQL manual's entry for any parameter
+of a supported version. The contract is in [docs/mcp.md](docs/mcp.md).
 
 ### Run the server
 
@@ -52,7 +55,8 @@ docker run --rm -p 3000:3000 ghcr.io/momoi-labs/pgconfig
 ```
 
 Then open <http://localhost:3000>. The same port serves the web app, the guide
-under `/guide`, REST v1 under `/v1`, and MCP at `/mcp`. `PORT` changes the port.
+under `/guide`, REST v1 under `/v1`, MCP at `/mcp`, and the parameter
+documentation under `/parameters`. `PORT` changes the port.
 
 ## Docker images
 

@@ -13,8 +13,8 @@ just check-conf   # Load a generated config in PostgreSQL (needs Docker)
 just release-build  # Rehearse the release build for Linux and macOS
 ```
 
-`mise.toml` lists every tool the repository uses: Rust, Node, just, Go for the
-docs generator, and the release tooling. `mise install` sets them up. Do not
+`mise.toml` lists every tool the repository uses: Rust, Node, just, and the
+release tooling. `mise install` sets them up. Do not
 add another tool manager, such as Nix. Run commands through `mise exec --`
 when the tools are not on the `PATH`.
 
@@ -26,11 +26,13 @@ when the tools are not on the `PATH`.
 ├── crates/pgconfig-server/  # axum: REST v1, OpenAPI at /docs, MCP at /mcp, web app
 ├── crates/pgconfigctl/      # clap CLI
 ├── crates/golden/           # Records and replays tests/golden
+├── crates/parameter-docs/   # Extracts parameters/ from the PostgreSQL source
 ├── web/                     # React 19, Vite, Kiso: comparison, export, guide
 ├── tests/golden/            # Recorded REST v1 and CLI outputs
-├── generators/pg-docs/      # Go tool that scrapes pg-docs.yml (own module)
+├── skills/                  # Agent skills of this repository
+├── parameters/              # The manual's entry for each parameter, per version
 ├── rules.yml                # Rule metadata (abstracts, recommendations)
-└── pg-docs.yml              # PostgreSQL parameter documentation per version
+└── pg-docs.yml              # REST v1 `show_doc` text, frozen (ADR 0003)
 ```
 
 ## Code Patterns
@@ -49,8 +51,8 @@ when the tools are not on the `PATH`.
 - The `v1` module reproduces REST v1 and `pgconfigctl`, known defects included.
   Read `docs/adr/0001-rust-engine-with-v1-frozen-by-goldens.md` before
   changing it.
-- `rules.yml` and `pg-docs.yml` are compiled into the crate by its `build.rs`.
-  No YAML is parsed at run time.
+- `rules.yml`, `pg-docs.yml`, and `parameters/` are compiled into the crate by
+  its `build.rs`. No YAML is parsed at run time.
 - Three v1 output formats besides JSON: `conf`, `alter_system`, `stackgres`.
 
 ## Testing
@@ -72,8 +74,9 @@ when the tools are not on the `PATH`.
    is `None`, never zero.
 2. Add its reason in `crates/pgconfig/src/reasons.rs`.
 3. Write the test first, in `crates/pgconfig/tests/tuning.rs`.
-4. Update `rules.yml` if the rule needs metadata, and `pg-docs.yml` through
-   the generator if it adds a parameter.
+4. Update `rules.yml` if the rule needs metadata. `pg-docs.yml` is frozen, so
+   a parameter it lacks gets an empty `show_doc` entry in REST v1: raise that
+   with the user before adding one.
 5. Record the goldens again and review the diff. A rule change alters REST v1
    output, so it needs a changeset.
 
@@ -84,8 +87,8 @@ keep the server stateless and read-only.
 
 ## CI/CD
 
-- **cover.yml**: release config checks, the web and Rust test suite, a build on
-  macOS and Windows, and a check that the docs generator compiles
+- **cover.yml**: release config checks, the web and Rust test suite, and a
+  build on macOS and Windows
 - **integration.yml**: loads the generated config in PostgreSQL 9.5 to 18
 - **mcp-conformance.yml**: the official MCP conformance suite, pinned
 - **changesets.yml**: on `main`, opens or updates the Changesets version PR;
@@ -139,8 +142,8 @@ Rules:
    Mixed 25%, OLTP 30%, DW 40%, +10% for HDD, capped at 32.
 6. **Float arithmetic**: the memory formulas run in `f32` in the order Go ran
    them. Reordering an operation changes outputs.
-7. **The docs generator**: `cd generators/pg-docs && go run . --target-file
-   ../../pg-docs.yml`. It scrapes postgresqlco.nf and runs rarely.
+7. **Parameter docs are generated**: `parameters/` changes only through the
+   extractor. See the `update-parameter-docs` skill below.
 
 ## Agent skills
 
@@ -157,6 +160,12 @@ This repository uses the default triage labels. See
 ### Domain docs
 
 This is a single-context repository. See `docs/agents/domain.md`.
+
+### Parameter docs
+
+To regenerate `parameters/` after a PostgreSQL release, for a new major
+version, or when the extractor stops, use
+[update-parameter-docs](skills/update-parameter-docs/SKILL.md).
 
 ### Commit convention
 

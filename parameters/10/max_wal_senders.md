@@ -1,0 +1,14 @@
+---
+name: "max_wal_senders"
+version: "10"
+type: "integer"
+category: "Replication / Sending Servers"
+short_desc: "Sets the maximum number of simultaneously running WAL sender processes."
+context: "postmaster"
+default: "10"
+min: "0"
+max: "262143"
+url: "https://www.postgresql.org/docs/10/runtime-config-replication.html#GUC-MAX-WAL-SENDERS"
+---
+
+Specifies the maximum number of concurrent connections from standby servers or streaming base backup clients (i.e., the maximum number of simultaneously running WAL sender processes). The default is 10. The value 0 means replication is disabled. WAL sender processes count towards the total number of connections, so the parameter cannot be set higher than [`max_connections`](https://www.postgresql.org/docs/10/runtime-config-connection.html#GUC-MAX-CONNECTIONS). Abrupt streaming client disconnection might cause an orphaned connection slot until a timeout is reached, so this parameter should be set slightly higher than the maximum number of expected clients so disconnected clients can immediately reconnect. This parameter can only be set at server start. `wal_level` must be set to `replica` or higher to allow connections from standby servers.

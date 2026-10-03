@@ -60,3 +60,33 @@ built from.
 
 The Swagger UI is at [/docs](/docs/), and the OpenAPI 3.1 document at
 [/docs/openapi.json](/docs/openapi.json).
+
+## Parameter documentation
+
+`GET /parameters/<version>/<name>.md` answers the PostgreSQL manual's entry for
+one parameter of one major version, such as `18` or `9.6`. It is not part of
+REST v1 and has no envelope: the answer is a Markdown file with the settings as
+YAML front matter, then the manual's text. An unknown version or parameter
+gets HTTP 404.
+
+```bash
+curl 'https://api.pgconfig.org/parameters/18/work_mem.md'
+```
+
+```markdown
+---
+name: "work_mem"
+version: "18"
+type: "integer"
+category: "Resource Usage / Memory"
+short_desc: "Sets the maximum memory to be used for query workspaces."
+context: "user"
+unit: "kB"
+default: "4096"
+min: "64"
+max: "2147483647"
+url: "https://www.postgresql.org/docs/18/runtime-config-resource.html#GUC-WORK-MEM"
+---
+
+Sets the base maximum amount of memory to be used by a query operation...
+```

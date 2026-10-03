@@ -1,8 +1,9 @@
 # PGConfig MCP contract
 
 PGConfig provides a public Model Context Protocol server for deterministic
-PostgreSQL configuration recommendations. This document is the source of truth
-for the public MCP contract.
+PostgreSQL configuration recommendations and for the PostgreSQL manual's entry
+on each parameter. This document is the source of truth for the public MCP
+contract.
 
 The endpoint is:
 
@@ -29,23 +30,27 @@ Client configuration formats vary. Select Streamable HTTP when a client asks
 for a transport. The server identifies itself as `pgconfig` and reports the
 same release version as the PGConfig API.
 
-## Tool
+## Tools
 
-The server exposes exactly one tool:
+The server exposes three tools. Each one is read-only, deterministic, and
+idempotent, and serializes its structured result as JSON text too, for clients
+that do not consume MCP structured content.
 
-```text
-recommend_postgres_configuration
-```
+| Tool | What it answers |
+| --- | --- |
+| `recommend_postgres_configuration` | The recommended values for one server, with the reason for each |
+| `list_postgres_parameters` | The parameters the PostgreSQL manual documents for a version |
+| `describe_postgres_parameter` | The manual's entry for one parameter in a version |
 
-It is read-only, deterministic, and idempotent. A call accepts a complete or
-partially defaulted Tuning Request and returns a structured Tuning Result. The
-same result is also serialized as JSON text for clients that do not consume MCP
-structured content.
+A call to `recommend_postgres_configuration` accepts a complete or partially
+defaulted Tuning Request and returns a structured Tuning Result. It returns
+PostgreSQL parameter values and explanations. It does not return a rendered
+`postgresql.conf`, `ALTER SYSTEM` statements, or StackGres configuration, and
+it does not accept an output-format argument. REST v1 and `pgconfigctl`
+produce those.
 
-The tool returns PostgreSQL parameter values and explanations. It does not
-return a rendered `postgresql.conf`, `ALTER SYSTEM` statements, or StackGres
-configuration, and it does not accept an output-format argument. REST v1 and
-`pgconfigctl` produce those.
+[Parameter documentation](#parameter-documentation) describes the other two
+tools.
 
 ## Tuning Request
 
@@ -232,6 +237,94 @@ A call to a tool name the server does not have is a protocol error
 (`-32602`). Treat protocol and HTTP failures separately from tool execution
 errors.
 
+## Parameter documentation
+
+`list_postgres_parameters` and `describe_postgres_parameter` read the
+PostgreSQL manual's entry for each parameter of each supported major version.
+The entries ship with the server. Their text comes from the manual, and their
+settings from the GUC tables, both read from the PostgreSQL source at the
+newest release of the version. The settings are those of a standard 64-bit
+Linux build, in the words of `pg_settings`.
+
+Both tools take `postgres_version` with the syntax and the supported series of
+a Tuning Request, and answer for its PostgreSQL Major Version. Their errors
+follow [Errors](#errors).
+
+### List the parameters
+
+| Argument | Required | Accepted values |
+| --- | --- | --- |
+| `postgres_version` | Yes | A PostgreSQL Version, such as `18.4` or `9.6` |
+| `category` | No | Text the category contains, in any case, such as `memory` |
+| `search` | No | Text the name or the short description contains, in any case, such as `vacuum` |
+
+The result has `postgres_version`, as supplied, and `parameters`: one entry
+per parameter, sorted by name, with `name`, `category`, and `short_desc`. A
+filter that matches nothing gives an empty list, not an error.
+
+### Describe a parameter
+
+`describe_postgres_parameter` takes `name`, in any case, and
+`postgres_version`. Its result has these fields:
+
+| Field | Meaning |
+| --- | --- |
+| `postgres_version` | As supplied |
+| `name` | The name as the manual writes it |
+| `type` | `boolean`, `integer`, `floating point`, `string`, or `enum` |
+| `category` | The category `pg_settings` shows |
+| `short_desc`, `extra_desc` | The descriptions `pg_settings` shows |
+| `context` | When a change takes effect: `postmaster` needs a restart, `sighup` a reload |
+| `unit` | The unit of `default`, `min`, and `max`, such as `kB` or `8kB` |
+| `default`, `min`, `max` | What PostgreSQL starts with and accepts, in the unit |
+| `values` | The values an enum accepts |
+| `url` | The entry in the PostgreSQL manual |
+| `documentation` | The manual's text, in Markdown |
+
+A field PostgreSQL does not define for the parameter is absent. A parameter
+that a standard build leaves out, such as `trace_locks`, has only `type`,
+`url`, and `documentation`.
+
+```json
+{
+  "name": "describe_postgres_parameter",
+  "arguments": {
+    "name": "work_mem",
+    "postgres_version": "18.4"
+  }
+}
+```
+
+An abbreviated result:
+
+```json
+{
+  "postgres_version": "18.4",
+  "name": "work_mem",
+  "type": "integer",
+  "category": "Resource Usage / Memory",
+  "short_desc": "Sets the maximum memory to be used for query workspaces.",
+  "context": "user",
+  "unit": "kB",
+  "default": "4096",
+  "min": "64",
+  "max": "2147483647",
+  "url": "https://www.postgresql.org/docs/18/runtime-config-resource.html#GUC-WORK-MEM",
+  "documentation": "Sets the base maximum amount of memory to be used by a query operation..."
+}
+```
+
+A name the version does not have is a tool execution error. It says which
+versions document the parameter, or which names look alike:
+
+```text
+checkpoint_segments is not a parameter of PostgreSQL 18. The manual documents it in PostgreSQL 9.1 to 9.4. Call list_postgres_parameters to find a name.
+```
+
+The server also answers each entry over HTTP, as the Markdown file it ships,
+at `/parameters/<major version>/<name>.md`, such as
+`/parameters/18/work_mem.md`.
+
 ## Operational contract
 
 - Access is public and anonymous. The server keeps no session and no
@@ -245,16 +338,19 @@ errors.
   `PGCONFIG_MCP_ALLOWED_ORIGINS`, separated by commas.
 - The `Host` header is not checked. That check protects a local server from
   DNS rebinding, and this endpoint is public and read-only.
-- Each tool execution has a five-second timeout. A timeout comes back as a
-  tool execution error that asks the caller to try again.
+- A call to `recommend_postgres_configuration` has a five-second timeout. A
+  timeout comes back as a tool execution error that asks the caller to try
+  again. The documentation tools read data that ships with the server and
+  have no timeout.
 - A request body above 4 MiB gets HTTP 413.
 - The protections at the deployment edge apply. The server has no rate limiter
   of its own.
-- A successful execution logs `tool`, `status`, `duration_ms`, the assumption
-  count, the warning count, and `server_version`.
-- A failed execution logs `status`, a stable `error_code` (`invalid_request` or
-  `timeout`), and the names of the missing fields. The arguments and the
-  Tuning Request are never logged.
+- A successful call logs `tool`, `status`, `duration_ms`, and
+  `server_version`. A recommendation also logs the assumption count and the
+  warning count.
+- A failed call logs `status` and a stable `error_code` (`invalid_request` or
+  `timeout`). A failed recommendation also logs the names of the missing
+  fields. The arguments and the Tuning Request are never logged.
 
 ## Conformance
 
@@ -267,8 +363,8 @@ localhost, which a public endpoint cannot be.
 
 ## Deferred work
 
-The server keeps one small, stateless, read-only tool on purpose. Each deferred
-item is recorded with the condition that would justify revisiting it:
+The server keeps a few small, stateless, read-only tools on purpose. Each
+deferred item is recorded with the condition that would justify revisiting it:
 
 | Deferred item | Why it is deferred | Revisit when |
 | --- | --- | --- |
@@ -276,7 +372,8 @@ item is recorded with the condition that would justify revisiting it:
 | Custom rate limiting | The deployment edge is the baseline | Traffic or abuse exceeds what the edge handles |
 | Prometheus metrics | Structured logs are the first observability mechanism | PGConfig has a metrics collector and monitoring infrastructure |
 | Authentication | The tool is public, stateless, and read-only | It gains private data, persisted state, user-specific behavior, or mutations |
-| Additional tools | One intent has one clear tool | A distinct user intent cannot be expressed by `recommend_postgres_configuration` |
+| Additional tools | Each intent has one clear tool | A distinct user intent cannot be expressed by the current tools |
+| Resources for the parameter documentation | Every client calls tools, and fewer read resources | The clients people use read MCP resources |
 | Detailed calculation traces | Short reasons give provenance without a large schema | Consumers need machine-readable, step-by-step provenance |
 | pgBadger and `log_format` | Log analysis is a separate capability | That capability has its own requirements and design |
 | Decimal RAM | An integer in a smaller unit expresses the same amount | Real clients cannot express those values reliably |

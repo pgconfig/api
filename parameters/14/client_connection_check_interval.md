@@ -1,0 +1,21 @@
+---
+name: "client_connection_check_interval"
+version: "14"
+type: "integer"
+category: "Connections and Authentication / Connection Settings"
+short_desc: "Sets the time interval between checks for disconnection while running queries."
+context: "user"
+unit: "ms"
+default: "0"
+min: "0"
+max: "2147483647"
+url: "https://www.postgresql.org/docs/14/runtime-config-connection.html#GUC-CLIENT-CONNECTION-CHECK-INTERVAL"
+---
+
+Sets the time interval between optional checks that the client is still connected, while running queries. The check is performed by polling the socket, and allows long running queries to be aborted sooner if the kernel reports that the connection is closed.
+
+This option is currently available only on systems that support the non-standard `POLLRDHUP` extension to the `poll` system call, including Linux.
+
+If the value is specified without units, it is taken as milliseconds. The default value is `0`, which disables connection checks. Without connection checks, the server will detect the loss of the connection only at the next interaction with the socket, when it waits for, receives or sends data.
+
+For the kernel itself to detect lost TCP connections reliably and within a known timeframe in all scenarios including network failure, it may also be necessary to adjust the TCP keepalive settings of the operating system, or the [`tcp_keepalives_idle`](https://www.postgresql.org/docs/14/runtime-config-connection.html#GUC-TCP-KEEPALIVES-IDLE), [`tcp_keepalives_interval`](https://www.postgresql.org/docs/14/runtime-config-connection.html#GUC-TCP-KEEPALIVES-INTERVAL) and [`tcp_keepalives_count`](https://www.postgresql.org/docs/14/runtime-config-connection.html#GUC-TCP-KEEPALIVES-COUNT) settings of PostgreSQL.

@@ -1,8 +1,9 @@
 //! The pgconfig HTTP server. One binary serves REST v1, its OpenAPI document,
-//! the MCP endpoint, and the web app.
+//! the MCP endpoint, the parameter documentation, and the web app.
 
 mod cors;
 mod mcp;
+mod parameters;
 mod v1;
 mod web;
 
@@ -43,6 +44,7 @@ pub fn app_with(config: Config) -> Router {
     openapi.info.version = pgconfig::build::TAG.to_string();
 
     let routes = v1::router()
+        .merge(parameters::router())
         .merge(SwaggerUi::new("/docs").url("/docs/openapi.json", openapi))
         .fallback(web::serve);
 
