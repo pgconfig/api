@@ -82,6 +82,21 @@
   border-bottom: 1px solid var(--color-border);
   background: var(--color-surface);
 }
+/* Seven fields in one row need about 1280px. A narrower desktop gets two
+   rows, where one row would wrap the labels and hide the values. */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .filter-bar { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+/* From this width the lists get the room their longer values need, taken
+   from the three counts. Below it, a narrower count would cut its digits. */
+@media (min-width: 1440px) {
+  .filter-bar {
+    grid-template-columns:
+      minmax(0, 1.35fr) minmax(0, 1.3fr) minmax(0, 1.2fr)
+      minmax(0, 0.85fr) minmax(0, 1fr) minmax(0, 0.9fr)
+      minmax(0, 1.1fr);
+  }
+}
 @media (max-width: 1023px) {
   /* One field per line. */
   .filter-bar { grid-template-columns: minmax(0, 1fr); padding-inline: var(--presentation-page-padding); }
