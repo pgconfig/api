@@ -17,7 +17,7 @@ impl PgMajor {
     /// The oldest and the newest supported 9.x series.
     const NINE: std::ops::RangeInclusive<u32> = 1..=6;
     /// The supported series from PostgreSQL 10 on.
-    const MODERN: std::ops::RangeInclusive<u32> = 10..=18;
+    const MODERN: std::ops::RangeInclusive<u32> = 10..=19;
 
     /// Every supported major version, oldest first.
     pub fn supported() -> impl Iterator<Item = PgMajor> {
@@ -97,7 +97,7 @@ impl PgVersion {
         };
         if !supported {
             return Err(PgVersionError(format!(
-                "PostgreSQL {major} is not supported. Supported major versions are 9.1 to 9.6 and 10 to 18."
+                "PostgreSQL {major} is not supported. Supported major versions are 9.1 to 9.6 and 10 to 19 (19 is beta)."
             )));
         }
         Ok(Self {
@@ -143,6 +143,7 @@ mod tests {
         assert_eq!(major("10"), "10");
         assert_eq!(major("17.10"), "17");
         assert_eq!(major("18.4"), "18");
+        assert_eq!(major("19"), "19");
     }
 
     #[test]
@@ -165,14 +166,14 @@ mod tests {
 
     #[test]
     fn rejects_unsupported_major_versions() {
-        for text in ["8.4", "9.0", "9.7", "19", "19.1", "7.4.30"] {
+        for text in ["8.4", "9.0", "9.7", "20", "20.1", "7.4.30"] {
             let error = PgVersion::parse(text).unwrap_err().to_string();
             assert!(error.contains("is not supported"), "{text}: {error}");
         }
     }
 
     #[test]
-    fn supports_fifteen_major_versions() {
+    fn supports_sixteen_major_versions() {
         let supported: Vec<String> = PgMajor::supported()
             .map(|major| major.to_string())
             .collect();
@@ -181,7 +182,7 @@ mod tests {
             supported,
             [
                 "9.1", "9.2", "9.3", "9.4", "9.5", "9.6", "10", "11", "12", "13", "14", "15", "16",
-                "17", "18"
+                "17", "18", "19"
             ]
         );
     }
@@ -193,5 +194,6 @@ mod tests {
         assert!(scale.is_sorted());
         assert_eq!(scale[5], 9.6);
         assert_eq!(scale[14], 18.0);
+        assert_eq!(scale[15], 19.0);
     }
 }

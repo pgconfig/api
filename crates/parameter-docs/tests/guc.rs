@@ -4,6 +4,54 @@ use std::collections::BTreeMap;
 
 use pgconfig_parameter_docs::guc::{Setting, Sources, settings};
 
+#[test]
+fn postgresql_19_data_preserves_types_macros_units_and_build_conditions() {
+    let tables = format!(
+        "{GROUPS}\nconst struct config_enum_entry methods[] = {{\n{{\"worker\", 1, false}}, {{\"hidden\", 2, true}}, {{NULL, 0, false}}\n}};"
+    );
+    let source = Sources {
+        tables: &tables,
+        header: "",
+        options: &[],
+        headers: &["#define MAX_IO_WORKERS 32\n"],
+        release: "19beta4",
+    };
+    let data = r#"[
+      # Data, not executable Perl.
+      { name => 'io_max_workers', type => 'int', context => 'PGC_SIGHUP', group => 'RESOURCES_MEM',
+        short_desc => 'Worker\'s maximum.', variable => 'workers', boot_val => '8', min => '1', max => 'MAX_IO_WORKERS' },
+      { name => 'io_worker_idle_timeout', type => 'int', context => 'PGC_SIGHUP', group => 'RESOURCES_MEM',
+        short_desc => 'Idle time.', variable => 'timeout', boot_val => '60000', min => '0', max => 'INT_MAX', flags => 'GUC_UNIT_MS' },
+      { name => 'io_method', type => 'enum', context => 'PGC_POSTMASTER', group => 'RESOURCES_MEM',
+        short_desc => 'Method.', variable => 'method', boot_val => '1', options => 'methods' },
+      { name => 'jit', type => 'bool', context => 'PGC_USERSET', group => 'RESOURCES_MEM',
+        short_desc => 'JIT.', variable => 'jit', boot_val => 'false' },
+      { name => 'server_version', type => 'string', context => 'PGC_INTERNAL', group => 'UNGROUPED',
+        short_desc => 'Version.', variable => 'version', boot_val => 'PG_VERSION' },
+      { name => 'weight', type => 'real', context => 'PGC_SIGHUP', group => 'RESOURCES_MEM',
+        short_desc => 'Weight.', variable => 'weight', boot_val => '1.0', min => '0.0', max => '10.0' },
+      { name => 'debug', type => 'bool', context => 'PGC_USERSET', group => 'UNGROUPED',
+        short_desc => 'Debug.', variable => 'debug', boot_val => 'true', ifdef => 'USE_ASSERT_CHECKING' },
+    ]"#;
+    let settings = pgconfig_parameter_docs::guc::settings_from_dat(&source, data).unwrap();
+    assert_eq!(settings["io_max_workers"].default.as_deref(), Some("8"));
+    assert_eq!(settings["io_max_workers"].max.as_deref(), Some("32"));
+    assert_eq!(settings["io_max_workers"].short_desc, "Worker's maximum.");
+    assert_eq!(
+        settings["io_worker_idle_timeout"].unit.as_deref(),
+        Some("ms")
+    );
+    assert_eq!(settings["io_method"].values, ["worker"]);
+    assert_eq!(settings["io_method"].context, "postmaster");
+    assert_eq!(settings["jit"].default.as_deref(), Some("off"));
+    assert_eq!(
+        settings["server_version"].default.as_deref(),
+        Some("19beta4")
+    );
+    assert_eq!(settings["weight"].max.as_deref(), Some("10"));
+    assert!(!settings.contains_key("debug"));
+}
+
 /// Group names written the way PostgreSQL 16 and later write them.
 const GROUPS: &str = r#"
 const char *const config_group_names[] =

@@ -59,14 +59,16 @@ export function ComparisonRowDetail({
             ))
           )}
           <div className="row-wrap">
-            <Button asChild variant="primary">
-              <a href={confUrl} target="_blank" rel="noreferrer">
-                <Icon name="lightbulb-line" />
-                <span>
-                  Learn more on Postgresql<strong>co.nf</strong>
-                </span>
-              </a>
-            </Button>
+            {Number(pgVersion) < 19 && (
+              <Button asChild variant="primary">
+                <a href={confUrl} target="_blank" rel="noreferrer">
+                  <Icon name="lightbulb-line" />
+                  <span>
+                    Learn more on Postgresql<strong>co.nf</strong>
+                  </span>
+                </a>
+              </Button>
+            )}
             {docsUrl && (
               <Button asChild>
                 <a href={docsUrl} target="_blank" rel="noreferrer">

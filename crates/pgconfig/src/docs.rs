@@ -49,9 +49,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn every_supported_release_documents_shared_buffers() {
-        for major in crate::PgMajor::supported() {
-            let doc = param(&major.to_string(), "shared_buffers").expect("a manual entry");
+    fn every_legacy_release_documents_shared_buffers() {
+        for (major, _) in PG_DOCS {
+            let doc = param(major, "shared_buffers").expect("a manual entry");
             assert_eq!(doc.title, "shared_buffers");
             assert!(doc.url.contains("postgresql.org"), "{major}: {}", doc.url);
         }

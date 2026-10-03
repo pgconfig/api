@@ -1,4 +1,4 @@
-//! The GUC tables in C: every parameter's context, category, descriptions,
+//! The GUC tables in C or guc_parameters.dat: every parameter's context, category, descriptions,
 //! unit, default, limits, and values, as a standard build has them.
 
 use std::collections::{BTreeMap, HashMap};
@@ -48,7 +48,7 @@ const ARRAYS: [(&str, &str); 5] = [
     ("ConfigureNamesEnum", "enum"),
 ];
 
-/// The settings of every parameter the tables define, as a standard 64-bit
+/// The settings of every parameter the tables define, as a standard x86-64
 /// Linux build has them.
 pub fn settings(sources: &Sources) -> Result<BTreeMap<String, Setting>, String> {
     let macros = Macros::new(
@@ -77,6 +77,100 @@ pub fn settings(sources: &Sources) -> Result<BTreeMap<String, Setting>, String> 
     }
     if arrays == 0 {
         return Err("the tables define none of the ConfigureNames arrays".into());
+    }
+    Ok(settings)
+}
+
+/// PostgreSQL 19 keeps GUC declarations in quoted records instead of C
+/// arrays. Defaults and enum options still use the same C expressions.
+pub fn settings_from_dat(
+    sources: &Sources,
+    data: &str,
+) -> Result<BTreeMap<String, Setting>, String> {
+    let macros = Macros::new(
+        sources.headers.iter().copied().chain([sources.tables]),
+        sources.release,
+    )?;
+    let groups = groups(sources, &macros)?;
+    let reader = Reader {
+        sources,
+        macros: &macros,
+        groups: &groups,
+    };
+    let mut settings = BTreeMap::new();
+    for fields in crate::dat::records(data)? {
+        let required = |field: &str| {
+            fields
+                .get(field)
+                .map(String::as_str)
+                .ok_or_else(|| format!("GUC record {:?} lacks {field}", fields.get("name")))
+        };
+        for key in fields.keys() {
+            if ![
+                "name",
+                "type",
+                "context",
+                "group",
+                "short_desc",
+                "long_desc",
+                "flags",
+                "variable",
+                "boot_val",
+                "min",
+                "max",
+                "options",
+                "ifdef",
+                "check_hook",
+                "assign_hook",
+                "show_hook",
+            ]
+            .contains(&key.as_str())
+            {
+                return Err(format!("unknown GUC field {key}"));
+            }
+        }
+        let name = required("name")?;
+        let vartype = match required("type")? {
+            "bool" => "boolean",
+            "int" => "integer",
+            "real" => "floating point",
+            "string" => "string",
+            "enum" => "enum",
+            other => return Err(format!("{name}: unknown GUC type {other}")),
+        };
+        if let Some(condition) = fields.get("ifdef")
+            && !macros.defined(condition)?
+        {
+            continue;
+        }
+        let expr = |text: &str| c::tokenize(text).map(Init::Expr);
+        // Match gen_guc_tables.pl: descriptions retain their C escapes.
+        let quoted = |text: &str| expr(&format!("\"{}\"", text.replace('"', "\\\"")));
+        let generic = vec![
+            quoted(name)?,
+            expr(required("context")?)?,
+            expr(required("group")?)?,
+            quoted(required("short_desc")?)?,
+            fields
+                .get("long_desc")
+                .map_or_else(|| expr("NULL"), |text| quoted(text))?,
+            expr(fields.get("flags").map_or("0", String::as_str))?,
+        ];
+        let mut values = vec![expr(required("variable")?)?, expr(required("boot_val")?)?];
+        if matches!(vartype, "integer" | "floating point") {
+            values.extend([expr(required("min")?)?, expr(required("max")?)?]);
+        } else if vartype == "enum" {
+            values.push(expr(required("options")?)?);
+        }
+        let setting = reader
+            .read(name, &generic, &values, vartype)
+            .map_err(|err| format!("{name}: {err}"))?;
+        if settings.insert(name.to_string(), setting).is_some() {
+            return Err(format!("duplicate GUC {name}"));
+        }
+    }
+    if settings.is_empty() {
+        return Err("guc_parameters.dat defines no settings".into());
     }
     Ok(settings)
 }

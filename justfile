@@ -19,9 +19,9 @@ run: web
     cargo run -p pgconfig-server
 
 # Load a generated config in a real PostgreSQL. Needs Docker.
-check-conf version="18":
+check-conf version="18" image="":
     cargo build -p pgconfigctl
-    scripts/check-conf-loads.sh target/debug/pgconfigctl {{version}}
+    scripts/check-conf-loads.sh target/debug/pgconfigctl {{version}} "{{image}}"
 
 # Windows compiles only on its own runner, so it is left out. The builds run
 # one at a time: two `cargo zigbuild` runs that start together race on their

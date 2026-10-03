@@ -139,7 +139,18 @@ impl Macros {
         files: impl IntoIterator<Item = &'a str>,
         release: &str,
     ) -> Result<Self, String> {
-        let numbers: Vec<u32> = release
+        let numeric = if let Some((major, suffix)) = release
+            .split_once("beta")
+            .or_else(|| release.split_once("rc"))
+        {
+            if suffix.is_empty() || !suffix.bytes().all(|c| c.is_ascii_digit()) {
+                return Err(format!("{release} is not a release number"));
+            }
+            format!("{major}.0")
+        } else {
+            release.to_string()
+        };
+        let numbers: Vec<u32> = numeric
             .split('.')
             .map(str::parse)
             .collect::<Result<_, _>>()

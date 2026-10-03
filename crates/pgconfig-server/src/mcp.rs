@@ -40,7 +40,7 @@ use serde_json::{Value, json};
 const TOOL: &str = "recommend_postgres_configuration";
 
 /// How every tool describes `postgres_version`.
-const POSTGRES_VERSION_DESCRIPTION: &str = "PostgreSQL version as a string, such as 18.4, 17.10, or 9.6.24. Supported major versions: 9.1 to 9.6 and 10 to 18.";
+const POSTGRES_VERSION_DESCRIPTION: &str = "PostgreSQL version as a string, such as 18.4, 17.10, or 9.6.24. Supported major versions: 9.1 to 9.6 and 10 to 19. PostgreSQL 19 is beta; use 19 for its version.";
 const LIST_TOOL: &str = "list_postgres_parameters";
 const DESCRIBE_TOOL: &str = "describe_postgres_parameter";
 

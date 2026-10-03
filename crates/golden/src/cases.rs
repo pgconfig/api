@@ -1,8 +1,9 @@
 //! The inputs the goldens cover. Recording runs every case here against the
 //! binaries. Changing this file means recording again.
 
-pub const VERSIONS: [&str; 15] = [
+pub const VERSIONS: [&str; 16] = [
     "9.1", "9.2", "9.3", "9.4", "9.5", "9.6", "10", "11", "12", "13", "14", "15", "16", "17", "18",
+    "19",
 ];
 pub const PROFILES: [&str; 5] = ["WEB", "OLTP", "DW", "MIXED", "DESKTOP"];
 const DISKS: [&str; 3] = ["HDD", "SSD", "SAN"];
@@ -212,7 +213,7 @@ fn formats() -> RestGroup {
 fn pgbadger() -> RestGroup {
     let mut cases = Vec::new();
     // The default log format changes from stderr to jsonlog at PostgreSQL 15.
-    for version in ["14", "15"] {
+    for version in ["14", "15", "19"] {
         for log_format in ["", "stderr", "syslog", "csvlog", "jsonlog", "foo"] {
             for format in ["json", "conf", "alter_system", "stackgres"] {
                 let log = if log_format.is_empty() {
@@ -257,7 +258,6 @@ fn docs() -> RestGroup {
         config("pg_version=13.5&show_doc=true"),
         config("pg_version=12.5&show_doc=true"),
         config("pg_version=17.10&show_doc=true"),
-        config("pg_version=19&show_doc=true"),
         config("pg_version=8.4&show_doc=true"),
         config("pg_version=16&show_doc=true&format=conf"),
         config("pg_version=16&show_doc=TRUE"),
@@ -276,7 +276,7 @@ fn os_and_arch() -> RestGroup {
     let mut cases = Vec::new();
     // 64GB over 5 connections puts work_mem and maintenance_work_mem above
     // the 2GB Windows limit of PostgreSQL 17 and older.
-    for version in ["9.6", "17", "18"] {
+    for version in ["9.6", "17", "18", "19"] {
         for os in [
             "linux", "windows", "Windows", "WINDOWS", "unix", "darwin", "Darwin", "LINUX",
         ] {
@@ -371,6 +371,13 @@ fn aio() -> RestGroup {
                     "pg_version=18&environment_name={profile}&drive_type={disk}&cpus={cpu}&format=conf"
                 )));
             }
+        }
+    }
+    for profile in PROFILES {
+        for os in ["linux", "windows"] {
+            cases.push(config(format!(
+                "pg_version=19&environment_name={profile}&os_type={os}&cpus=16&format=conf"
+            )));
         }
     }
     RestGroup {
@@ -555,7 +562,7 @@ fn cli_formats() -> CliGroup {
 fn cli_pgbadger() -> CliGroup {
     let mut cases = Vec::new();
     // Without --log-format the CLI picks csvlog, or jsonlog from PostgreSQL 15.
-    for version in ["14", "15"] {
+    for version in ["14", "15", "19"] {
         for format in ["conf", "json", "sql", "sg"] {
             cases.push(tune(&[
                 "--version",

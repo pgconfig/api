@@ -3,11 +3,13 @@
 # PostgreSQL server of that version starts with it and reads every setting
 # from it.
 #
-# Usage: scripts/check-conf-loads.sh <path to pgconfigctl> <postgres version>
+# Usage: scripts/check-conf-loads.sh <binary> <version> [image] [tune options...]
 set -euo pipefail
 
 bin="${1:?Usage: check-conf-loads.sh <path to pgconfigctl> <postgres version>}"
 version="${2:?Usage: check-conf-loads.sh <path to pgconfigctl> <postgres version>}"
+image="${3:-postgres:$version}"
+shift "$(( $# < 3 ? $# : 3 ))"
 container="pgconfig-conf-check-${version}-$$"
 workdir="$(mktemp -d)"
 
@@ -20,7 +22,7 @@ trap cleanup EXIT
 # The host facts are explicit so the result does not depend on the machine
 # that runs the check.
 "$bin" tune --version "$version" --format conf \
-  --ram 1GB --cpus 2 --os linux --arch amd64 >"$workdir/tuned.conf"
+  --ram 1GB --cpus 2 --os linux --arch amd64 "$@" >"$workdir/tuned.conf"
 echo "--- Generated config for PostgreSQL $version ---"
 cat "$workdir/tuned.conf"
 
@@ -35,7 +37,7 @@ docker run -d --name "$container" \
   -e POSTGRES_PASSWORD=postgres \
   -v "$workdir/tuned.conf:/etc/postgresql/tuned.conf:ro" \
   -v "$workdir/init-config.sh:/docker-entrypoint-initdb.d/init-config.sh:ro" \
-  "postgres:$version" >/dev/null
+  "$image" >/dev/null
 
 # The image starts a temporary server to run the init scripts and then
 # restarts. Only the final server has read the include.

@@ -21,7 +21,7 @@ reads `on` and `010` as the text they are:
 
 The manual's text follows, in Markdown. Notes and warnings are GitHub alerts.
 
-The settings are those of a standard 64-bit Linux build. A parameter that such
+The settings are those of a standard x86-64 Linux build. A parameter that such
 a build leaves out, such as `trace_locks`, has only `name`, `version`, `type`,
 and `url`.
 
@@ -29,7 +29,9 @@ and `url`.
 
 `crates/parameter-docs` reads a PostgreSQL git checkout at the newest release
 tag of each version: the text from `doc/src/sgml/config.sgml`, the settings
-from the GUC tables in C. `sources.yml` records each tag. Do not edit these
+from the GUC tables in C through PostgreSQL 18 and `guc_parameters.dat`
+from 19. The extractor prefers a final release; if none exists, it uses the
+newest release candidate or beta. `sources.yml` records each tag. Do not edit these
 files by hand: run the extraction again, as the `update-parameter-docs` skill
 describes. ADR 0003 records why.
 

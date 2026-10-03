@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { PG_VERSION_OPTIONS } from "../src/lib/options.ts";
 import {
   DEFAULT_FORM,
   buildUrlArgs,
@@ -19,6 +20,16 @@ test("an empty query string is the default form", () => {
     arch: "x86-64",
     os_type: "linux",
   });
+});
+
+test("PostgreSQL 19 beta is selectable and shareable while the default stays 18", () => {
+  assert.ok(
+    PG_VERSION_OPTIONS.some((version) => version.value === "19" && version.label.includes("Beta")),
+  );
+  assert.strictEqual(DEFAULT_FORM.pg_version, 18);
+  const form = { ...DEFAULT_FORM, pg_version: 19 };
+  assert.deepStrictEqual(parseFormQuery(new URLSearchParams(formToQuery(form))), form);
+  assert.ok(buildUrlArgs(form).includes("pg_version=19&"));
 });
 
 test("the query string overrides only the fields it names", () => {

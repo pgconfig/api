@@ -62,3 +62,37 @@ pub fn parameter_doc(major: PgMajor, name: &str) -> Option<&'static ParameterDoc
         .iter()
         .find(|doc| doc.name.eq_ignore_ascii_case(name))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::PgVersion;
+
+    #[test]
+    fn every_supported_release_has_a_manual() {
+        for major in PgMajor::supported() {
+            let doc = parameter_doc(major, "shared_buffers").expect("a versioned manual entry");
+            assert!(doc.default.is_some());
+            assert!(doc.url.contains(&format!("/docs/{major}/")));
+            assert!(!doc.text().is_empty());
+        }
+    }
+
+    #[test]
+    fn postgresql_19_documents_the_dynamic_pool_and_separate_analyze_logging() {
+        let pg19 = PgVersion::parse("19").unwrap().major();
+        for (name, default) in [
+            ("io_min_workers", "2"),
+            ("io_max_workers", "8"),
+            ("log_autoanalyze_min_duration", "600000"),
+        ] {
+            let doc = parameter_doc(pg19, name).expect("a new PostgreSQL 19 parameter");
+            assert_eq!(doc.default, Some(default));
+            assert_eq!(doc.context, Some("sighup"));
+            assert!(!doc.text().is_empty());
+            assert!(parameter_doc(PgVersion::parse("18").unwrap().major(), name).is_none());
+        }
+        assert!(parameter_doc(pg19, "io_workers").is_none());
+        assert!(parameter_doc(PgVersion::parse("18").unwrap().major(), "io_workers").is_some());
+    }
+}

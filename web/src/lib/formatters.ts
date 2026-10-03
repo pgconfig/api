@@ -30,6 +30,7 @@ export type EnvironmentConfig = {
 /** A parameter with one value per profile, keyed by the lowercase profile. */
 export type ComparisonParam = {
   name: string;
+  format?: string;
   documentation: ParameterDocumentation | undefined;
   [environment: string]: unknown;
 };
@@ -67,7 +68,7 @@ export const formatConfigs = (
       if (!categoryFound) return;
 
       parameters.forEach(
-        ({ name: paramName, config_value: paramValue, documentation }) => {
+        ({ name: paramName, config_value: paramValue, format, documentation }) => {
           const populatedParamIndex = categoryFound.params.findIndex(
             (it) => it.name === paramName,
           );
@@ -75,6 +76,7 @@ export const formatConfigs = (
           if (populatedParamIndex === -1) {
             categoryFound.params.push({
               name: paramName,
+              format,
               [env.toLowerCase()]: paramValue,
               documentation,
             });

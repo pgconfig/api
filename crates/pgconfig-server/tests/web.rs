@@ -47,6 +47,24 @@ async fn the_root_serves_the_app() {
 }
 
 #[tokio::test]
+async fn postgresql_19_serves_the_new_parameters_and_omits_the_removed_one() {
+    let (status, headers, body) = get("/parameters/19/io_max_workers.md").await;
+    assert_eq!(status, StatusCode::OK);
+    assert!(
+        headers[CONTENT_TYPE]
+            .to_str()
+            .unwrap()
+            .contains("text/markdown")
+    );
+    assert!(body.contains("default: \"8\""));
+    assert!(body.contains("The default is 8."));
+    let (status, _, _) = get("/parameters/19/io_workers.md").await;
+    assert_eq!(status, StatusCode::NOT_FOUND);
+    let (status, _, _) = get("/parameters/18/io_workers.md").await;
+    assert_eq!(status, StatusCode::OK);
+}
+
+#[tokio::test]
 async fn an_address_of_the_app_falls_back_to_the_app() {
     for path in [
         "/guide",

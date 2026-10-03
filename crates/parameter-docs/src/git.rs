@@ -14,7 +14,7 @@ impl Checkout {
         let checkout = Checkout {
             dir: dir.to_path_buf(),
         };
-        let tags = checkout.git(&["tag", "--list", "REL_1*_0"])?;
+        let tags = checkout.git(&["tag", "--list", "REL_*"])?;
         if tags.trim().is_empty() {
             return Err(format!(
                 "{} has no PostgreSQL release tags. Clone https://github.com/postgres/postgres.git there, or fetch its tags",
@@ -25,20 +25,16 @@ impl Checkout {
     }
 
     /// The newest release tag of a major version: `REL_18_6` for `18`,
-    /// `REL9_6_24` for `9.6`. Betas and release candidates do not count.
+    /// `REL9_6_24` for `9.6`. If no final release exists, use the newest
+    /// release candidate or beta, in that order.
     pub fn release_tag(&self, major: &str) -> Result<String, String> {
         let prefix = match major.split_once('.') {
             Some((nine, minor)) => format!("REL{nine}_{minor}_"),
             None => format!("REL_{major}_"),
         };
         let tags = self.git(&["tag", "--list", &format!("{prefix}*")])?;
-        tags.lines()
-            .filter_map(|tag| {
-                let patch: u32 = tag.strip_prefix(&prefix)?.parse().ok()?;
-                Some((patch, tag))
-            })
-            .max()
-            .map(|(_, tag)| tag.to_string())
+        newest_release(&tags, &prefix)
+            .map(str::to_string)
             .ok_or_else(|| {
                 format!(
                     "no release tag of PostgreSQL {major} in {}",
@@ -120,6 +116,23 @@ impl Checkout {
     }
 }
 
+fn newest_release<'a>(tags: &'a str, prefix: &str) -> Option<&'a str> {
+    tags.lines()
+        .filter_map(|tag| {
+            let suffix = tag.strip_prefix(prefix)?;
+            let (stage, number) = if let Some(number) = suffix.strip_prefix("BETA") {
+                (0, number)
+            } else if let Some(number) = suffix.strip_prefix("RC") {
+                (1, number)
+            } else {
+                (2, suffix)
+            };
+            Some(((stage, number.parse::<u32>().ok()?), tag))
+        })
+        .max()
+        .map(|(_, tag)| tag)
+}
+
 pub struct Reader {
     child: Child,
     stdin: ChildStdin,
@@ -157,5 +170,20 @@ impl Drop for Reader {
     fn drop(&mut self) {
         let _ = self.child.kill();
         let _ = self.child.wait();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn final_releases_take_precedence_over_release_candidates_and_betas() {
+        let betas = "REL_19_BETA4\nREL_19_BETA10\nREL_20_BETA1\nREL_19_STABLE";
+        assert_eq!(newest_release(betas, "REL_19_"), Some("REL_19_BETA10"));
+        let rc = format!("{betas}\nREL_19_RC1");
+        assert_eq!(newest_release(&rc, "REL_19_"), Some("REL_19_RC1"));
+        let final_release = format!("{rc}\nREL_19_0\nREL_19_2\nREL_19_1");
+        assert_eq!(newest_release(&final_release, "REL_19_"), Some("REL_19_2"));
     }
 }

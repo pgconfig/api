@@ -145,7 +145,7 @@ async fn method_not_allowed(caller: Caller) -> Response {
 #[into_params(parameter_in = Query)]
 #[allow(dead_code)]
 struct ConfigParams {
-    /// PostgreSQL version, from 9.1 to 18.
+    /// PostgreSQL version, from 9.1 to 19. Version 19 is beta; the default remains 18.
     #[param(default = "18")]
     pg_version: Option<String>,
     /// Total memory dedicated to PostgreSQL, such as 8GB.

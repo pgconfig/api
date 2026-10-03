@@ -58,6 +58,58 @@ fn complete() -> Value {
 }
 
 #[tokio::test]
+async fn postgresql_19_recommendations_and_parameter_docs_share_the_new_pool() {
+    let client = connect(serve(Config::default()).await).await;
+    let mut request = complete();
+    request["postgres_version"] = json!("19");
+    let result = call(&client, request).await;
+    assert_eq!(result.is_error, Some(false));
+    let content = result.structured_content.unwrap();
+    assert_eq!(content["recommendations"]["io_min_workers"]["value"], "2");
+    assert_eq!(content["recommendations"]["io_max_workers"]["value"], "8");
+    assert!(content["recommendations"].get("io_workers").is_none());
+
+    let listed = client
+        .call_tool(
+            CallToolRequestParams::new("list_postgres_parameters").with_arguments(
+                json!({"postgres_version": "19", "search": "io_max_workers"})
+                    .as_object()
+                    .unwrap()
+                    .clone(),
+            ),
+        )
+        .await
+        .unwrap();
+    assert_eq!(listed.is_error, Some(false));
+    assert_eq!(
+        listed.structured_content.unwrap()["parameters"][0]["name"],
+        "io_max_workers"
+    );
+
+    let described = client
+        .call_tool(
+            CallToolRequestParams::new("describe_postgres_parameter").with_arguments(
+                json!({"postgres_version": "19", "name": "io_max_workers"})
+                    .as_object()
+                    .unwrap()
+                    .clone(),
+            ),
+        )
+        .await
+        .unwrap();
+    assert_eq!(described.is_error, Some(false));
+    let content = described.structured_content.unwrap();
+    assert_eq!(content["default"], "8");
+    assert_eq!(content["context"], "sighup");
+    assert!(
+        content["documentation"]
+            .as_str()
+            .unwrap()
+            .contains("The default is 8.")
+    );
+}
+
+#[tokio::test]
 async fn the_server_identifies_as_pgconfig_with_the_release_version() {
     let client = connect(serve(Config::default()).await).await;
 

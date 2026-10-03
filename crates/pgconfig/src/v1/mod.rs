@@ -202,7 +202,7 @@ pub fn categories(
         .collect();
 
     if let Some(log_format) = pgbadger_log_format {
-        categories.push(pgbadger());
+        categories.push(pgbadger(input.pg_version));
         categories.push(log_options(log_format));
     }
     Ok(categories)
@@ -218,7 +218,7 @@ fn parameter(name: &'static str, value: &str, format: &'static str) -> Parameter
     }
 }
 
-fn pgbadger() -> Category {
+fn pgbadger(pg_version: f32) -> Category {
     let mut parameters = vec![
         parameter("logging_collector", "on", "bool"),
         parameter("log_checkpoints", "on", "bool"),
@@ -231,6 +231,9 @@ fn pgbadger() -> Category {
         parameter("log_autovacuum_min_duration", "0", "int"),
     ];
     parameters[7].comment = Some("Adjust the minimum time to collect the data");
+    if pg_version >= 19.0 {
+        parameters.push(parameter("log_autoanalyze_min_duration", "0", "int"));
+    }
     Category {
         name: "log_config",
         description: "Logging configuration for pgbadger",

@@ -1,4 +1,4 @@
-//! How a standard build of PostgreSQL for 64-bit Linux defines the macros
+//! How a standard build of PostgreSQL for x86-64 Linux defines the macros
 //! the GUC tables depend on: the configure defaults, `<limits.h>`, and the
 //! choices the build makes for Linux.
 //!
@@ -19,6 +19,9 @@ const MACROS: &[(&str, Option<&str>)] = &[
     ("SIZEOF_LONG", Some("8")),
     ("SIZEOF_SIZE_T", Some("8")),
     ("MAX_KILOBYTES", Some("INT_MAX")),
+    // PostgreSQL 19's portability/instr_time.h enables the TSC clock on
+    // x86-64. ARM builds accept only auto and system for timing_clock_source.
+    ("PG_INSTR_TSC_CLOCK", Some("1")),
     // configure's defaults: 8kB pages, 16MB WAL segments, 1GB relation
     // segments, and the Kerberos settings under the default prefix.
     ("BLCKSZ", Some("8192")),

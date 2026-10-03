@@ -44,7 +44,8 @@ export const DRIVE_TYPE_OPTIONS: Option[] = [
 ];
 
 export const PG_VERSION_OPTIONS: Option[] = [
-  { value: "18", label: "18 (Latest)" },
+  { value: "19", label: "19 (Beta)" },
+  { value: "18", label: "18 (Stable, default)" },
   { value: "17", label: "17" },
   { value: "16", label: "16" },
   { value: "15", label: "15" },

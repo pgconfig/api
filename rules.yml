@@ -208,7 +208,7 @@ categories:
         "Tuning Your PostgreSQL Server": https://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
     effective_io_concurrency:
       abstract: |
-        Controls concurrent disk I/O operations for **bitmap heap scans** only.
+        Controls concurrent disk I/O. Before PostgreSQL 18, it applies to bitmap heap scans. From 18, it also controls asynchronous read-ahead for sequential scans and other supported reads.
 
         Bitmap scans are used when queries need to fetch moderate result sets (too many rows for index scans, too few for sequential scans) or when combining multiple indexes. They're more common in analytical workloads.
 
@@ -236,7 +236,7 @@ categories:
         "PostgreSQL 18: The AIO Revolution - dev.to": https://dev.to/mattleads/postgresql-18-the-aio-revolution-uuidv7-and-the-path-to-unprecedented-performance-415m
     io_workers:
       abstract: |
-        Background worker processes for async I/O when `io_method = worker`.
+        Background worker processes for async I/O when `io_method = worker`, in PostgreSQL 18. PostgreSQL 19 replaces this fixed pool with `io_min_workers` and `io_max_workers`.
 
         > [!TIP]
         > Default of `3` is too low for modern multi-core systems.
@@ -254,6 +254,20 @@ categories:
         "Waiting for Postgres 18: Accelerating Disk Reads with Asynchronous I/O - pganalyze": https://pganalyze.com/blog/postgres-18-async-io
         "PostgreSQL 18: Better I/O performance with AIO - Cybertec": https://www.cybertec-postgresql.com/en/postgresql-18-better-i-o-performance-with-aio/
         "PostgreSQL 18 Asynchronous I/O - Neon": https://neon.com/postgresql/postgresql-18/asynchronous-io
+    io_min_workers:
+      abstract: |
+        Minimum size of the dynamic I/O worker pool in PostgreSQL 19, when `io_method = worker`.
+
+        pgconfig keeps the PostgreSQL default of `2`. The pool grows with demand up to `io_max_workers` and releases idle workers. This is a baseline, not a CPU-based sizing rule.
+      recomendations:
+        "PostgreSQL 19 I/O configuration": https://www.postgresql.org/docs/19/runtime-config-resource.html#GUC-IO-MIN-WORKERS
+    io_max_workers:
+      abstract: |
+        Maximum size of the dynamic I/O worker pool in PostgreSQL 19, when `io_method = worker`.
+
+        pgconfig keeps the PostgreSQL default of `8`, with `io_min_workers=2`. Measure I/O demand before changing the ceiling. The pool timers keep their PostgreSQL defaults.
+      recomendations:
+        "PostgreSQL 19 I/O configuration": https://www.postgresql.org/docs/19/runtime-config-resource.html#GUC-IO-MAX-WORKERS
     maintenance_io_concurrency:
       abstract: |
         Concurrent I/O operations for maintenance: **VACUUM**, **CREATE INDEX**, **ANALYZE**.
@@ -278,7 +292,7 @@ categories:
       abstract: |
         Server-wide limit that clamps `io_combine_limit` (PostgreSQL 18+).
 
-        Set at server startup. Controls the maximum I/O size for operations that combine I/O. Increase for data warehouses with large sequential scans.
+        Set at server startup. Raising this ceiling does not change `io_combine_limit`, which controls the active combine size. pgconfig caps the ceiling at 128kB on Windows for PostgreSQL 19.
       recomendations:
         "Allow io_combine_limit up to 1MB": https://www.postgresql.org/message-id/CA+hUKGKd=U1zSFYNjwBBrXV3NsqR2U8dCUrCBVeB0DQ8Vb8Dwg@mail.gmail.com
         "Tuning AIO in PostgreSQL 18 - Tomas Vondra": https://vondra.me/posts/tuning-aio-in-postgresql-18/
@@ -291,10 +305,7 @@ categories:
       abstract: |
         Hard limit on concurrent I/O operations per backend process (PostgreSQL 18+).
 
-        Controls read-ahead with async I/O:
-        ```
-        max_read_ahead = effective_io_concurrency × io_combine_limit
-        ```
+        This is a hard limit, separate from `effective_io_concurrency`. The PostgreSQL default of `-1` calculates it from shared buffers and process counts. pgconfig retains its explicit profile values of 64, 128, or 256.
 
         Higher values benefit high-latency storage (cloud/EBS) with high IOPS. Watch memory usage - high concurrency increases memory pressure.
       recomendations:
@@ -351,4 +362,3 @@ categories:
       recomendations:
         "Parallel Queries in Postgres": https://www.crunchydata.com/blog/parallel-queries-in-postgres
         "PostgreSQL Performance Tuning Best Practices 2025": https://www.mydbops.com/blog/postgresql-parameter-tuning-best-practices
-

@@ -94,11 +94,13 @@ pub(crate) struct IoWorkers {
     pub capped_at_maximum: bool,
 }
 
-/// The asynchronous I/O settings of PostgreSQL 18.
+/// The asynchronous I/O settings of PostgreSQL 18 and later.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) struct Aio {
     pub io_method: &'static str,
-    pub io_workers: IoWorkers,
+    pub io_workers: Option<IoWorkers>,
+    pub io_min_workers: Option<i64>,
+    pub io_max_workers: Option<i64>,
     pub io_max_combine_limit: i64,
     pub io_max_concurrency: i64,
     pub file_copy_method: &'static str,
@@ -289,17 +291,26 @@ fn aio(facts: &Facts) -> Aio {
         _ => (16, 64),
     };
 
+    let dynamic_pool = facts.version >= 19.0;
     Aio {
         io_method: "worker",
-        io_workers: IoWorkers {
+        io_workers: (!dynamic_pool).then_some(IoWorkers {
             value,
             initial,
             hdd_adjusted,
             raised_to_minimum,
             capped_at_cpus,
             capped_at_maximum,
+        }),
+        // PostgreSQL 19 grows and shrinks the pool with demand. Keep its
+        // defaults instead of applying the fixed-pool CPU formula.
+        io_min_workers: dynamic_pool.then_some(2),
+        io_max_workers: dynamic_pool.then_some(8),
+        io_max_combine_limit: if dynamic_pool && facts.windows {
+            io_max_combine_limit.min(16)
+        } else {
+            io_max_combine_limit
         },
-        io_max_combine_limit,
         io_max_concurrency,
         file_copy_method: "copy",
     }
@@ -407,7 +418,16 @@ impl Computed {
                     ("io_method", aio.map(|aio| Value::Text(aio.io_method))),
                     (
                         "io_workers",
-                        aio.map(|aio| Value::Int(aio.io_workers.value)),
+                        aio.and_then(|aio| aio.io_workers)
+                            .map(|workers| Value::Int(workers.value)),
+                    ),
+                    (
+                        "io_min_workers",
+                        int(aio.and_then(|aio| aio.io_min_workers)),
+                    ),
+                    (
+                        "io_max_workers",
+                        int(aio.and_then(|aio| aio.io_max_workers)),
                     ),
                     (
                         "io_max_combine_limit",

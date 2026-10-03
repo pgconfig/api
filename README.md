@@ -68,6 +68,10 @@ The images `pgconfig/api` and `pgconfig/pgconfigctl`, on Docker Hub and on
 `pgconfig/api`: its binary is `pgconfig-server`, and it needs no `rules.yml` or
 `pg-docs.yml` next to it.
 
+PostgreSQL 19 beta is available explicitly as version `19`. PostgreSQL 18
+remains the default in the web app, REST v1, and CLI. The 19 parameter catalog
+and container checks use beta 4; support will be reviewed again at release.
+
 ## CPU Core Counting
 
 The `cpus` argument is the total number of **logical CPU cores**, which
@@ -77,7 +81,7 @@ includes hyperthreading. This is the standard output from:
 
 **Example**: A system with 8 physical cores and hyperthreading enabled has 16 logical cores. Use `cpus=16`.
 
-**Why logical cores?** Modern PostgreSQL (2017-2025) benefits from hyperthreading with [up to 15% performance improvement](https://www.cybertec-postgresql.com/en/experimenting-scaling-full-parallelism-postgresql/). The tuning formulas for `max_worker_processes`, `max_parallel_workers`, and `io_workers` are designed to work with logical core counts.
+**Why logical cores?** Modern PostgreSQL (2017-2025) benefits from hyperthreading with [up to 15% performance improvement](https://www.cybertec-postgresql.com/en/experimenting-scaling-full-parallelism-postgresql/). The tuning formulas for `max_worker_processes`, `max_parallel_workers`, and PostgreSQL 18's `io_workers` are designed to work with logical core counts.
 
 ## Rules Engine
 
@@ -101,6 +105,11 @@ adjusted by the environment.
 |                | < 10                                        | Remove `max_parallel_workers`.                                                                                |
 |                | < 13                                        | Remove `maintenance_io_concurrency`.                                                                          |
 |                | < 18                                        | Remove the asynchronous I/O settings (`io_method`, `io_workers`, and the others).                             |
+
+PostgreSQL 19 uses the native dynamic I/O pool defaults, `io_min_workers=2`
+and `io_max_workers=8`, in place of `io_workers`. Its pgBadger preset also
+sets `log_autoanalyze_min_duration=0`. On Windows, its I/O combine ceiling is
+128kB. Existing calculations for 18 and earlier stay unchanged.
 
 ## Development
 

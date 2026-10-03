@@ -2,11 +2,12 @@
 //! a PostgreSQL git checkout into `parameters/`.
 //!
 //! The text comes from `doc/src/sgml/config.sgml` and the settings (context,
-//! unit, default, limits) from the GUC tables in C, both read at the release
-//! tag of each major version.
+//! unit, default, limits) from the GUC tables in C or guc_parameters.dat,
+//! both read at the release tag of each major version.
 
 mod c;
 pub mod corpus;
+mod dat;
 pub mod git;
 pub mod guc;
 pub mod manual;
@@ -15,8 +16,9 @@ mod platform;
 
 /// The PostgreSQL major versions pgconfig supports, oldest first, as
 /// `PgMajor::supported` lists them.
-pub const SUPPORTED: [&str; 15] = [
+pub const SUPPORTED: [&str; 16] = [
     "9.1", "9.2", "9.3", "9.4", "9.5", "9.6", "10", "11", "12", "13", "14", "15", "16", "17", "18",
+    "19",
 ];
 
 /// Everything one release documents about its parameters.
@@ -94,13 +96,20 @@ pub fn extract(checkout: &git::Checkout, major: &str) -> Result<Release, String>
     }
     let options: Vec<&str> = options.iter().map(String::as_str).collect();
     let headers: Vec<&str> = headers.iter().map(String::as_str).collect();
-    let settings = guc::settings(&guc::Sources {
+    let release = release_number(&tag)?;
+    let sources = guc::Sources {
         tables: &tables,
         header: &header,
         options: &options,
         headers: &headers,
-        release: &release_number(&tag)?,
-    })
+        release: &release,
+    };
+    let data_path = "src/backend/utils/misc/guc_parameters.dat";
+    let settings = if checkout.files(&tag, data_path)?.is_empty() {
+        guc::settings(&sources)
+    } else {
+        guc::settings_from_dat(&sources, &read(data_path)?)
+    }
     .map_err(at)?;
     // Names are case-insensitive: the manual and the tables may differ.
     let mut settings: std::collections::HashMap<String, guc::Setting> = settings
@@ -154,5 +163,15 @@ fn release_number(tag: &str) -> Result<String, String> {
         .strip_prefix("REL_")
         .or_else(|| tag.strip_prefix("REL"))
         .ok_or_else(|| format!("{tag} is not a release tag"))?;
+    if let Some((major, prerelease)) = digits.split_once('_') {
+        for kind in ["BETA", "RC"] {
+            if let Some(number) = prerelease.strip_prefix(kind)
+                && !number.is_empty()
+                && number.bytes().all(|c| c.is_ascii_digit())
+            {
+                return Ok(format!("{major}{}{number}", kind.to_ascii_lowercase()));
+            }
+        }
+    }
     Ok(digits.replace('_', "."))
 }

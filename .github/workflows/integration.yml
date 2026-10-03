@@ -37,6 +37,9 @@ jobs:
       fail-fast: false
       matrix:
         pg_version: ["9.5", "9.6", "10", "11", "12", "13", "14", "15", "16", "17", "18"]
+        include:
+          - pg_version: "19"
+            image: "postgres:19beta4@sha256:d4afb1c70ecbcc4d87b8f7e86750a1a9ba04ddf830dbd27600ce14e5220077f6"
 
     steps:
       - uses: actions/checkout@v4
@@ -51,4 +54,15 @@ jobs:
         run: chmod +x pgconfigctl
 
       - name: Load the generated config in PostgreSQL ${{ matrix.pg_version }}
-        run: scripts/check-conf-loads.sh ./pgconfigctl ${{ matrix.pg_version }}
+        env:
+          PG_VERSION: ${{ matrix.pg_version }}
+          PG_IMAGE: ${{ matrix.image }}
+        run: |
+          if [ "$PG_VERSION" = "19" ]; then
+            for profile in WEB OLTP DW Mixed Desktop; do
+              scripts/check-conf-loads.sh ./pgconfigctl "$PG_VERSION" "$PG_IMAGE" \
+                --profile "$profile" --include-pgbadger --log-format jsonlog
+            done
+          else
+            scripts/check-conf-loads.sh ./pgconfigctl "$PG_VERSION"
+          fi

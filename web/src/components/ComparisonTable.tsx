@@ -17,10 +17,23 @@ import {
   type EnvironmentConfig,
 } from "../lib/formatters.js";
 import { ENV_COLUMN_TO_PROFILE, profileColumnLabel } from "../lib/options.js";
+import { parameterDefault } from "../lib/parameterDefault.js";
+import { useParameterDoc } from "../lib/useParameterDoc.js";
 import { ComparisonRowDetail } from "./ComparisonRowDetail.js";
 import { Icon } from "./Icon.js";
 
 const ALL_ENVS = Object.keys(ENV_COLUMN_TO_PROFILE);
+
+/** PostgreSQL 19 has no defaults in the frozen REST v1 catalog. */
+function CatalogDefault({ pgVersion, name, format }: { pgVersion: string; name: string; format?: string }) {
+  const doc = useParameterDoc(pgVersion, name);
+  const value = parameterDefault(doc, format);
+  return (
+    <TableCell className="mono muted" title={value} data-reference>
+      {value}
+    </TableCell>
+  );
+}
 
 function isSelected(env: string, currentEnv: string): boolean {
   return env.toUpperCase() === currentEnv.toUpperCase();
@@ -156,9 +169,18 @@ function ComparisonCategory({
                         <span className="mono">{breakable(param.name)}</span>
                       </button>
                     </TableCell>
-                    <TableCell className="mono muted" title={defaultValue} data-reference>
-                      {defaultValue}
-                    </TableCell>
+                    {Number(pgVersion) >= 19 ? (
+                      <CatalogDefault
+                        key={`${pgVersion}/${param.name}`}
+                        pgVersion={pgVersion}
+                        name={param.name}
+                        format={param.format}
+                      />
+                    ) : (
+                      <TableCell className="mono muted" title={defaultValue} data-reference>
+                        {defaultValue}
+                      </TableCell>
+                    )}
                     {envs.map((env) => {
                       const value = String(param[env] ?? "");
                       return (

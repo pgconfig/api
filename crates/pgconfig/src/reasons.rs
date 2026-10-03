@@ -41,6 +41,11 @@ pub(crate) fn reason(
                 format!("Set to {value} as 5% of memory available to the {profile} profile.")
             })
         }
+        "io_max_combine_limit" if request.os == Os::Windows
+            && request.postgres_version.major().rule_scale() >= 19.0
+            && profile == Profile::Dw => format!(
+                "Set to {value} blocks (128kB) to respect the Windows I/O combine limit."
+            ),
         "min_wal_size" | "max_wal_size" | "io_max_combine_limit" | "io_max_concurrency" => {
             format!("Set to {value} for the {profile} workload profile.")
         }
@@ -72,10 +77,16 @@ pub(crate) fn reason(
             format!("Set to {value} for the requested {disk} storage.")
         }
         "io_method" => format!("Set to {value} to use worker-based asynchronous I/O."),
-        "io_workers" => match computed.aio {
-            Some(aio) => io_workers(value, request, &aio.io_workers),
+        "io_workers" => match computed.aio.and_then(|aio| aio.io_workers) {
+            Some(workers) => io_workers(value, request, &workers),
             None => String::new(),
         },
+        "io_min_workers" => format!(
+            "Set to {value}, the PostgreSQL 19 default minimum for the dynamic I/O worker pool."
+        ),
+        "io_max_workers" => format!(
+            "Set to {value}, the PostgreSQL 19 default maximum; the I/O worker pool grows with demand."
+        ),
         "file_copy_method" => format!("Set to {value} as the copy method for file operations."),
         "max_worker_processes" | "max_parallel_workers" if cpus < 8 => {
             format!("Set to {value} by applying the minimum of 8 to {cpus} logical CPUs.")

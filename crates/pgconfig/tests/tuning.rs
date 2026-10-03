@@ -69,6 +69,98 @@ fn value(result: &TuningResult, name: &str) -> String {
 }
 
 #[test]
+fn postgresql_19_uses_the_native_dynamic_io_pool_for_every_profile() {
+    for profile in pgconfig::Profile::ALL {
+        for cpus in [1, 8, 128] {
+            let result = tuned(RawTuningRequest {
+                postgres_version: Some("19".into()),
+                profile: Some(profile.to_string()),
+                total_cpu: Some(cpus),
+                ..complete()
+            });
+            assert!(!result.recommendations.contains_key("io_workers"));
+            assert_eq!(value(&result, "io_min_workers"), "2");
+            assert_eq!(value(&result, "io_max_workers"), "8");
+            assert!(reason(&result, "io_max_workers").contains("PostgreSQL 19 default"));
+            for name in result.recommendations.keys() {
+                let major = pgconfig::PgVersion::parse("19").unwrap().major();
+                assert!(
+                    pgconfig::parameter_doc(major, name).is_some(),
+                    "missing documentation for {name}"
+                );
+            }
+        }
+    }
+    let previous = tuned(complete());
+    assert_eq!(value(&previous, "io_workers"), "2");
+    assert!(!previous.recommendations.contains_key("io_min_workers"));
+    assert!(!previous.recommendations.contains_key("io_max_workers"));
+}
+
+#[test]
+fn postgresql_19_respects_the_windows_io_combine_limit() {
+    for (os, limit) in [("windows", "16"), ("linux", "128")] {
+        let result = tuned(RawTuningRequest {
+            postgres_version: Some("19".into()),
+            profile: Some("DW".into()),
+            os: Some(os.into()),
+            ..complete()
+        });
+        assert_eq!(value(&result, "io_max_combine_limit"), limit);
+        if os == "windows" {
+            assert!(reason(&result, "io_max_combine_limit").contains("Windows"));
+        }
+    }
+}
+
+#[test]
+fn postgresql_19_pgbadger_keeps_autoanalyze_logging() {
+    use pgconfig::v1;
+    for version in [18.0, 19.0] {
+        let input = v1::Input {
+            pg_version: version,
+            total_ram: 1 << 30,
+            total_cpu: 2,
+            max_connections: 100,
+            profile: pgconfig::Profile::Web,
+            os: "linux".into(),
+            arch: "amd64".into(),
+            drive_type: "SSD".into(),
+        };
+        for logging in [
+            None,
+            Some("jsonlog"),
+            Some("csvlog"),
+            Some("stderr"),
+            Some("syslog"),
+        ] {
+            let categories = v1::categories(&input, logging).unwrap();
+            let setting = categories
+                .iter()
+                .flat_map(|category| category.parameters.iter().flatten())
+                .find(|parameter| parameter.name == "log_autoanalyze_min_duration");
+            assert_eq!(
+                setting.map(|parameter| parameter.value.as_str()),
+                (version >= 19.0 && logging.is_some()).then_some("0")
+            );
+            if version >= 19.0 {
+                for parameter in categories
+                    .iter()
+                    .flat_map(|category| category.parameters.iter().flatten())
+                {
+                    let major = pgconfig::PgVersion::parse("19").unwrap().major();
+                    assert!(
+                        pgconfig::parameter_doc(major, parameter.name).is_some(),
+                        "missing documentation for {}",
+                        parameter.name
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[test]
 fn a_reason_names_the_limit_that_lowered_a_value() {
     let result = tuned(RawTuningRequest {
         os: Some("windows".into()),
@@ -539,7 +631,7 @@ fn invalid_optional_facts_are_errors_not_defaults() {
         ),
         (
             RawTuningRequest {
-                postgres_version: Some("19".into()),
+                postgres_version: Some("20".into()),
                 ..complete()
             },
             "postgres_version",

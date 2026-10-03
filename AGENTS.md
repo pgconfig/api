@@ -65,7 +65,7 @@ when the tools are not on the `PATH`.
   fails with `the web bundle is missing` when you have not.
 - `crates/pgconfig/tests/snapshots` holds `insta` snapshots of full results.
 - CI: `cover.yml` (Verify), `integration.yml` (the generated config loads in
-  PostgreSQL 9.5 to 18), `mcp-conformance.yml`.
+  PostgreSQL 9.5 to 18 and 19 beta), `mcp-conformance.yml`.
 
 ## Adding a New Rule
 
@@ -89,7 +89,7 @@ keep the server stateless and read-only.
 
 - **cover.yml**: release config checks, the web and Rust test suite, and a
   build on macOS and Windows
-- **integration.yml**: loads the generated config in PostgreSQL 9.5 to 18
+- **integration.yml**: loads the generated config in PostgreSQL 9.5 to 18 and 19 beta
 - **mcp-conformance.yml**: the official MCP conformance suite, pinned
 - **changesets.yml**: on `main`, opens or updates the Changesets version PR;
   merging it tags `v<version>` and calls `release.yml`
@@ -136,10 +136,12 @@ Rules:
    input are pinned by the goldens. Fix v1 behavior in a new API version.
 3. **Byte parsing**: v1 is permissive (`2GB`, `2gb`, a bare number means
    bytes). `tune` is strict and requires a unit.
-4. **PostgreSQL version defaults**: default is 18, supported 9.1–18.
-5. **AIO parameters (PostgreSQL 18+)**: `io_method` and `io_workers` only
-   available in ≥18. `io_workers` scaled by profile: Desktop 10%, WEB 20%,
-   Mixed 25%, OLTP 30%, DW 40%, +10% for HDD, capped at 32.
+4. **PostgreSQL version defaults**: default is 18, supported 9.1 to 19. Version 19 is beta.
+5. **AIO parameters**: `io_method` is available from 18. Only 18 emits
+   `io_workers`, scaled by profile and capped at 32. From 19, emit the native
+   dynamic pool defaults: `io_min_workers=2`, `io_max_workers=8`. Cap
+   `io_max_combine_limit` at 16 blocks on Windows for 19. The 19 pgBadger
+   preset also needs `log_autoanalyze_min_duration=0`.
 6. **Float arithmetic**: the memory formulas run in `f32` in the order Go ran
    them. Reordering an operation changes outputs.
 7. **Parameter docs are generated**: `parameters/` changes only through the

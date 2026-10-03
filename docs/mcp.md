@@ -63,7 +63,7 @@ server.
 | --- | --- | --- | --- |
 | `total_ram` | Yes | String: a positive integer followed by `B`, `KB`, `MB`, `GB`, or `TB`, in any case | Uppercase unit, largest unit that divides the amount. No default |
 | `total_cpu` | Yes | Positive integer count of logical CPUs, including hyperthreads | Integer. No default |
-| `postgres_version` | Yes | String of dotted numbers in a supported series: 9.1 to 9.6, or 10 to 18 | The supplied version is kept as it is. No default |
+| `postgres_version` | Yes | String of dotted numbers in a supported series: 9.1 to 9.6, or 10 to 19 (beta) | The supplied version is kept as it is. No default |
 | `profile` | No | `WEB`, `OLTP`, `DW`, `MIXED`, or `DESKTOP`, in any case | Uppercase. Defaults to `WEB` |
 | `disk_type` | No | `SSD`, `HDD`, or `SAN`, in any case | Uppercase. Defaults to `SSD` |
 | `os` | No | `linux`, `windows`, `unix`, or `darwin`, in any case | Lowercase. Defaults to `linux` |
@@ -243,8 +243,12 @@ errors.
 PostgreSQL manual's entry for each parameter of each supported major version.
 The entries ship with the server. Their text comes from the manual, and their
 settings from the GUC tables, both read from the PostgreSQL source at the
-newest release of the version. The settings are those of a standard 64-bit
+newest release of the version. The settings are those of a standard x86-64
 Linux build, in the words of `pg_settings`.
+
+PostgreSQL 19 beta uses the numeric version string `"19"`, including for
+recommendations. Its documentation comes from `REL_19_BETA4`. Every MCP
+request still requires an explicit version.
 
 Both tools take `postgres_version` with the syntax and the supported series of
 a Tuning Request, and answer for its PostgreSQL Major Version. Their errors

@@ -39,7 +39,7 @@ describes the files, and ADR 0003 the decision.
 | `the preprocessor condition X is not in the platform table` | Add X to `src/platform.rs` |
 | `X is not defined`, or `X has several definitions` | Add the Linux definition of X to `src/platform.rs` |
 
-The platform table describes a standard 64-bit Linux build, like the PGDG
+The platform table describes a standard x86-64 Linux build, like the PGDG
 packages and the official Docker images: OpenSSL, LZ4, Zstandard, liburing,
 and no assertions or debugging aids. Look up how PostgreSQL's headers and
 configure define each macro at the tag, and write the reason as a comment
@@ -48,7 +48,7 @@ beside the entry.
 ## Check against pg_settings
 
 ```sh
-docker run -d --name pgsettings -e POSTGRES_HOST_AUTH_METHOD=trust postgres:18
+docker run --platform linux/amd64 -d --name pgsettings -e POSTGRES_HOST_AUTH_METHOD=trust postgres:18
 docker exec pgsettings psql -U postgres -Atc "select json_agg(s) from (select name, unit, boot_val, min_val, max_val, context, category, enumvals from pg_settings) s"
 docker rm -f pgsettings
 ```
@@ -65,3 +65,11 @@ platform table entry to fix.
 The extractor covers the versions in `SUPPORTED` in
 `crates/parameter-docs/src/lib.rs`, which follows `PgMajor::supported()` in
 `crates/pgconfig/src/version.rs`. Add the version to both, then extract it.
+The extractor reads C declarations through 18 and `guc_parameters.dat` from
+19. It chooses a final release first, then the newest RC or beta when no
+final release exists. Verify the tag in `parameters/sources.yml`.
+
+For 19 beta, validate with `postgres:19beta4` rather than `postgres:19`.
+The CI image digest is pinned in `.github/workflows/integration.yml`; update
+it together with the source tag when moving to another prerelease. Keep 18
+as the product default until a separate change is approved.

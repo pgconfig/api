@@ -6,6 +6,9 @@ HTTP.
 
 ## A first call
 
+Select PostgreSQL 19 beta with `pg_version=19`. The default remains 18.
+The 19 documentation is based on beta 4.
+
 Without parameters, the route answers for its defaults: PostgreSQL 18, 2GB of
 RAM, 2 CPUs, the `WEB` profile, and HDD storage.
 
@@ -54,7 +57,7 @@ curl 'https://api.pgconfig.org/v1/tuning/get-config?total_ram=16GB&cpus=8&pg_ver
 
 | Parameter | Accepted values | Default | Meaning |
 | --- | --- | --- | --- |
-| `pg_version` | `9.1` to `9.6`, `10` to `18` | `18` | PostgreSQL version |
+| `pg_version` | `9.1` to `9.6`, `10` to `19` (beta) | `18` | PostgreSQL version |
 | `total_ram` | A number followed by `KB`, `MB`, `GB`, or `TB` | `2GB` | Memory dedicated to PostgreSQL |
 | `cpus` | A positive integer | `2` | Logical CPUs, hyperthreads included |
 | `max_connections` | A positive integer | `100` | Expected number of connections |
@@ -136,7 +139,7 @@ ALTER SYSTEM SET maintenance_work_mem TO '819MB';
 
 | Parameter | Accepted values | Default | Effect |
 | --- | --- | --- | --- |
-| `show_doc` | `true`, `false` | `false` | Adds a `documentation` object to each parameter of the JSON output: what the setting does, its PostgreSQL default, and further reading |
+| `show_doc` | `true`, `false` | `false` | Adds legacy parameter documentation to the JSON output. This frozen catalog has no PostgreSQL 19 manual entries; the web app and MCP use the complete versioned catalog instead |
 | `include_pgbadger` | `true`, `false` | `false` | Adds the logging settings [pgBadger](https://pgbadger.darold.net) needs |
 | `log_format` | `stderr`, `csvlog`, `syslog`, `jsonlog` | `jsonlog` from PostgreSQL 15, `stderr` before | The log destination, used with `include_pgbadger=true` |
 
