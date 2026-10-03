@@ -136,3 +136,13 @@ test("the version workflow pushes the tag and hands it to the release only once"
   assert.notEqual(failed.status, 0);
   assert.equal(readFileSync(output, "utf8"), "");
 });
+
+test("the release build checks files out with LF on every runner", () => {
+  // A Windows runner converts to CRLF by default, and the version check then
+  // cannot find the version in Cargo.toml.
+  const workflow = readFileSync(resolve(".github/workflows/release.yml"), "utf8");
+  const build = workflow.slice(workflow.indexOf("\n  build:"), workflow.indexOf("\n  goreleaser:"));
+  const setting = build.indexOf("git config --global core.autocrlf false");
+  assert.ok(setting >= 0, "The build job must turn off line-ending conversion");
+  assert.ok(setting < build.indexOf("actions/checkout"), "It must do so before the checkout");
+});
